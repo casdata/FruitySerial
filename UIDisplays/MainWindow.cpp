@@ -6,6 +6,25 @@
 
 MainWindow::MainWindow() {
     int windowCount = 0;
+
+    int imageWidth = 0;
+    int imageHeight = 0;
+
+    GLuint *texturePtr = &TabSerialWindow::timestampTexture;
+
+    bool ret = FunctionTools::loadTextureFromFile("../Assets/timestamp.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    TabSerialWindow::textureSize = ImVec2(imageWidth, imageHeight);
+
+    texturePtr = &TabSerialWindow::settingsTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/comSettings.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::separatorTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/separator.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
     auto* subWin = new SubWindow(windowCount);
     subWindows.push_back(subWin);
     subWindows.back()->setWidthPercentage(1.0f);

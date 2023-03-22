@@ -89,6 +89,18 @@ serialFlowcontrol SerialConnection::getFlowcontrol() {
     return static_cast<serialFlowcontrol>(mySerial->getFlowcontrol());
 }
 
+void SerialConnection::setTimeStamp(bool state) {
+    timeStamp = state ? EN_TIME : DISABLE;
+}
+
+void SerialConnection::swapTimeStamp() {
+    timeStamp = timeStamp == EN_TIME ? DISABLE : EN_TIME;
+}
+
+bool SerialConnection::isTimeStampEnabled() {
+    return timeStamp == EN_TIME ? true : false;
+}
+
 bool SerialConnection::getScroll2Bottom() {
     bool bottomState = scroll2Bottom & autoScroll;
     scroll2Bottom = false;
@@ -110,203 +122,213 @@ void SerialConnection::update(ClockTime *clockTime) {
 }
 
 void SerialConnection::printLines(const UI_Theme& uiTheme) {
-    std::vector<std::string>::iterator linesIt;
-
     std::string preBuff;
 
-    for(linesIt = dataLines.begin(); linesIt != dataLines.end(); linesIt++){
-
-        if(!(*linesIt).empty()) {
-            preBuff.assign(*linesIt);
-
-            std::string postBuff = " ";
-
-            if (timeStamp == EN_TIME)
-                postBuff.append(preBuff.substr(0, 13));
+    ImGuiListClipper clipper;
 
 
-            ImGui::TextUnformatted(postBuff.c_str());
-            ImGui::SameLine(0,0);
+    clipper.Begin(dataLines.size());
 
-            postBuff.assign(std::string());
+    while(clipper.Step()){
+        for(int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++){
+            if(!(dataLines.at(i)).empty()) {
+                preBuff.assign(dataLines.at(i));
 
-            postBuff = preBuff.substr(13, 3);
-            ImGui::TextUnformatted(postBuff.c_str());
-            ImGui::SameLine(0,0);
+                std::string postBuff = " ";
 
-            postBuff.assign(std::string());
+                if (timeStamp == EN_TIME) {
+                    postBuff.append(preBuff.substr(0, 13));
 
-            std::string::iterator strIt;
+                    ImGui::TextUnformatted(postBuff.c_str());
+                    ImGui::SameLine(0, 0);
 
-            if(textEncoding == RAW_DEC || textEncoding == RAW_HEX){
-                std::stringstream sStream;
+                    postBuff.assign(std::string());
 
-                for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
-                    if(textEncoding == RAW_DEC){
-                        sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(*strIt);
-                        postBuff.append(sStream.str());
-                        postBuff.push_back(' ');
-                        sStream.str(std::string());
-                    }
-                    else{
-                        sStream<<std::uppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<static_cast<int>(*strIt);
-                        postBuff.append(sStream.str());
-                        postBuff.push_back(' ');
-                        sStream.str(std::string());
-                    }
+                    postBuff = preBuff.substr(13, 3);
+                    ImGui::TextUnformatted(postBuff.c_str());
+                    ImGui::SameLine(0, 0);
+                }
+                else{
+                    ImGui::TextUnformatted(postBuff.c_str());
+                    ImGui::SameLine(0, 0);
                 }
 
-                ImGui::TextUnformatted(postBuff.c_str());
+                postBuff.assign(std::string());
 
-            }
-            else{
+                std::string::iterator strIt;
 
-                bool postBuffActive = false;
+                if(textEncoding == RAW_DEC || textEncoding == RAW_HEX){
+                    std::stringstream sStream;
 
-                for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
+                    for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
+                        if(textEncoding == RAW_DEC){
+                            sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(*strIt);
+                            postBuff.append(sStream.str());
+                            postBuff.push_back(' ');
+                            sStream.str(std::string());
+                        }
+                        else{
+                            sStream<<std::uppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<static_cast<int>(*strIt);
+                            postBuff.append(sStream.str());
+                            postBuff.push_back(' ');
+                            sStream.str(std::string());
+                        }
+                    }
+
+                    ImGui::TextUnformatted(postBuff.c_str());
+
+                }
+                else{
+
+                    bool postBuffActive = false;
+
+                    for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
+
+                        switch(textEncoding){
+                            case UTF_8:
+                                postBuff.push_back(*strIt);
+                                break;
+                            case UTF_8_SPECIAL:
+                                switch(static_cast<int>(*strIt)){
+                                    case 0:
+                                        FunctionTools::printSpecialUTF8("NUL", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 1:
+                                        FunctionTools::printSpecialUTF8("SOH", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 2:
+                                        FunctionTools::printSpecialUTF8("STX", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 3:
+                                        FunctionTools::printSpecialUTF8("ETX", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 4:
+                                        FunctionTools::printSpecialUTF8("EOT", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 5:
+                                        FunctionTools::printSpecialUTF8("ENQ", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 6:
+                                        FunctionTools::printSpecialUTF8("ACK", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 7:
+                                        FunctionTools::printSpecialUTF8("BEL", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 8:
+                                        FunctionTools::printSpecialUTF8("BS", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 9:
+                                        FunctionTools::printSpecialUTF8("TAB", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 10:
+                                        FunctionTools::printSpecialUTF8("LF", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 11:
+                                        FunctionTools::printSpecialUTF8("VT", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 12:
+                                        FunctionTools::printSpecialUTF8("FF", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 13:
+                                        FunctionTools::printSpecialUTF8("CR", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 14:
+                                        FunctionTools::printSpecialUTF8("SO", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 15:
+                                        FunctionTools::printSpecialUTF8("SI", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 16:
+                                        FunctionTools::printSpecialUTF8("DLE", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 17:
+                                        FunctionTools::printSpecialUTF8("DC1", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 18:
+                                        FunctionTools::printSpecialUTF8("DC2", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 19:
+                                        FunctionTools::printSpecialUTF8("DC3", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 20:
+                                        FunctionTools::printSpecialUTF8("DC4", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 21:
+                                        FunctionTools::printSpecialUTF8("NAK", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 22:
+                                        FunctionTools::printSpecialUTF8("SYN", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 23:
+                                        FunctionTools::printSpecialUTF8("ETB", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 24:
+                                        FunctionTools::printSpecialUTF8("CAN", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 25:
+                                        FunctionTools::printSpecialUTF8("EM", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 26:
+                                        FunctionTools::printSpecialUTF8("SUB", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 27:
+                                        FunctionTools::printSpecialUTF8("ESC", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 28:
+                                        FunctionTools::printSpecialUTF8("FS", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 29:
+                                        FunctionTools::printSpecialUTF8("GS", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 30:
+                                        FunctionTools::printSpecialUTF8("RS", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    case 31:
+                                        FunctionTools::printSpecialUTF8("US", uiTheme, postBuffActive, postBuff);
+                                        break;
+                                    default:
+                                        postBuff.push_back(*strIt);
+                                        //FunctionTools::char2Utf8(*strIt, postBuff);
+                                        postBuffActive = true;
+                                        break;
+                                }
+
+
+                                break;
+                            case UTF_8_RAW_DEC:
+
+                                break;
+                            case UTF_8_RAW_HEX:
+
+                                break;
+                            default:
+
+                                break;
+                        }
+
+                    }
 
                     switch(textEncoding){
                         case UTF_8:
-                            postBuff.push_back(*strIt);
+                            ImGui::TextUnformatted(postBuff.c_str());
                             break;
                         case UTF_8_SPECIAL:
-                            switch(static_cast<int>(*strIt)){
-                                case 0:
-                                    FunctionTools::printSpecialUTF8("NUL", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 1:
-                                    FunctionTools::printSpecialUTF8("SOH", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 2:
-                                    FunctionTools::printSpecialUTF8("STX", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 3:
-                                    FunctionTools::printSpecialUTF8("ETX", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 4:
-                                    FunctionTools::printSpecialUTF8("EOT", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 5:
-                                    FunctionTools::printSpecialUTF8("ENQ", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 6:
-                                    FunctionTools::printSpecialUTF8("ACK", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 7:
-                                    FunctionTools::printSpecialUTF8("BEL", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 8:
-                                    FunctionTools::printSpecialUTF8("BS", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 9:
-                                    FunctionTools::printSpecialUTF8("TAB", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 10:
-                                    FunctionTools::printSpecialUTF8("LF", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 11:
-                                    FunctionTools::printSpecialUTF8("VT", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 12:
-                                    FunctionTools::printSpecialUTF8("FF", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 13:
-                                    FunctionTools::printSpecialUTF8("CR", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 14:
-                                    FunctionTools::printSpecialUTF8("SO", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 15:
-                                    FunctionTools::printSpecialUTF8("SI", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 16:
-                                    FunctionTools::printSpecialUTF8("DLE", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 17:
-                                    FunctionTools::printSpecialUTF8("DC1", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 18:
-                                    FunctionTools::printSpecialUTF8("DC2", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 19:
-                                    FunctionTools::printSpecialUTF8("DC3", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 20:
-                                    FunctionTools::printSpecialUTF8("DC4", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 21:
-                                    FunctionTools::printSpecialUTF8("NAK", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 22:
-                                    FunctionTools::printSpecialUTF8("SYN", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 23:
-                                    FunctionTools::printSpecialUTF8("ETB", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 24:
-                                    FunctionTools::printSpecialUTF8("CAN", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 25:
-                                    FunctionTools::printSpecialUTF8("EM", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 26:
-                                    FunctionTools::printSpecialUTF8("SUB", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 27:
-                                    FunctionTools::printSpecialUTF8("ESC", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 28:
-                                    FunctionTools::printSpecialUTF8("FS", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 29:
-                                    FunctionTools::printSpecialUTF8("GS", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 30:
-                                    FunctionTools::printSpecialUTF8("RS", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                case 31:
-                                    FunctionTools::printSpecialUTF8("US", uiTheme, postBuffActive, postBuff);
-                                    break;
-                                default:
-                                    postBuff.push_back(*strIt);
-                                    //FunctionTools::char2Utf8(*strIt, postBuff);
-                                    postBuffActive = true;
-                                    break;
-                            }
+                            if(postBuffActive)
+                                ImGui::TextUnformatted(postBuff.c_str());
 
-
-                            break;
-                        case UTF_8_RAW_DEC:
-
-                            break;
-                        case UTF_8_RAW_HEX:
-
-                            break;
-                        default:
-
+                            ImGui::NewLine();
                             break;
                     }
 
+
                 }
-
-                switch(textEncoding){
-                    case UTF_8:
-                        ImGui::TextUnformatted(postBuff.c_str());
-                        break;
-                    case UTF_8_SPECIAL:
-                        if(postBuffActive)
-                            ImGui::TextUnformatted(postBuff.c_str());
-
-                        ImGui::NewLine();
-                        break;
-                }
-
 
             }
-
         }
-
     }
+
+    clipper.End();
+
 }
 
 void SerialConnection::checkAndReadPort(ClockTime *clockTime) {

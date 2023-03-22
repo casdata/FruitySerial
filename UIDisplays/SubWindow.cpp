@@ -61,7 +61,7 @@ void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
                     if (serialManager->anyPortAvailable()) {
 
                         size_t i = 0;
-                        for (auto port: serialManager->getAvailablePortList()) {
+                        for (const auto& port: serialManager->getAvailablePortList()) {
                             if (ImGui::Selectable(port.c_str())) {
                                 SerialPortData *serialPtr = serialManager->getSerialPortDataByPortName(port);
                                 if(serialPtr != nullptr) {

@@ -45,6 +45,10 @@ public:
     void setFlowcontrol(serialFlowcontrol flowcontrol);
     serialFlowcontrol getFlowcontrol();
 
+    void setTimeStamp(bool state);
+    void swapTimeStamp();
+    bool isTimeStampEnabled();
+
     bool getScroll2Bottom();
 
     void setAutoScroll(bool state);

@@ -155,28 +155,58 @@ void TabSerialWindow::drawTopBar() {
 
     int currentItem = baudItem;
 
-    ImGui::SetNextItemWidth(FunctionTools::norm2Height(120));
+
+    ImVec2 myCursorPos = ImGui::GetCursorPos();
+
+    std::cout<<"-> "<<ImGui::GetWindowSize().x<<" "<<ImGui::GetItemRectSize().x<<std::endl;
+
+
+
+
+
+
+    float tempWidth = FunctionTools::norm2HeightFloat(120);
+
+    ImGui::SetNextItemWidth(tempWidth);
 
     ImGui::Combo("##baudrate_combo", &currentItem, BAUDRATE_ITEMS, IM_ARRAYSIZE(BAUDRATE_ITEMS));
-
-    //std::cout<<"-> "<<currentItem<<" "<<baudItem<<std::endl;
 
     if(currentItem != baudItem)
         serialConnection->setBaudrate(static_cast<serialBaudrate>(currentItem));
 
+    ImGui::SameLine();
 
-    /*
-    if(ImGui::BeginCombo("##baudrate_combo", currentItem)){
+    tempWidth = FunctionTools::norm2HeightFloat(18);
 
+    int imagePadding = FunctionTools::norm2Height(1);
 
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+    if(ImGui::ImageButton((void*)(intptr_t)settingsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding)){
 
-
-        ImGui::EndCombo();
     }
-    */
+    ImGui::PopStyleColor();
 
     ImGui::SameLine();
-    ImGui::Button("Hola");
+
+    float tempHeight = tempWidth;
+    tempWidth = FunctionTools::norm2HeightFloat(5);
+
+    ImGui::Image((void*)(intptr_t)separatorTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1));
+
+    ImGui::SameLine();
+
+    tempWidth = FunctionTools::norm2HeightFloat(18);
+
+    if(serialConnection->isTimeStampEnabled())
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+    else
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+    if(ImGui::ImageButton((void*)(intptr_t)timestampTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
+        serialConnection->swapTimeStamp();
+
+    ImGui::PopStyleColor();
+
 
 }
 

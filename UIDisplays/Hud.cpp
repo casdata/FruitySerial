@@ -74,8 +74,9 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
         int imagePadding = FunctionTools::norm2Height(4);
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
-        if(ImGui::ImageButton((void*)(intptr_t)texture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding))
+        if(ImGui::ImageButton((void*)(intptr_t)texture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)) {
             ImGui::OpenPopup("menuPopup");
+        }
 
         ImGui::PopStyleColor();
 

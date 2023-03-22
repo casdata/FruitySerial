@@ -54,7 +54,7 @@ int main(int, char**)
     AppData appData = {false,
                        1,
                        0,
-                       DARK,
+                       LIGHT,
                        0, 0,
                        0, 0,
                        IDLE,
@@ -534,6 +534,9 @@ bool initSDL(HitTestData &hitTestData){
 
     int testWidth = dm.w;
     int testHeight = dm.h;
+
+    //testWidth = 1280;
+    //testHeight = 720;
 
     FunctionTools::norm2Width(0, true, testWidth);
     FunctionTools::norm2Height(0, true, testHeight);

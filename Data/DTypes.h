@@ -129,6 +129,8 @@ static const ImU32 DARK_SPECIAL_UTF8_COL    = IM_COL32(255, 0, 0, 255);
 static const ImU32 LIGHT_BRACKET_COL        = IM_COL32(0, 100, 255, 255);
 static const ImU32 LIGHT_SPECIAL_UTF8_COL   = IM_COL32(255, 0, 0, 255);
 
+static const ImU32 BTN_DOWN                 = IM_COL32(0, 100, 179, 255);
+
 static const char* BAUDRATE_ITEMS[] = {"300 baud","1200 baud", "2400 baud", "4800 baud", "9600 baud", "19200 baud",
                                             "38400 baud", "57600 baud", "74880 baud", "115200 baud", "230400 baud",
                                             "250000 baud", "500000 baud", "1000000 baud", "2000000 baud"};

@@ -15,6 +15,11 @@
 
 class TabSerialWindow {
 public:
+    inline static GLuint timestampTexture;
+    inline static GLuint settingsTexture;
+    inline static GLuint separatorTexture;
+    inline static ImVec2 textureSize;
+
     explicit TabSerialWindow(SerialPortData *serialPortData, SerialConnection *serialConnection);
 
     std::string getTabName();
