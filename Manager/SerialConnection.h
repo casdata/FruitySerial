@@ -27,6 +27,9 @@ public:
     void closeConnection();
     bool isConnectionOpen();
 
+    void swapListening();
+    bool isListening();
+
     void setTimeout(const uint32_t timeout);
     uint32_t getTimeout();
 
@@ -44,6 +47,9 @@ public:
 
     void setFlowcontrol(serialFlowcontrol flowcontrol);
     serialFlowcontrol getFlowcontrol();
+
+    void setTextEnconding(TextEncoding txtEncoding);
+    TextEncoding getTextEncoding();
 
     void setTimeStamp(bool state);
     void swapTimeStamp();
@@ -76,6 +82,7 @@ private:
     TextEncoding textEncoding;
     bool scroll2Bottom;
     bool autoScroll;
+    bool listening;
 
 };
 

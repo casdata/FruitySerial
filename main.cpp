@@ -54,7 +54,7 @@ int main(int, char**)
     AppData appData = {false,
                        1,
                        0,
-                       LIGHT,
+                       DARK,
                        0, 0,
                        0, 0,
                        IDLE,
@@ -634,7 +634,7 @@ void setTheme(AppData* appData){
 
 }
 
-void setStyleColorAppDark(){
+void setStyleColorAppDark() {
     ImGuiStyle *style = &ImGui::GetStyle();
     ImVec4 *colors = style->Colors;
 

@@ -28,6 +28,8 @@ public:
     static bool btnStateInsideArea(BtnState &&btnState, const BtnState &mouseBtn, const ImVec2 &cursorPos, ImVec2 &&areaXY, ImVec2 &&areaHW);
     static uint32_t baudrateEnum2int(serialBaudrate sBaudrate);
     static serialBaudrate int2BaudrateEnum(uint32_t baudrate);
+    static std::string textEncodingEnum2charptr(TextEncoding tEncoding);
+    static TextEncoding int2TextEncodingEnum(uint32_t tEncodingIndex);
     static void char2Utf8(char character, std::string& str);
     static void unicode2Utf8(unsigned int unicode, std::string& str);
     static void printSpecialUTF8(std::string&& name, const UI_Theme& uiTheme, bool& postBuffActive, std::string& postBuff);

@@ -15,6 +15,8 @@
 
 class TabSerialWindow {
 public:
+    inline static GLuint playTexture;
+    inline static GLuint pauseTexture;
     inline static GLuint timestampTexture;
     inline static GLuint settingsTexture;
     inline static GLuint separatorTexture;
@@ -39,7 +41,7 @@ public:
 
 private:
     void drawPopupTabMenu(bool multiTabs);
-    void drawTopBar();
+    void drawTopBar(const UI_Theme& uiTheme);
 
     std::string tabName;
 

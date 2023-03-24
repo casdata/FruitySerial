@@ -13,11 +13,12 @@ SerialConnection::SerialConnection(const std::string &port) {
     inputEolType = newLine;
     outputEolType = newLine;
 
-    timeStamp = EN_TIME;
+    timeStamp = DISABLE;
     textEncoding = UTF_8_SPECIAL;
 
     scroll2Bottom = false;
     autoScroll = true;
+    listening = true;
 }
 
 std::string SerialConnection::getPortName() {
@@ -38,6 +39,15 @@ void SerialConnection::closeConnection() {
 bool SerialConnection::isConnectionOpen() {
     return mySerial->isOpen();
 }
+
+void SerialConnection::swapListening() {
+    listening = !listening;
+}
+
+bool SerialConnection::isListening() {
+    return listening;
+}
+
 
 void SerialConnection::setTimeout(const uint32_t timeout) {
     serial::Timeout timeout1 = serial::Timeout::simpleTimeout(timeout);
@@ -87,6 +97,14 @@ void SerialConnection::setFlowcontrol(serialFlowcontrol flowcontrol) {
 
 serialFlowcontrol SerialConnection::getFlowcontrol() {
     return static_cast<serialFlowcontrol>(mySerial->getFlowcontrol());
+}
+
+void SerialConnection::setTextEnconding(TextEncoding txtEncoding) {
+    textEncoding = txtEncoding;
+}
+
+TextEncoding SerialConnection::getTextEncoding() {
+    return textEncoding;
 }
 
 void SerialConnection::setTimeStamp(bool state) {
@@ -160,6 +178,56 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                 if(textEncoding == RAW_DEC || textEncoding == RAW_HEX){
                     std::stringstream sStream;
 
+                    bool postBuffActive = false;
+
+                    for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++) {
+
+                        if(textEncoding == RAW_DEC)
+                            sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(*strIt);
+                        else
+                            sStream<<std::uppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<static_cast<int>(*strIt);
+
+                        if(static_cast<int>(*strIt) < 32){
+                            if(postBuffActive){
+                                postBuffActive = false;
+                                ImGui::TextUnformatted(postBuff.c_str());
+                                ImGui::SameLine(0,0);
+
+                                postBuff.assign(std::string());
+                            }
+
+                            if(uiTheme == DARK)
+                                ImGui::PushStyleColor(ImGuiCol_Text, DARK_SPECIAL_UTF8_COL);
+                            else
+                                ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_SPECIAL_UTF8_COL);
+
+                            ImGui::TextUnformatted(sStream.str().c_str());
+                            ImGui::SameLine(0,0);
+                            ImGui::TextUnformatted(" ");
+                            ImGui::SameLine(0,0);
+                            ImGui::PopStyleColor();
+
+                        }
+                        else{
+
+                            postBuff.append(sStream.str());
+                            postBuff.push_back(' ');
+
+                            postBuffActive = true;
+                        }
+
+                        sStream.str(std::string());
+
+                    }
+
+
+                    if(postBuffActive)
+                        ImGui::TextUnformatted(postBuff.c_str());
+
+                    ImGui::NewLine();
+
+
+                    /*
                     for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
                         if(textEncoding == RAW_DEC){
                             sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(*strIt);
@@ -168,6 +236,7 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                             sStream.str(std::string());
                         }
                         else{
+
                             sStream<<std::uppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<static_cast<int>(*strIt);
                             postBuff.append(sStream.str());
                             postBuff.push_back(' ');
@@ -176,6 +245,7 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                     }
 
                     ImGui::TextUnformatted(postBuff.c_str());
+                    */
 
                 }
                 else{
@@ -187,6 +257,9 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                         switch(textEncoding){
                             case UTF_8:
                                 postBuff.push_back(*strIt);
+                                break;
+                            case UTF_8_ESP_LOG:
+
                                 break;
                             case UTF_8_SPECIAL:
                                 switch(static_cast<int>(*strIt)){
@@ -318,6 +391,9 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                             ImGui::NewLine();
                             break;
+                        default:
+
+                            break;
                     }
 
 
@@ -339,83 +415,88 @@ void SerialConnection::checkAndReadPort(ClockTime *clockTime) {
             std::string strBuff;
             mySerial->read(strBuff, bytesBuff);
 
-            if(dataLines.empty()) {
-                dataLines.push_back(std::string());
-                scroll2Bottom = true;
-            }
+            if(listening) {
+                if (dataLines.empty()) {
+                    dataLines.push_back(std::string());
+                    scroll2Bottom = true;
+                }
 
-            std::string strLine = dataLines.back();
-            dataLines.pop_back();
+                std::string strLine = dataLines.back();
+                dataLines.pop_back();
 
-            if(strLine.empty()) {
-                strLine.append(clockTime->getTimestamp());
-                strLine.push_back(static_cast<char>(0x20));                 //space
-                FunctionTools::unicode2Utf8(0xBB, strLine);
-                strLine.push_back(static_cast<char>(0x20));                 //space
-            }
-
-
-            auto& dataLinesRef = dataLines;
-            auto& scroll2BottomRef = scroll2Bottom;
-
-            auto addNewLine = [&strLine, &dataLinesRef, &scroll2BottomRef]() {
-                dataLinesRef.push_back(strLine);
-                strLine.assign(std::string());
-                scroll2BottomRef = true;
-            };
-
-            std::string::iterator strIt;
-
-            bool crSet = false;                                                                                         //carrie return set
-
-            for(strIt = strBuff.begin(); strIt != strBuff.end(); strIt++){
-
-                bool preSetCr = false;
-
-                if(strLine.empty()) {
+                if (strLine.empty()) {
                     strLine.append(clockTime->getTimestamp());
                     strLine.push_back(static_cast<char>(0x20));                 //space
                     FunctionTools::unicode2Utf8(0xBB, strLine);
                     strLine.push_back(static_cast<char>(0x20));                 //space
                 }
 
-                strLine.push_back(*strIt);
 
-                switch(*strIt){
-                    case 10:                                                                                            //new line LF
+                auto &dataLinesRef = dataLines;
+                auto &scroll2BottomRef = scroll2Bottom;
 
-                        switch(inputEolType){
-                            case newLine:
-                                addNewLine();
-                                break;
-                            case crAndLf:
-                                if(crSet)
+                auto addNewLine = [&strLine, &dataLinesRef, &scroll2BottomRef]() {
+                    dataLinesRef.push_back(strLine);
+                    strLine.assign(std::string());
+                    scroll2BottomRef = true;
+                };
+
+                std::string::iterator strIt;
+
+                bool crSet = false;                                                                                         //carrie return set
+
+                for (strIt = strBuff.begin(); strIt != strBuff.end(); strIt++) {
+
+                    bool preSetCr = false;
+
+                    if (strLine.empty()) {
+                        strLine.append(clockTime->getTimestamp());
+                        strLine.push_back(static_cast<char>(0x20));                 //space
+                        FunctionTools::unicode2Utf8(0xBB, strLine);
+                        strLine.push_back(static_cast<char>(0x20));                 //space
+                    }
+
+                    strLine.push_back(*strIt);
+
+                    switch (*strIt) {
+                        case 10:                                                                                            //new line LF
+
+                            switch (inputEolType) {
+                                case newLine:
                                     addNewLine();
-                                break;
-                        }
+                                    break;
+                                case crAndLf:
+                                    if (crSet)
+                                        addNewLine();
+                                    break;
+                                default:
+
+                                    break;
+                            }
 
 
-                        break;
-                    case 13:                                                                                            //carrie return CR
+                            break;
+                        case 13:                                                                                            //carrie return CR
 
-                        if(inputEolType == carrieReturn)
-                            addNewLine();
-                        else
-                            preSetCr = true;
+                            if (inputEolType == carrieReturn)
+                                addNewLine();
+                            else
+                                preSetCr = true;
 
-                        break;
+                            break;
+                    }
+
+                    if (preSetCr)
+                        crSet = true;
+                    else
+                        crSet = false;
+
+
                 }
 
-                if(preSetCr)
-                    crSet = true;
-                else
-                    crSet = false;
-
+                dataLines.push_back(strLine);
 
             }
-
-            dataLines.push_back(strLine);
-
         }
     }
 }

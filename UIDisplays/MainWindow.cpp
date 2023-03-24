@@ -25,6 +25,13 @@ MainWindow::MainWindow() {
     ret = FunctionTools::loadTextureFromFile("../Assets/separator.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    texturePtr = &TabSerialWindow::playTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/play.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::pauseTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/pause.png", texturePtr, &imageWidth, &imageHeight);
+
     auto* subWin = new SubWindow(windowCount);
     subWindows.push_back(subWin);
     subWindows.back()->setWidthPercentage(1.0f);

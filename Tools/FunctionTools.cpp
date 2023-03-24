@@ -238,6 +238,37 @@ serialBaudrate FunctionTools::int2BaudrateEnum(uint32_t baudrate) {
 
 }
 
+std::string FunctionTools::textEncodingEnum2charptr(TextEncoding tEncoding) {
+
+    switch(tEncoding){
+        case RAW_DEC:
+            return std::string("RAW-DEC");
+            break;
+        case RAW_HEX:
+            return std::string("RAW-HEX");
+            break;
+        case UTF_8_RAW_DEC:
+            return std::string("UTF-8 RAW-DEC");
+            break;
+        case UTF_8_RAW_HEX:
+            return std::string("UTF-8 RAW-HEX");
+            break;
+        case UTF_8_SPECIAL:
+            return std::string("UTF-8 RULES");
+            break;
+        case UTF_8_ESP_LOG:
+            return std::string("UTF-8 ESP-LOG");
+            break;
+        default:
+            return std::string("UTF-8");
+    }
+
+}
+
+TextEncoding FunctionTools::int2TextEncodingEnum(uint32_t tEncodingIndex) {
+    return static_cast<TextEncoding>(tEncodingIndex);
+}
+
 void FunctionTools::char2Utf8(char character, std::string &str) {
     unsigned int unicode = static_cast<int>(character);
 
@@ -270,6 +301,8 @@ void FunctionTools::unicode2Utf8(unsigned int unicode, std::string &str) {
     }
 
 }
+
+//void FunctionTools::printSpecialHEX()
 
 void FunctionTools::printSpecialUTF8(std::string&& name, const UI_Theme &uiTheme, bool& postBuffActive, std::string& postBuff) {
 
@@ -343,5 +376,6 @@ int FunctionTools::norm2Width(const int &value, bool setLegacyWidth, int newWidt
         return static_cast<int>(((value * originalWidth)/LEGACY_WIDTH));
     }
 }
+
 
 
