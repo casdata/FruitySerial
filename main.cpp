@@ -54,7 +54,7 @@ int main(int, char**)
     AppData appData = {false,
                        1,
                        0,
-                       DARK,
+                       LIGHT,
                        0, 0,
                        0, 0,
                        IDLE,

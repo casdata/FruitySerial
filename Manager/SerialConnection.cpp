@@ -227,26 +227,103 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                     ImGui::NewLine();
 
 
-                    /*
-                    for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
-                        if(textEncoding == RAW_DEC){
-                            sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(*strIt);
-                            postBuff.append(sStream.str());
-                            postBuff.push_back(' ');
-                            sStream.str(std::string());
-                        }
-                        else{
+                }
+                else if(textEncoding == UTF_8_ESP_LOG){
 
-                            sStream<<std::uppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<static_cast<int>(*strIt);
-                            postBuff.append(sStream.str());
-                            postBuff.push_back(' ');
-                            sStream.str(std::string());
+                    bool nullData = true;
+
+                    if(preBuff.length() > 24){
+
+                        if(static_cast<int>(preBuff.at(16)) == 0x1B &&
+                                static_cast<int>(preBuff.at(17)) == 0x5B &&
+                                static_cast<int>(preBuff.at(18)) == 0x30 &&
+                                static_cast<int>(preBuff.at(19)) == 0x3B &&
+                                static_cast<int>(preBuff.at(20)) == 0x33 &&
+                                static_cast<int>(preBuff.at(22)) == 0x6D){
+
+                            nullData = false;
+                            bool pushColor = false;
+
+                            switch(static_cast<int>(preBuff.at(21))){
+                                case 0x31:                                                                              //E
+                                    pushColor = true;
+                                    if(uiTheme == DARK)
+                                        ImGui::PushStyleColor(ImGuiCol_Text, DARK_ESP_LOG_E_COL);
+                                    else
+                                        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_ESP_LOG_E_COL);
+                                    break;
+                                case 0x32:                                                                              //I
+                                    pushColor = true;
+                                    if(uiTheme == DARK)
+                                        ImGui::PushStyleColor(ImGuiCol_Text, DARK_ESP_LOG_I_COL);
+                                    else
+                                        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_ESP_LOG_I_COL);
+
+                                    break;
+                                case 0x33:                                                                              //W
+                                    pushColor = true;
+                                    if(uiTheme == DARK)
+                                        ImGui::PushStyleColor(ImGuiCol_Text, DARK_ESP_LOG_W_COL);
+                                    else
+                                        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_ESP_LOG_W_COL);
+                                    break;
+                            }
+
+                            for(size_t j = 23; j < preBuff.length(); j++){
+
+                                if(static_cast<int>(preBuff.at(j)) == 0x1B && (j + 5) < preBuff.length()){
+                                    if(static_cast<int>(preBuff.at(j + 1)) == 0x5B &&
+                                            static_cast<int>(preBuff.at(j + 2)) == 0x30 &&
+                                            static_cast<int>(preBuff.at(j + 3)) == 0x6D &&
+                                            static_cast<int>(preBuff.at(j + 4)) == 0xD &&
+                                            static_cast<int>(preBuff.at(j + 5)) == 0xA){
+
+                                        break;
+                                    }
+                                }
+                                else
+                                    postBuff.push_back(preBuff.at(j));
+
+                            }
+
+                            ImGui::TextUnformatted(postBuff.c_str());
+                            ImGui::SameLine(0,0);
+
+                            if(pushColor)
+                                ImGui::PopStyleColor();
+
                         }
+
                     }
 
-                    ImGui::TextUnformatted(postBuff.c_str());
-                    */
+                    if(nullData){
+                        if(uiTheme == DARK)
+                            ImGui::PushStyleColor(ImGuiCol_Text, DARK_BRACKET_COL);
+                        else
+                            ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_BRACKET_COL);
 
+                        ImGui::TextUnformatted("<");
+                        ImGui::SameLine(0,0);
+
+                        ImGui::PopStyleColor();
+
+                        ImGui::TextUnformatted("null data");
+                        ImGui::SameLine(0,0);
+
+                        if(uiTheme == DARK)
+                            ImGui::PushStyleColor(ImGuiCol_Text, DARK_BRACKET_COL);
+                        else
+                            ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_BRACKET_COL);
+
+                        ImGui::TextUnformatted(">");
+                        ImGui::SameLine(0,0);
+
+                        ImGui::PopStyleColor();
+
+
+                    }
+
+                    ImGui::NewLine();
                 }
                 else{
 
@@ -257,9 +334,6 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                         switch(textEncoding){
                             case UTF_8:
                                 postBuff.push_back(*strIt);
-                                break;
-                            case UTF_8_ESP_LOG:
-
                                 break;
                             case UTF_8_SPECIAL:
                                 switch(static_cast<int>(*strIt)){

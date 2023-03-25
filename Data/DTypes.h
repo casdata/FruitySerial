@@ -138,6 +138,14 @@ static const ImU32 LIGHT_COMBO_BG_COL       = IM_COL32(215, 215, 215, 255);
 static const ImU32 LIGHT_COMBO_BG_OVER_COL  = IM_COL32(137, 137, 137, 255);
 static const ImU32 LIGHT_COMBO_BG_PRESS_COL = IM_COL32(168, 168, 168, 255);
 
+static const ImU32 DARK_ESP_LOG_W_COL            = IM_COL32(249, 249, 0, 255);
+static const ImU32 DARK_ESP_LOG_E_COL            = IM_COL32(255, 73, 89, 255);
+static const ImU32 DARK_ESP_LOG_I_COL            = IM_COL32(13, 229, 99, 255);
+
+static const ImU32 LIGHT_ESP_LOG_W_COL            = IM_COL32(215, 180, 0, 255);
+static const ImU32 LIGHT_ESP_LOG_E_COL            = IM_COL32(255, 73, 45, 255);
+static const ImU32 LIGHT_ESP_LOG_I_COL            = IM_COL32(13, 170, 99, 255);
+
 static const ImU32 BTN_DOWN                 = IM_COL32(0, 100, 179, 255);
 
 static const char* BAUDRATE_ITEMS[] = {"300 baud","1200 baud", "2400 baud", "4800 baud", "9600 baud", "19200 baud",
