@@ -51,6 +51,12 @@ private:
     GLuint openBtnTexture = 0;
     GLuint saveAsBtnTexture = 0;
     GLuint saveBtnTexture = 0;
+    GLuint withBarTexture = 0;
+    GLuint withoutBarTexture = 0;
+    GLuint minimizeTexture = 0;
+    GLuint maximizeTexture = 0;
+    GLuint maximize2Texture = 0;
+    GLuint closeTexture = 0;
 
     GLuint uNewBtnTexture = 0;
     GLuint uOpenBtnTexture = 0;
@@ -60,6 +66,7 @@ private:
 
     ImVec2* questionSize;
     ImVec2* menuBarIconSize;
+    ImVec2* cornerIconSize;
     //ImVec2*
     //SDL_Texture* qTexture = nullptr;
 };

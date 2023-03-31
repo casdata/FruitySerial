@@ -294,9 +294,64 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                         }
 
+
+                        else if(static_cast<int>(preBuff.at(17)) == 0x20 &&
+                                 static_cast<int>(preBuff.at(18)) == 0x28){
+
+                            nullData = false;
+                            bool pushColor = false;
+
+                            switch(static_cast<int>(preBuff.at(16))){
+                                case 0x44:                                                                              //D debug
+                                    pushColor = true;
+                                    if(uiTheme == DARK)
+                                        ImGui::PushStyleColor(ImGuiCol_Text, DARK_ESP_LOG_D_COL);
+                                    else
+                                        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_ESP_LOG_D_COL);
+                                    break;
+                                case 0x56:                                                                              //V verbose
+                                    pushColor = true;
+                                    if(uiTheme == DARK)
+                                        ImGui::PushStyleColor(ImGuiCol_Text, DARK_ESP_LOG_V_COL);
+                                    else
+                                        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_ESP_LOG_V_COL);
+                                    break;
+                            }
+
+                            for(size_t j = 16; j < preBuff.length(); j++){
+
+                                if(static_cast<int>(preBuff.at(j)) == 0x1B && (j + 5) < preBuff.length()){
+                                    if(static_cast<int>(preBuff.at(j + 1)) == 0x5B &&
+                                       static_cast<int>(preBuff.at(j + 2)) == 0x30 &&
+                                       static_cast<int>(preBuff.at(j + 3)) == 0x6D &&
+                                       static_cast<int>(preBuff.at(j + 4)) == 0xD &&
+                                       static_cast<int>(preBuff.at(j + 5)) == 0xA){
+
+                                        break;
+                                    }
+                                }
+                                else
+                                    postBuff.push_back(preBuff.at(j));
+
+                            }
+
+                            ImGui::TextUnformatted(postBuff.c_str());
+                            ImGui::SameLine(0,0);
+
+                            if(pushColor)
+                                ImGui::PopStyleColor();
+
+
+                        }
+
+
                     }
 
                     if(nullData){
+
+                        ImGui::TextUnformatted(preBuff.substr(16, preBuff.size()).c_str());
+                        ImGui::SameLine(0,0);
+                        /*
                         if(uiTheme == DARK)
                             ImGui::PushStyleColor(ImGuiCol_Text, DARK_BRACKET_COL);
                         else
@@ -320,6 +375,7 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                         ImGui::PopStyleColor();
 
+                        */
 
                     }
 

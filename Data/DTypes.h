@@ -11,6 +11,8 @@ typedef enum {DARK, CLASSIC, LIGHT} UI_Theme;
 typedef enum {OFF, DOWN, UP, ON} BtnState;
 typedef enum {IDLE, SAVE, LOAD, MENU} AppState;
 typedef enum {DISABLE, EN_TIME} TimeStamp;
+typedef enum {TB_2DISABLE, TB_DISABLE, TB_2ENABLE, TB_ENABLE} TitleBar;
+typedef enum {SET_2MAXIMIZE, MAXIMIZE, SET_2NORMAL, NORMAL} MaximizeState;
 
 typedef enum {
     fivebits = 5,
@@ -76,6 +78,9 @@ typedef enum {
 
 typedef struct{
     bool exitApp;
+    MaximizeState maximize;
+    bool minimize;
+    TitleBar titleBar;
 } MenuData;
 
 typedef struct{
@@ -138,15 +143,21 @@ static const ImU32 LIGHT_COMBO_BG_COL       = IM_COL32(215, 215, 215, 255);
 static const ImU32 LIGHT_COMBO_BG_OVER_COL  = IM_COL32(137, 137, 137, 255);
 static const ImU32 LIGHT_COMBO_BG_PRESS_COL = IM_COL32(168, 168, 168, 255);
 
-static const ImU32 DARK_ESP_LOG_W_COL            = IM_COL32(249, 249, 0, 255);
-static const ImU32 DARK_ESP_LOG_E_COL            = IM_COL32(255, 73, 89, 255);
-static const ImU32 DARK_ESP_LOG_I_COL            = IM_COL32(13, 229, 99, 255);
+static const ImU32 DARK_ESP_LOG_W_COL       = IM_COL32(249, 249, 0, 255);
+static const ImU32 DARK_ESP_LOG_E_COL       = IM_COL32(255, 73, 89, 255);
+static const ImU32 DARK_ESP_LOG_I_COL       = IM_COL32(13, 229, 99, 255);
+static const ImU32 DARK_ESP_LOG_D_COL       = IM_COL32(0, 130, 255, 255);
+static const ImU32 DARK_ESP_LOG_V_COL       = IM_COL32(148, 68, 255, 255);
 
-static const ImU32 LIGHT_ESP_LOG_W_COL            = IM_COL32(215, 180, 0, 255);
-static const ImU32 LIGHT_ESP_LOG_E_COL            = IM_COL32(255, 73, 45, 255);
-static const ImU32 LIGHT_ESP_LOG_I_COL            = IM_COL32(13, 170, 99, 255);
+static const ImU32 LIGHT_ESP_LOG_W_COL      = IM_COL32(215, 180, 0, 255);
+static const ImU32 LIGHT_ESP_LOG_E_COL      = IM_COL32(255, 73, 45, 255);
+static const ImU32 LIGHT_ESP_LOG_I_COL      = IM_COL32(13, 170, 99, 255);
+static const ImU32 LIGHT_ESP_LOG_D_COL      = IM_COL32(0, 0, 223, 255);
+static const ImU32 LIGHT_ESP_LOG_V_COL      = IM_COL32(148, 0, 223, 255);
 
-static const ImU32 BTN_DOWN                 = IM_COL32(0, 100, 179, 255);
+static const ImU32 CLOSE_BTN_OVER           = IM_COL32(231, 28, 28, 255);
+static const ImU32 CLOSE_BTN_PRESSED        = IM_COL32(214, 98, 98, 255);
+static const ImU32 CORNER_BTN_OVER          = IM_COL32(221, 221, 221, 255);
 
 static const char* BAUDRATE_ITEMS[] = {"300 baud","1200 baud", "2400 baud", "4800 baud", "9600 baud", "19200 baud",
                                             "38400 baud", "57600 baud", "74880 baud", "115200 baud", "230400 baud",

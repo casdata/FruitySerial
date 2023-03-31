@@ -259,11 +259,19 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
 
     GLuint *texturePtr = &playTexture;
 
-    if(serialConnection->isListening())
+    if(serialConnection->isConnectionOpen())
         texturePtr = &pauseTexture;
 
-    if(ImGui::ImageButton((void*)(intptr_t)*texturePtr, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
-        serialConnection->swapListening();
+    if(ImGui::ImageButton((void*)(intptr_t)*texturePtr, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding)){
+        //serialConnection->swapListening();
+
+        if(serialConnection->isConnectionOpen())
+            serialConnection->closeConnection();
+        else
+            serialConnection->openConnection();
+
+    }
+
     ImGui::PopStyleColor();
 
 

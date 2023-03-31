@@ -49,6 +49,25 @@ Hud::Hud() {
     ret = FunctionTools::loadTextureFromFile("../Assets/uEmpty.png", &uEmptyBtnTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    ret = FunctionTools::loadTextureFromFile("../Assets/withBar.png", &withBarTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("../Assets/withoutBar.png", &withoutBarTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("../Assets/minimizeBtn.png", &minimizeTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("../Assets/maximizeBtn.png", &maximizeTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("../Assets/maximize2Btn.png", &maximize2Texture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("../Assets/closeBtn.png", &closeTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+    cornerIconSize = new ImVec2(imageWidth, imageHeight);
+
     mainWin = new MainWindow();
 
 }
@@ -186,18 +205,93 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
 
         if(ImGui::ImageButton((void*)(intptr_t)newBtnTexture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1),imagePadding)){
-            //addWindow("More", appData.windowCount, appData.tabCount, true);
+
         }
 
-
         if(ImGui::ImageButton((void*)(intptr_t)openBtnTexture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)){
-            //mainWin->newSubWindow(appData.windowCount);
-            //removeWindow(0);
+
         }
 
 
         if(ImGui::ImageButton((void*)(intptr_t)saveBtnTexture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)){
-            //removeWindow(1);
+
+        }
+
+
+        int spaceBetween = FunctionTools::norm2Height(8);
+        float iconWidth = FunctionTools::norm2Height(static_cast<int>(cornerIconSize->x));//FunctionTools::norm2HeightFloat(38);
+        float tempX = ImGui::GetWindowSize().x - iconWidth - spaceBetween;
+
+        if(menuData.titleBar == TB_DISABLE) {
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, CLOSE_BTN_OVER);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, CLOSE_BTN_PRESSED);
+            ImGui::SetCursorPos(ImVec2(tempX, 0));
+            if (ImGui::ImageButton((void *) (intptr_t) closeTexture, ImVec2(iconWidth, iconSize), ImVec2(0, 0),
+                                   ImVec2(1, 1), imagePadding))
+                menuData.exitApp = true;
+            ImGui::PopStyleColor(2);
+
+            tempX -= (spaceBetween + iconWidth);
+
+
+            ImGui::SetCursorPos(ImVec2(tempX, 0));
+            switch (menuData.maximize) {
+                case MAXIMIZE:
+                case SET_2MAXIMIZE:
+                    if (ImGui::ImageButton((void *) (intptr_t) maximizeTexture, ImVec2(iconWidth, iconSize),
+                                           ImVec2(0, 0), ImVec2(1, 1), imagePadding)) {
+                        menuData.maximize = SET_2NORMAL;
+                    }
+                    break;
+                case NORMAL:
+                case SET_2NORMAL:
+                    if (ImGui::ImageButton((void *) (intptr_t) maximize2Texture, ImVec2(iconWidth, iconSize),
+                                           ImVec2(0, 0), ImVec2(1, 1), imagePadding)) {
+                        menuData.maximize = SET_2MAXIMIZE;
+                    }
+                    break;
+            }
+
+
+
+            tempX -= (spaceBetween + iconWidth);
+
+
+            ImGui::SetCursorPos(ImVec2(tempX, 0));
+            if (ImGui::ImageButton((void *) (intptr_t) minimizeTexture, ImVec2(iconWidth, iconSize), ImVec2(0, 0),
+                                   ImVec2(1, 1), imagePadding)) {
+
+            }
+
+            tempX -= ((spaceBetween * 2) + iconSize);
+
+        }
+        else
+            tempX += spaceBetween;
+
+
+
+        ImGui::SetCursorPos(ImVec2(tempX, 0));
+        bool barBtnState = false;
+
+        if(menuData.titleBar == TB_ENABLE) {
+            if (ImGui::ImageButton((void *) (intptr_t) withoutBarTexture, ImVec2(iconSize, iconSize), ImVec2(0, 0),
+                                   ImVec2(1, 1), imagePadding))
+                barBtnState = true;
+        }
+        else{
+            if (ImGui::ImageButton((void *) (intptr_t) withBarTexture, ImVec2(iconSize, iconSize), ImVec2(0, 0),
+                                   ImVec2(1, 1), imagePadding))
+                barBtnState = true;
+        }
+
+
+
+        if(barBtnState){
+            if(menuData.titleBar == TB_ENABLE)
+                menuData.titleBar = TB_2DISABLE;
+            else if(menuData.titleBar == TB_DISABLE)
+                menuData.titleBar = TB_2ENABLE;
         }
 
 
@@ -317,6 +411,8 @@ void Hud::drawMainWin(AppData &appData, SerialManager *serialManager) {
 Hud::~Hud() {
 
     delete questionSize;
+    delete menuBarIconSize;
+    delete cornerIconSize;
 
     delete mainWin;
 

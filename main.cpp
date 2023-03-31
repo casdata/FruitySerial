@@ -38,11 +38,13 @@ Hud *hud;
 SerialManager *serialManager;
 ClockTime *clockTime;
 
-bool initSDL(HitTestData &hitTestData);
+bool initSDL();
 void initApp(AppData* appData);
 void setTheme(AppData* appData);
 void setStyleColorAppDark();
 void setStyleColorAppLight();
+void enableWindowTitleBar();
+void disableWindowTitleBar(HitTestData &hitTestData);
 SDL_HitTestResult SDLCALL hitTest(SDL_Window *window, const SDL_Point *pt, void *data);
 
 // Main code
@@ -50,20 +52,21 @@ int main(int, char**)
 {
 
     float deltaTime = 0.0f;
-    MenuData menuData = {false};
+    MenuData menuData = {false, NORMAL, false,
+                         TB_2ENABLE};
     AppData appData = {false,
                        1,
                        0,
-                       LIGHT,
+                       DARK,
                        0, 0,
                        0, 0,
                        IDLE,
                        false,
                        nullptr};
     IOData ioData = {OFF, OFF};
-    HitTestData hitTestData = {OFF, 0};
+    HitTestData hitTestData = {OFF, 0, 0};
 
-    if(!initSDL(hitTestData))
+    if(!initSDL())
         return -1;
 
     initApp(&appData);
@@ -151,7 +154,14 @@ int main(int, char**)
         if(appData.cursorOverSubWinBorder)
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 
-
+        if(menuData.titleBar == TB_2DISABLE){
+            disableWindowTitleBar(hitTestData);
+            menuData.titleBar = TB_DISABLE;
+        }
+        else if(menuData.titleBar == TB_2ENABLE){
+            enableWindowTitleBar();
+            menuData.titleBar= TB_ENABLE;
+        }
 
         SDL_GetWindowPosition(gWindow, &appData.windowPosX, &appData.windowPosY);
         SDL_GetWindowSize(gWindow, &appData.windowSizeW, &appData.windowSizeH);
@@ -441,6 +451,17 @@ int main(int, char**)
                 ImGui::OpenPopup("Comfirm Close App");
         }
 
+        if(menuData.maximize == SET_2MAXIMIZE){
+            menuData.maximize = MAXIMIZE;
+
+            SDL_MaximizeWindow(gWindow);
+        }
+        else if(menuData.maximize == SET_2NORMAL){
+            menuData.maximize = NORMAL;
+
+            SDL_RestoreWindow(gWindow);
+        }
+
         if (hud->closeAppDialog(appData))
             runMainLoop = false;
 
@@ -484,7 +505,7 @@ int main(int, char**)
     return 0;
 }
 
-bool initSDL(HitTestData &hitTestData){
+bool initSDL(){
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
@@ -517,16 +538,10 @@ bool initSDL(HitTestData &hitTestData){
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);// | SDL_WINDOW_BORDERLESS);
-    gWindow = SDL_CreateWindow("Fruity Serial Terminal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 620, window_flags);  //1280, 980,
+    gWindow = SDL_CreateWindow("Fruity Serial Terminal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, window_flags);  //1280, 980,
     gl_context = SDL_GL_CreateContext(gWindow);
     SDL_GL_MakeCurrent(gWindow, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
-
-    //if(SDL_SetWindowHitTest(gWindow, hitTest, &hitTestData) == -1)
-    //  SDL_Log("Hit test failed!\n");
-
-
-    //SDL_SetWindowBordered(gWindow, SDL_FALSE);
 
     SDL_DisplayMode dm;
     SDL_GetCurrentDisplayMode(0, &dm);
@@ -650,18 +665,34 @@ void setStyleColorAppLight(){
 
 }
 
+void enableWindowTitleBar(){
+    if(SDL_SetWindowHitTest(gWindow, nullptr, nullptr) == -1)
+        SDL_Log("Hit test failed!\n");
+
+    SDL_SetWindowBordered(gWindow, SDL_TRUE);
+}
+
+void disableWindowTitleBar(HitTestData &hitTestData){
+    if(SDL_SetWindowHitTest(gWindow, hitTest, &hitTestData) == -1)
+        SDL_Log("Hit test failed!\n");
+
+    SDL_SetWindowBordered(gWindow, SDL_FALSE);
+}
+
 SDL_HitTestResult SDLCALL hitTest(SDL_Window *window, const SDL_Point *pt, void *data){
 
     //std::cout<<"-> "<<pt->x<<" "<<pt->y<<std::endl;
     HitTestData *hitTestData = reinterpret_cast<HitTestData*>(data);                                                    //(*(HitTestData*)data)
 
-    if(pt->x > 100 && pt->x < hitTestData->windowSizeW){//ImGui::GetContentRegionAvail().x){
-        if(pt->y > 0 && pt->y < MENU_BAR_HIGHT){
-            return SDL_HITTEST_DRAGGABLE;
-            //SDL_Log("Inside\n");
-        }
-    }
 
+                                                                                                                        //TEMP DELETE after resize code implemented;
+    int minXPoint = hitTestData->windowSizeW * 0.1582f;
+    int maxXPoint = hitTestData->windowSizeW * 0.8222f;
+
+    if(pt->x > minXPoint && pt->x < maxXPoint){
+        if(pt->y > 0 && pt->y < MENU_BAR_HIGHT)
+            return SDL_HITTEST_DRAGGABLE;
+    }
 
 
     if(pt->x < RESIZE_OFFSET && pt->y < RESIZE_OFFSET)
