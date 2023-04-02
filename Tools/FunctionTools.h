@@ -32,6 +32,7 @@ public:
     static TextEncoding int2TextEncodingEnum(uint32_t tEncodingIndex);
     static void char2Utf8(char character, std::string& str);
     static void unicode2Utf8(unsigned int unicode, std::string& str);
+    static void printDECorHEX_UTF8(bool&& decType, const char charData, const UI_Theme& uiTheme, bool& postBuffActive, std::string& postBuff);
     static void printSpecialUTF8(std::string&& name, const UI_Theme& uiTheme, bool& postBuffActive, std::string& postBuff);
     static float norm2HeightFloat(const int &value, bool setLegacyHeight = false, int newHeight = 0);
     static int norm2Width(const int &value, bool setLegacyWidth = false, int newWidth = 0);

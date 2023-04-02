@@ -205,7 +205,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
 
         if(ImGui::ImageButton((void*)(intptr_t)newBtnTexture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1),imagePadding)){
-
+            ImGui::OpenPopup("sergio");
         }
 
         if(ImGui::ImageButton((void*)(intptr_t)openBtnTexture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)){

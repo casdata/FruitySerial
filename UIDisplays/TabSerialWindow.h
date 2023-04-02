@@ -51,6 +51,8 @@ private:
     bool undock;
     bool rename;
 
+    bool serialSettings;
+
     SerialPortData *tabSerialPortData;
     SerialConnection *serialConnection;
 

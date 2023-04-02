@@ -15,6 +15,7 @@ TabSerialWindow::TabSerialWindow(SerialPortData *serialPortData, SerialConnectio
 
     splitRight = false;
     open = true;
+    serialSettings = false;
     //undock = false;
     //rename = false;
 }
@@ -63,7 +64,6 @@ void TabSerialWindow::freePort() {
 void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiTheme) {
 
 
-    //ImGui:
      if(ImGui::BeginTabItem(tabName.c_str(), &open, ImGuiTabItemFlags_None)) {
 
          drawPopupTabMenu(multiTabs);
@@ -109,6 +109,134 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
      }
      else
          tabSelected = false;
+
+
+
+     if(serialSettings){
+
+         std::string nameId;
+
+         nameId.assign("Settings: ");
+         nameId.append(tabSerialPortData->portInfo.port);
+
+         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+         //ImGui::SetScrollX()
+         static float wSizeX = FunctionTools::norm2HeightFloat(330);
+         static float wSizeY = FunctionTools::norm2HeightFloat(200);
+         ImGui::SetNextWindowSize(ImVec2(wSizeX, wSizeY));
+         ImGui::Begin(nameId.c_str(), &serialSettings, windowFlags);
+
+
+            nameId.assign("table:");
+            nameId.append(tabSerialPortData->portInfo.port);
+
+            if(ImGui::BeginTable(nameId.c_str(), 2, ImGuiTableFlags_SizingFixedFit)){
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Device:");
+                ImGui::TableSetColumnIndex(1);
+
+                static float wrap_width =  FunctionTools::norm2HeightFloat(240.0f);
+                static float wrap_offset = FunctionTools::norm2HeightFloat(10);
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                ImVec2 marker_min = ImVec2(pos.x + wrap_width, pos.y);
+                ImVec2 marker_max = ImVec2(pos.x + wrap_width + wrap_offset, pos.y + ImGui::GetTextLineHeight());
+                ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
+                    ImGui::Text(tabSerialPortData->portInfo.hardware_id.c_str());
+                ImGui::PopTextWrapPos();
+
+
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Port:");
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text(tabSerialPortData->portInfo.port.c_str());
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("About:");
+                ImGui::TableSetColumnIndex(1);
+
+                pos = ImGui::GetCursorScreenPos();
+                marker_min = ImVec2(pos.x + wrap_width, pos.y);
+                marker_max = ImVec2(pos.x + wrap_width + wrap_offset, pos.y + ImGui::GetTextLineHeight());
+                ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
+                    ImGui::Text(tabSerialPortData->portInfo.description.c_str());
+                ImGui::PopTextWrapPos();
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Byte size:");
+                ImGui::TableSetColumnIndex(1);
+
+
+                nameId.assign("##bitSize:");
+                nameId.append(tabSerialPortData->portInfo.port);
+
+                int preItemIndex = static_cast<int>(serialConnection->getByteSize());
+                int itemIndex = preItemIndex - 5;
+
+                ImGui::SetNextItemWidth(ImGui::GetColumnWidth(1));
+                ImGui::Combo(nameId.c_str(), &itemIndex, BYTE_SIZE_ITEMS, IM_ARRAYSIZE(BYTE_SIZE_ITEMS));
+
+                itemIndex += 5;
+
+                if(itemIndex != preItemIndex)
+                    serialConnection->setBytesize(static_cast<serialByteSize>(itemIndex));
+
+
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Parity:");
+                ImGui::TableSetColumnIndex(1);
+
+                preItemIndex = static_cast<int>(serialConnection->getParity());
+                itemIndex = preItemIndex;
+
+                nameId.assign("##parity:");
+                nameId.append(tabSerialPortData->portInfo.port);
+
+                ImGui::SetNextItemWidth(ImGui::GetColumnWidth(1));
+                ImGui::Combo(nameId.c_str(), &itemIndex, PARITY_ITEMS, IM_ARRAYSIZE(PARITY_ITEMS));
+
+                if(itemIndex != preItemIndex)
+                    serialConnection->setParity(static_cast<serialParity>(itemIndex));
+
+
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Stop bits:");
+                ImGui::TableSetColumnIndex(1);
+
+                preItemIndex = static_cast<int>(serialConnection->getStopbits());
+                itemIndex = preItemIndex;
+
+                nameId.assign("##stopb:");
+                nameId.append(tabSerialPortData->portInfo.port);
+
+                ImGui::SetNextItemWidth(ImGui::GetColumnWidth(1));
+                ImGui::Combo(nameId.c_str(), &itemIndex, STOP_BITS_ITEMS, IM_ARRAYSIZE(STOP_BITS_ITEMS));
+
+                if(itemIndex != preItemIndex)
+                    serialConnection->setStopbits(static_cast<serialStopbits>(itemIndex));
+
+
+                std::cout<<"stop bits: "<<serialConnection->getStopbits()<<std::endl;
+
+                ImGui::EndTable();
+            }
+
+
+         ImGui::End();
+
+
+     }
+
 
 }
 
@@ -168,9 +296,10 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
     int imagePadding = FunctionTools::norm2Height(1);
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
-    if(ImGui::ImageButton((void*)(intptr_t)settingsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding)){
-
+    if(ImGui::ImageButton((void*)(intptr_t)settingsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding)) {
+        serialSettings = true;//ImGui::OpenPopup("sergio");//tabSerialPortData->portInfo.port.c_str());
     }
+
     ImGui::PopStyleColor();
 
     //Baudrate combo
@@ -181,18 +310,56 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
 
     ImGui::SetNextItemWidth(tempWidth);
 
-    ImGui::Combo("##baudrate_combo", &currentItem, BAUDRATE_ITEMS, IM_ARRAYSIZE(BAUDRATE_ITEMS));
+    std::string nameId;
+    nameId.assign("##baudr_c:");
+    nameId.append(tabName);
+
+    ImGui::Combo(nameId.c_str(), &currentItem, BAUDRATE_ITEMS, IM_ARRAYSIZE(BAUDRATE_ITEMS));
 
     if(currentItem != comboItem)
         serialConnection->setBaudrate(static_cast<serialBaudrate>(currentItem));
 
     //Separator
-    tempWidth = FunctionTools::norm2HeightFloat(5);
+    tempWidth = FunctionTools::norm2HeightFloat(6);
     float tempHeight = FunctionTools::norm2HeightFloat(18);
     tempX -= (tempWidth + myCursorPos.x);
 
     ImGui::SetCursorPos(ImVec2(tempX, tempY));
     ImGui::Image((void*)(intptr_t)separatorTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1));
+
+
+    //Encoding buttons
+    int arrowPressed = -1;
+
+    tempWidth = tempHeight;
+    tempX -= (tempWidth + myCursorPos.x);
+    ImGui::SetNextItemWidth(tempWidth);
+    ImGui::SetCursorPos(ImVec2(tempX, tempY));
+
+    if(ImGui::ArrowButton("encoRight", ImGuiDir_Right))
+        arrowPressed = 1;
+
+    float tempLittleSpace = FunctionTools::norm2HeightFloat(6);
+    tempX -= (tempWidth + tempLittleSpace);
+    ImGui::SetNextItemWidth(tempWidth);
+    ImGui::SetCursorPos(ImVec2(tempX, tempY));
+
+    if(ImGui::ArrowButton("encoLeft", ImGuiDir_Left))
+        arrowPressed = 2;
+
+    if(arrowPressed == 1){                                                                                              //Right
+
+        int encodingIndex = static_cast<int>(serialConnection->getTextEncoding());
+
+        if(++encodingIndex < IM_ARRAYSIZE(TXT_ENCODING_ITEMS))
+            serialConnection->setTextEnconding(static_cast<TextEncoding>(encodingIndex));
+    }
+    else if(arrowPressed == 2){                                                                                         //Left
+        int encodingIndex = static_cast<int>(serialConnection->getTextEncoding());
+
+        if(--encodingIndex > -1)
+            serialConnection->setTextEnconding(static_cast<TextEncoding>(encodingIndex));
+    }
 
 
     //Encoding format
@@ -204,7 +371,7 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
     ImVec2 txtSize = ImGui::CalcTextSize(TXT_ENCODING_ITEMS[comboItem]);
 
     tempWidth = txtSize.x;
-    tempX -= (tempWidth + (myCursorPos.x * 2));
+    tempX -= (tempWidth + tempLittleSpace * 2);
 
     ImGui::SetCursorPos(ImVec2(tempX, tempY));
     ImGui::SetNextItemWidth(tempWidth);

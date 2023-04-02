@@ -2,6 +2,7 @@
 // Created by castdata on 1/18/23.
 //
 
+#include <iomanip>
 #include "FunctionTools.h"
 
 bool FunctionTools::loadTextureFromFile(const char *filename, GLuint *outTexture, int *outWidth, int *outHeight) {
@@ -302,7 +303,46 @@ void FunctionTools::unicode2Utf8(unsigned int unicode, std::string &str) {
 
 }
 
-//void FunctionTools::printSpecialHEX()
+void FunctionTools::printDECorHEX_UTF8(bool&& decType, const char charData, const UI_Theme &uiTheme, bool &postBuffActive,
+                                       std::string &postBuff) {
+
+    if(postBuffActive){
+        postBuffActive = false;
+
+        ImGui::TextUnformatted(postBuff.c_str());
+        ImGui::SameLine(0,0);
+
+        postBuff.assign(std::string());
+    }
+
+    if(uiTheme == DARK)
+        ImGui::PushStyleColor(ImGuiCol_Text, DARK_BRACKET_COL);
+    else
+        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_BRACKET_COL);
+
+    ImGui::TextUnformatted("[");
+    ImGui::SameLine(0,0);
+
+    if(uiTheme == DARK)
+        ImGui::PushStyleColor(ImGuiCol_Text, DARK_SPECIAL_UTF8_COL);
+    else
+        ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_SPECIAL_UTF8_COL);
+
+    std::stringstream sStream;
+
+    if(decType)
+        sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(charData);
+    else
+        sStream<<std::uppercase<<std::setfill('0')<<std::setw(2)<<std::hex<<static_cast<int>(charData);
+
+    ImGui::TextUnformatted(sStream.str().c_str());
+    ImGui::SameLine(0,0);
+    ImGui::PopStyleColor();
+    ImGui::TextUnformatted("]");
+    ImGui::SameLine(0,0);
+    ImGui::PopStyleColor();
+
+}
 
 void FunctionTools::printSpecialUTF8(std::string&& name, const UI_Theme &uiTheme, bool& postBuffActive, std::string& postBuff) {
 

@@ -84,11 +84,40 @@ serialParity SerialConnection::getParity() {
 }
 
 void SerialConnection::setStopbits(serialStopbits stopbits) {
-    mySerial->setStopbits(static_cast<serial::stopbits_t>(stopbits));
+
+    switch(stopbits){
+        case stopbits_one:
+            mySerial->setStopbits(serial::stopbits_one);
+            break;
+        case stopbits_one_point_five:
+            mySerial->setStopbits(serial::stopbits_one_point_five);
+            break;
+        case stopbits_two:
+            mySerial->setStopbits(serial::stopbits_two);
+            break;
+    }
 }
 
 serialStopbits SerialConnection::getStopbits() {
-    return static_cast<serialStopbits>(mySerial->getStopbits());
+
+
+    std::cout<<"-> "<<mySerial->getStopbits()<<std::endl;
+
+    serialStopbits sStopBits ;
+
+    switch(mySerial->getStopbits()){
+        case serial::stopbits_one:
+            sStopBits = stopbits_one;
+            break;
+        case serial::stopbits_two:
+            sStopBits = stopbits_two;
+            break;
+        case serial::stopbits_one_point_five:
+            sStopBits = stopbits_one_point_five;
+            break;
+    }
+
+    return sStopBits;
 }
 
 void SerialConnection::setFlowcontrol(serialFlowcontrol flowcontrol) {
@@ -220,7 +249,6 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                     }
 
-
                     if(postBuffActive)
                         ImGui::TextUnformatted(postBuff.c_str());
 
@@ -340,43 +368,12 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                             if(pushColor)
                                 ImGui::PopStyleColor();
-
-
                         }
-
-
                     }
 
                     if(nullData){
-
                         ImGui::TextUnformatted(preBuff.substr(16, preBuff.size()).c_str());
                         ImGui::SameLine(0,0);
-                        /*
-                        if(uiTheme == DARK)
-                            ImGui::PushStyleColor(ImGuiCol_Text, DARK_BRACKET_COL);
-                        else
-                            ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_BRACKET_COL);
-
-                        ImGui::TextUnformatted("<");
-                        ImGui::SameLine(0,0);
-
-                        ImGui::PopStyleColor();
-
-                        ImGui::TextUnformatted("null data");
-                        ImGui::SameLine(0,0);
-
-                        if(uiTheme == DARK)
-                            ImGui::PushStyleColor(ImGuiCol_Text, DARK_BRACKET_COL);
-                        else
-                            ImGui::PushStyleColor(ImGuiCol_Text, LIGHT_BRACKET_COL);
-
-                        ImGui::TextUnformatted(">");
-                        ImGui::SameLine(0,0);
-
-                        ImGui::PopStyleColor();
-
-                        */
-
                     }
 
                     ImGui::NewLine();
@@ -491,18 +488,26 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                                         break;
                                     default:
                                         postBuff.push_back(*strIt);
-                                        //FunctionTools::char2Utf8(*strIt, postBuff);
                                         postBuffActive = true;
                                         break;
                                 }
-
-
                                 break;
                             case UTF_8_RAW_DEC:
+                                if(static_cast<int>(*strIt) < 32)
+                                    FunctionTools::printDECorHEX_UTF8(true, *strIt, uiTheme, postBuffActive, postBuff);
+                                else{
+                                    postBuff.push_back(*strIt);
+                                    postBuffActive = true;
+                                }
 
                                 break;
                             case UTF_8_RAW_HEX:
-
+                                if(static_cast<int>(*strIt) < 32)
+                                    FunctionTools::printDECorHEX_UTF8(false, *strIt, uiTheme, postBuffActive, postBuff);
+                                else{
+                                    postBuff.push_back(*strIt);
+                                    postBuffActive = true;
+                                }
                                 break;
                             default:
 
@@ -516,6 +521,8 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                             ImGui::TextUnformatted(postBuff.c_str());
                             break;
                         case UTF_8_SPECIAL:
+                        case UTF_8_RAW_DEC:
+                        case UTF_8_RAW_HEX:
                             if(postBuffActive)
                                 ImGui::TextUnformatted(postBuff.c_str());
 

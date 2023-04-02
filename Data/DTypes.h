@@ -25,14 +25,14 @@ typedef enum {
     parity_none = 0,
     parity_odd = 1,
     parity_even = 2,
-    parity_mark = 3,
-    parity_space = 4
+    parityCount
 } serialParity;
 
 typedef enum {
-    stopbits_one = 1,
-    stopbits_two = 2,
-    stopbits_one_point_five
+    stopbits_one = 0,
+    stopbits_one_point_five = 1,
+    stopbits_two
+
 } serialStopbits;
 
 typedef enum {
@@ -69,9 +69,9 @@ typedef enum {
 typedef enum {
     RAW_DEC = 0,
     RAW_HEX,
+    UTF_8,
     UTF_8_RAW_DEC,
     UTF_8_RAW_HEX,
-    UTF_8,
     UTF_8_SPECIAL,
     UTF_8_ESP_LOG
 } TextEncoding;
@@ -118,6 +118,8 @@ typedef struct{
 } HitTestData;
 
 
+
+
 const char* const dataFileName = "data.bin";
 
 static const float LEGACY_WIDTH = 1920.0f;
@@ -159,19 +161,21 @@ static const ImU32 CLOSE_BTN_OVER           = IM_COL32(231, 28, 28, 255);
 static const ImU32 CLOSE_BTN_PRESSED        = IM_COL32(214, 98, 98, 255);
 static const ImU32 CORNER_BTN_OVER          = IM_COL32(221, 221, 221, 255);
 
-static const char* BAUDRATE_ITEMS[] = {"300 baud","1200 baud", "2400 baud", "4800 baud", "9600 baud", "19200 baud",
+static const char* TXT_ENCODING_ITEMS[]     = {"RAW-DEC", "RAW-HEX", "UTF-8", "UTF-8 RAW-DEC", "UTF-8 RAW-HEX", "UTF-8 SPECIAL", "UTF-8 ESP-LOG"};
+
+static const char* BAUDRATE_ITEMS[]         = {"300 baud","1200 baud", "2400 baud", "4800 baud", "9600 baud", "19200 baud",
                                             "38400 baud", "57600 baud", "74880 baud", "115200 baud", "230400 baud",
                                             "250000 baud", "500000 baud", "1000000 baud", "2000000 baud"};
-
-
-static const char* TXT_ENCODING_ITEMS[] = {"RAW-DEC", "RAW-HEX", "UTF-8 RAW-DEC", "UTF-8 RAW-HEX",
-                                           "UTF-8", "UTF-8 RULES", "UTF-8 ESP-LOG"};
+static const char* BYTE_SIZE_ITEMS[]         = {"5", "6", "7", "8"};
+static const char* PARITY_ITEMS[]           = {"none", "odd", "even"};
+static const char* STOP_BITS_ITEMS[]        = {"1", "1.5", "2"};
+static const char* FLOW_CONTROL_ITEMS[]     = {"none", "software", "hardware"};
 /*
  * RAW_DEC = 0,
     RAW_HEX,
+    UTF_8,
     UTF_8_RAW_DEC,
     UTF_8_RAW_HEX,
-    UTF_8,
     UTF_8_SPECIAL,
     UTF_8_ESP_LOG
  */
