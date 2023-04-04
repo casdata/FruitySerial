@@ -68,7 +68,27 @@ serialBaudrate SerialConnection::getBaudrate() {
 }
 
 void SerialConnection::setBytesize(serialByteSize bytesize) {
-    mySerial->setBytesize(static_cast<serial::bytesize_t>(bytesize));
+
+    bool restoreStopBits = false;
+
+    try {
+        mySerial->setBytesize(static_cast<serial::bytesize_t>(bytesize));
+    }
+    catch (serial::IOException e){
+        std::cout<<" "<<e.what()<<std::endl;
+        restoreStopBits = true;
+    }
+
+    if(restoreStopBits){
+        try{
+            mySerial->setStopbits(serial::stopbits_one);
+            mySerial->setBytesize(static_cast<serial::bytesize_t>(bytesize));
+            mySerial->open();
+        }
+        catch (serial::IOException e){
+            std::cout<<"x2 "<<e.what()<<std::endl;
+        }
+    }
 }
 
 serialByteSize SerialConnection::getByteSize() {
@@ -85,23 +105,39 @@ serialParity SerialConnection::getParity() {
 
 void SerialConnection::setStopbits(serialStopbits stopbits) {
 
-    switch(stopbits){
-        case stopbits_one:
+    bool reConnect = false;
+
+    try{
+        switch(stopbits){
+            case stopbits_one:
+                mySerial->setStopbits(serial::stopbits_one);
+                break;
+            case stopbits_one_point_five:
+                mySerial->setStopbits(serial::stopbits_one_point_five);
+                break;
+            case stopbits_two:
+                mySerial->setStopbits(serial::stopbits_two);
+                break;
+        }
+    }
+    catch (serial::IOException e){
+        std::cout<<" "<<e.what()<<std::endl;
+        reConnect = true;
+    }
+
+
+
+    if(reConnect){
+        try{
             mySerial->setStopbits(serial::stopbits_one);
-            break;
-        case stopbits_one_point_five:
-            mySerial->setStopbits(serial::stopbits_one_point_five);
-            break;
-        case stopbits_two:
-            mySerial->setStopbits(serial::stopbits_two);
-            break;
+            mySerial->open();
+        }catch (serial::IOException e){
+            std::cout<<" "<<e.what()<<std::endl;
+        }
     }
 }
 
 serialStopbits SerialConnection::getStopbits() {
-
-
-    std::cout<<"-> "<<mySerial->getStopbits()<<std::endl;
 
     serialStopbits sStopBits ;
 

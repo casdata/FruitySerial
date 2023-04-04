@@ -123,7 +123,7 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
 
          //ImGui::SetScrollX()
          static float wSizeX = FunctionTools::norm2HeightFloat(330);
-         static float wSizeY = FunctionTools::norm2HeightFloat(200);
+         static float wSizeY = FunctionTools::norm2HeightFloat(266);
          ImGui::SetNextWindowSize(ImVec2(wSizeX, wSizeY));
          ImGui::Begin(nameId.c_str(), &serialSettings, windowFlags);
 
@@ -167,6 +167,8 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
                     ImGui::Text(tabSerialPortData->portInfo.description.c_str());
                 ImGui::PopTextWrapPos();
 
+
+                ImGui::NewLine();
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("Byte size:");
@@ -226,9 +228,40 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
                     serialConnection->setStopbits(static_cast<serialStopbits>(itemIndex));
 
 
-                std::cout<<"stop bits: "<<serialConnection->getStopbits()<<std::endl;
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Flow control:");
+                ImGui::TableSetColumnIndex(1);
+
+                preItemIndex = static_cast<int>(serialConnection->getFlowcontrol());
+                itemIndex = preItemIndex;
+
+                nameId.assign("##flowc:");
+                nameId.append(tabSerialPortData->portInfo.port);
+
+                ImGui::SetNextItemWidth(ImGui::GetColumnWidth(1));
+                ImGui::Combo(nameId.c_str(), &itemIndex, FLOW_CONTROL_ITEMS, IM_ARRAYSIZE(FLOW_CONTROL_ITEMS));
+
+                if(itemIndex != preItemIndex)
+                    serialConnection->setFlowcontrol(static_cast<serialFlowcontrol>(itemIndex));
+
 
                 ImGui::EndTable();
+            }
+
+            ImGui::NewLine();
+
+            ImVec2 curPos = ImGui::GetCursorPos();
+
+            ImVec2 textSizes = ImGui::CalcTextSize("Restore defaults");
+
+            ImGui::SetCursorPos(ImVec2(wSizeX - textSizes.x - FunctionTools::norm2HeightFloat(16), curPos.y));
+
+            if(ImGui::Button("Restore defaults")){
+                serialConnection->setStopbits(stopbits_one);
+                serialConnection->setBytesize(eigthbits);
+                serialConnection->setParity(parity_none);
+                serialConnection->setFlowcontrol(flowcontrol_none);
             }
 
 
