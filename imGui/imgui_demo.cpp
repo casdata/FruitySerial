@@ -3331,6 +3331,7 @@ static void ShowDemoWindowLayout()
             if (n > 0)
                 ImGui::SameLine();
 
+
             ImGui::PushID(n);
             ImGui::InvisibleButton("##canvas", size);
             if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -3339,6 +3340,7 @@ static void ShowDemoWindowLayout()
                 offset.y += ImGui::GetIO().MouseDelta.y;
             }
             ImGui::PopID();
+
             if (!ImGui::IsItemVisible()) // Skip rendering as ImDrawList elements are not clipped.
                 continue;
 

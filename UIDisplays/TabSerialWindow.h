@@ -21,6 +21,7 @@ public:
     inline static GLuint settingsTexture;
     inline static GLuint separatorTexture;
     inline static ImVec2 textureSize;
+    inline static ImVec2 caretSize;
 
     explicit TabSerialWindow(SerialPortData *serialPortData, SerialConnection *serialConnection);
 
@@ -38,6 +39,8 @@ public:
 
     void add2DataBuffer(const std::string &dataText);
     void clearDataBuffer();
+
+    SerialConnection* getSerialConnectionPtr();
 
 private:
     void drawPopupTabMenu(bool multiTabs);

@@ -25,10 +25,13 @@ std::string TabSerialWindow::getTabName() {
 }
 
 bool TabSerialWindow::isTabSelected() {
+    return tabSelected;
+    /*
     bool preTabSelected = tabSelected;
     tabSelected = false;
 
     return preTabSelected;
+    */
 }
 
 bool TabSerialWindow::isTabClosing(){
@@ -328,10 +331,14 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
 
     int imagePadding = FunctionTools::norm2Height(1);
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
-    if(ImGui::ImageButton((void*)(intptr_t)settingsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding)) {
-        serialSettings = true;//ImGui::OpenPopup("sergio");//tabSerialPortData->portInfo.port.c_str());
-    }
+    if(serialSettings)
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+    else
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+    if(ImGui::ImageButton((void*)(intptr_t)settingsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
+        serialSettings = true;
+
 
     ImGui::PopStyleColor();
 
@@ -518,6 +525,10 @@ void TabSerialWindow::clearDataBuffer() {
         dataBuffer[i].clear();
 
     dataBuffer.clear();
+}
+
+SerialConnection *TabSerialWindow::getSerialConnectionPtr() {
+    return serialConnection;
 }
 
 

@@ -209,7 +209,6 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
     ImGuiListClipper clipper;
 
-
     clipper.Begin(dataLines.size());
 
     while(clipper.Step()){

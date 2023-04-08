@@ -34,9 +34,9 @@ public:
     void statusBar();
     bool closeAppDialog(AppData &appFlags);
 
-    void update(const float &dt, const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager);
+    void update(const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager);
 
-    void drawMainWin(AppData &appData, SerialManager *serialManager);
+    void drawMainWin(const double &dt, AppData &appData, SerialManager *serialManager);
 
     virtual ~Hud();
 

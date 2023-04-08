@@ -19,9 +19,6 @@ public:
     explicit SubWindow(int &windowCount);
     void addTabPortConnection(SerialPortData *serialPortData, SerialConnection *serialConnection);
 
-    void resetTabCounter();
-    std::string getTabName();
-
     void update(const IOData &ioData, SerialManager *serialManager);
 
     void draw(AppData &appData, SerialManager *serialManager);
@@ -41,6 +38,9 @@ public:
     bool isClickOverWin(const ImVec2 &mousePos);
     bool isCursorOverBorder(const ImVec2 &mousePos);
 
+    bool anySelectedTab();
+    SerialConnection* getSerialConnection();
+
     virtual ~SubWindow();
 private:
     void setWinPos(const int &x, const int &y);
@@ -56,6 +56,7 @@ private:
     int splitTabIndex;
 
     bool focused;
+    int focusedIndex;
 
 };
 

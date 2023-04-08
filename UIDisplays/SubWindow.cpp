@@ -213,3 +213,24 @@ void SubWindow::check4ClosedTabsRequest(SerialManager *serialManager) {
 
 }
 
+bool SubWindow::anySelectedTab() {
+
+    if(tabSerialWindows.empty())
+        return false;
+    else{
+        for(size_t i = 0; i < tabSerialWindows.size(); i++){
+            if(tabSerialWindows.at(i)->isTabSelected()){
+                focusedIndex = i;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+}
+
+SerialConnection *SubWindow::getSerialConnection() {
+    return tabSerialWindows.at(focusedIndex)->getSerialConnectionPtr();
+}
+

@@ -46,12 +46,16 @@ void setStyleColorAppLight();
 void enableWindowTitleBar();
 void disableWindowTitleBar(HitTestData &hitTestData);
 SDL_HitTestResult SDLCALL hitTest(SDL_Window *window, const SDL_Point *pt, void *data);
+void keyboardPostProcess(IOData *ioDat);
 
 // Main code
 int main(int, char**)
 {
 
-    float deltaTime = 0.0f;
+    Uint64 NOW = 0;
+    Uint64 LAST = 0;
+    double deltaTime = 0;
+
     MenuData menuData = {false, NORMAL, false,
                          TB_2ENABLE};
     AppData appData = {false,
@@ -60,10 +64,15 @@ int main(int, char**)
                        DARK,
                        0, 0,
                        0, 0,
+                       false,
                        IDLE,
                        false,
+                       false,
                        nullptr};
-    IOData ioData = {OFF, OFF};
+    IOData ioData = {OFF, OFF, OFF, OFF,
+                     OFF, OFF, OFF, OFF, OFF, OFF,
+                     OFF, OFF, OFF, OFF, OFF, OFF, OFF,
+                     OFF, OFF,""};
     HitTestData hitTestData = {OFF, 0, 0};
 
     if(!initSDL())
@@ -143,16 +152,21 @@ int main(int, char**)
     clockTime = new ClockTime();
     serialManager = new SerialManager(clockTime);
 
+    NOW = SDL_GetPerformanceCounter();
 
     // Main loop
     bool runMainLoop = true;
     while (runMainLoop) {
 
-        static bool debugLockClick = false;
-        static int debugClickX = 0;
+        LAST = NOW;
+        NOW = SDL_GetPerformanceCounter();
+        deltaTime = (double)((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );                               //mS
 
-        if(appData.cursorOverSubWinBorder)
+
+        if(appData.cursorOverSubWinBorder && !appData.cursorOverInputTextBar)
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+        else if(!appData.cursorOverSubWinBorder && appData.cursorOverInputTextBar)
+            ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
 
         if(menuData.titleBar == TB_2DISABLE){
             disableWindowTitleBar(hitTestData);
@@ -177,10 +191,20 @@ int main(int, char**)
             ioData.mouseBtnRight = OFF;
 
 
+        ioData.mouseCursorPositionRaw = ImGui::GetMousePos();
         ioData.mouseCursorPosition = FunctionTools::getMouseRealPos(appData.windowPosX, appData.windowPosY);
         hitTestData.mouseBtnLeft = ioData.mouseBtnLeft;
         hitTestData.windowSizeW = appData.windowSizeW;
         hitTestData.windowSizeH = appData.windowSizeH;
+
+
+        Uint32 winFlags = SDL_GetWindowFlags(gWindow);
+        if((winFlags & SDL_WINDOW_MINIMIZED) == SDL_WINDOW_MINIMIZED)
+            appData.winNotMinimized = false;
+        else
+            appData.winNotMinimized = true;
+
+        keyboardPostProcess(&ioData);
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -207,6 +231,126 @@ int main(int, char**)
                 else if(event.button.button == SDL_BUTTON_RIGHT)
                     ioData.mouseBtnRight = UP;
             }
+            if(event.type == SDL_TEXTINPUT)
+                ioData.charBuffer.append(event.text.text);
+                //std::cout<<"-> "<<event.text.text<<std::endl;
+
+
+            if(event.type == SDL_KEYDOWN){
+                switch(event.key.keysym.sym){
+                    case SDLK_LEFT:
+                        ioData.keyLeft = DOWN;
+                        break;
+                    case SDLK_RIGHT:
+                        ioData.keyRight = DOWN;
+                        break;
+                    case SDLK_UP:
+                        ioData.keyUp = DOWN;
+                        break;
+                    case SDLK_DOWN:
+                        ioData.keyDown = DOWN;
+                        break;
+                    case SDLK_LCTRL:
+                        ioData.keyL_Ctrl = DOWN;
+                        break;
+                    case SDLK_RCTRL:
+                        ioData.keyR_Ctrl = DOWN;
+                        break;
+                    case SDLK_LSHIFT:
+                        ioData.keyL_Shift = DOWN;
+                        break;
+                    case SDLK_RSHIFT:
+                        ioData.keyR_Shift = DOWN;
+                        break;
+                    case SDLK_LALT:
+                        ioData.keyL_Alt = DOWN;
+                        break;
+                    case SDLK_RALT:
+                        ioData.keyR_Alt = DOWN;
+                        break;
+                    case SDLK_TAB:
+                        ioData.keyTab = DOWN;
+                        break;
+                    case SDLK_BACKSPACE:
+                        ioData.keyBackspace = DOWN;
+                        break;
+                    case SDLK_DELETE:
+                        ioData.keyDel = DOWN;
+                        break;
+                    case SDLK_RETURN:
+                        ioData.keyEnter = DOWN;
+                        break;
+                    case SDLK_ESCAPE:
+                        ioData.keyEsc = DOWN;
+                        break;
+                    case SDLK_HOME:
+                        ioData.keyHome = DOWN;
+                        break;
+                    case SDLK_END:
+                        ioData.keyEnd = DOWN;
+                        break;
+                }
+            }
+
+            if(event.type == SDL_KEYUP){
+                switch(event.key.keysym.sym){
+                    case SDLK_LEFT:
+                        ioData.keyLeft = UP;
+                        break;
+                    case SDLK_RIGHT:
+                        ioData.keyRight = UP;
+                        break;
+                    case SDLK_UP:
+                        ioData.keyUp = UP;
+                        break;
+                    case SDLK_DOWN:
+                        ioData.keyDown = UP;
+                        break;
+                    case SDLK_LCTRL:
+                        ioData.keyL_Ctrl = UP;
+                        break;
+                    case SDLK_RCTRL:
+                        ioData.keyR_Ctrl = UP;
+                        break;
+                    case SDLK_LSHIFT:
+                        ioData.keyL_Shift = UP;
+                        break;
+                    case SDLK_RSHIFT:
+                        ioData.keyR_Shift = UP;
+                        break;
+                    case SDLK_LALT:
+                        ioData.keyL_Alt = UP;
+                        break;
+                    case SDLK_RALT:
+                        ioData.keyR_Alt = UP;
+                        break;
+                    case SDLK_TAB:
+                        ioData.keyTab = UP;
+                        break;
+                    case SDLK_BACKSPACE:
+                        ioData.keyBackspace = UP;
+                        break;
+                    case SDLK_DELETE:
+                        ioData.keyDel = UP;
+                        break;
+                    case SDLK_RETURN:
+                        ioData.keyEnter = UP;
+                        break;
+                    case SDLK_ESCAPE:
+                        ioData.keyEsc = UP;
+                        break;
+                    case SDLK_HOME:
+                        ioData.keyHome = UP;
+                        break;
+                    case SDLK_END:
+                        ioData.keyEnd = UP;
+                        break;
+
+                }
+            }
+
+
+
 
 
         }
@@ -265,10 +409,10 @@ int main(int, char**)
             ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags | ImGuiDockNodeFlags_DockSpace);
             ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-            auto dock_id_down = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.10f, nullptr, &dockspace_id);
+            auto dock_id_down = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.10f, nullptr, &dockspace_id);    //0.07f
 
             ImGui::DockBuilderDockWindow("Main Window", dockspace_id);
-            ImGui::DockBuilderDockWindow("Tools", dock_id_down);
+            ImGui::DockBuilderDockWindow("InputBar", dock_id_down);
 
             ImGui::DockBuilderFinish(dockspace_id);
         }
@@ -277,25 +421,15 @@ int main(int, char**)
         ImGui::End();
 
 
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove
-                                       | ImGuiWindowFlags_NoTitleBar
-                                       | ImGuiWindowFlags_NoCollapse;
 
+        hud->drawMainWin(deltaTime, appData, serialManager);
 
-        ImGui::Begin("Tools", NULL, windowFlags);
-        ImGui::Text("Hello, down!");
-        ImGui::End();
-
-
-        hud->drawMainWin(appData, serialManager);
-
-
-        ImGui::ShowDemoWindow();  //5tat
+        //ImGui::ShowDemoWindow();  //5tat
 
         clockTime->update();
         serialManager->update();
 
-        hud->update(deltaTime, menuData, appData, ioData, serialManager);
+        hud->update(menuData, appData, ioData, serialManager);
 
         hud->statusBar();
 
@@ -569,4 +703,97 @@ SDL_HitTestResult SDLCALL hitTest(SDL_Window *window, const SDL_Point *pt, void 
         return SDL_HITTEST_RESIZE_LEFT;
 
     return SDL_HITTEST_NORMAL;
+}
+
+void keyboardPostProcess(IOData *ioDat){
+
+    if(!ioDat->charBuffer.empty())
+        ioDat->charBuffer.clear();
+
+
+    if(ioDat->keyLeft == DOWN)
+        ioDat->keyLeft = ON;
+    else if(ioDat->keyLeft == UP)
+        ioDat->keyLeft = OFF;
+
+    if(ioDat->keyRight == DOWN)
+        ioDat->keyRight = ON;
+    else if(ioDat->keyRight == UP)
+        ioDat->keyRight = OFF;
+
+    if(ioDat->keyUp == DOWN)
+        ioDat->keyUp = ON;
+    else if(ioDat->keyUp == UP)
+        ioDat->keyUp = OFF;
+
+    if(ioDat->keyDown == DOWN)
+        ioDat->keyDown = ON;
+    else if(ioDat->keyDown == UP)
+        ioDat->keyDown = OFF;
+
+    if(ioDat->keyL_Ctrl == DOWN)
+        ioDat->keyL_Ctrl = ON;
+    else if(ioDat->keyL_Ctrl == UP)
+        ioDat->keyL_Ctrl = OFF;
+
+    if(ioDat->keyR_Ctrl == DOWN)
+        ioDat->keyR_Ctrl = ON;
+    else if(ioDat->keyR_Ctrl == UP)
+        ioDat->keyR_Ctrl = OFF;
+
+    if(ioDat->keyL_Shift == DOWN)
+        ioDat->keyL_Shift = ON;
+    else if(ioDat->keyL_Shift == UP)
+        ioDat->keyL_Shift = OFF;
+
+    if(ioDat->keyR_Shift == DOWN)
+        ioDat->keyR_Shift = ON;
+    else if(ioDat->keyR_Shift == UP)
+        ioDat->keyR_Shift = OFF;
+
+    if(ioDat->keyL_Alt == DOWN)
+        ioDat->keyL_Alt = ON;
+    else if(ioDat->keyL_Alt == UP)
+        ioDat->keyL_Alt = OFF;
+
+    if(ioDat->keyR_Alt == DOWN)
+        ioDat->keyR_Alt = ON;
+    else if(ioDat->keyR_Alt == UP)
+        ioDat->keyR_Alt = OFF;
+
+    if(ioDat->keyTab == DOWN)
+        ioDat->keyTab = ON;
+    else if(ioDat->keyTab == UP)
+        ioDat->keyTab = OFF;
+
+    if(ioDat->keyBackspace == DOWN)
+        ioDat->keyBackspace = ON;
+    else if(ioDat->keyBackspace == UP)
+        ioDat->keyBackspace = OFF;
+
+    if(ioDat->keyDel == DOWN)
+        ioDat->keyDel = ON;
+    else if(ioDat->keyDel == UP)
+        ioDat->keyDel = OFF;
+
+    if(ioDat->keyEnter == DOWN)
+        ioDat->keyEnter = ON;
+    else if(ioDat->keyEnter == UP)
+        ioDat->keyEnter = OFF;
+
+    if(ioDat->keyEsc == DOWN)
+        ioDat->keyEsc = ON;
+    else if(ioDat->keyEsc == UP)
+        ioDat->keyEsc = OFF;
+
+    if(ioDat->keyHome == DOWN)
+        ioDat->keyHome = ON;
+    else if(ioDat->keyHome == UP)
+        ioDat->keyHome = OFF;
+
+    if(ioDat->keyEnd == DOWN)
+        ioDat->keyEnd = ON;
+    else if(ioDat->keyEnd == UP)
+        ioDat->keyEnd = OFF;
+
 }

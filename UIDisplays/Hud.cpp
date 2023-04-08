@@ -393,16 +393,14 @@ bool Hud::closeAppDialog(AppData &appFlags){
 }
 
 
-void Hud::update(const float &dt, const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager) {
-
+void Hud::update(const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager) {
     mainWin->update(appData, ioData, serialManager);
-
 }
 
 
-void Hud::drawMainWin(AppData &appData, SerialManager *serialManager) {
+void Hud::drawMainWin(const double &dt, AppData &appData, SerialManager *serialManager) {
 
-    mainWin->draw(appData, serialManager);
+    mainWin->draw(dt, appData, serialManager);
 
 }
 
@@ -416,11 +414,8 @@ Hud::~Hud() {
 
     delete mainWin;
 
-
     //SDL_DestroyTexture(qTexture);
     //qTexture = nullptr;
-
-
 }
 
 

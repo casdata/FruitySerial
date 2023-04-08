@@ -10,6 +10,19 @@ MainWindow::MainWindow() {
     int imageWidth = 0;
     int imageHeight = 0;
 
+    inputBarPos = ImVec2(0,0);
+    inputBarSize = ImVec2(0,0);
+
+    onInputTextBar = false;
+    inputBarEnabled = false;
+    showInputBarCaret = false;
+    caretCurrentTime = 0;
+
+    inputTextBarBuffer = "";
+    iTextBarBufferPC = 0;
+    caretXPos = 0;
+    iBarOffsetX = 0;
+
     GLuint *texturePtr = &TabSerialWindow::timestampTexture;
 
     bool ret = FunctionTools::loadTextureFromFile("../Assets/timestamp.png", texturePtr, &imageWidth, &imageHeight);
@@ -31,6 +44,13 @@ MainWindow::MainWindow() {
 
     texturePtr = &TabSerialWindow::pauseTexture;
     ret = FunctionTools::loadTextureFromFile("../Assets/pause.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &caretTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/caret.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    TabSerialWindow::caretSize = ImVec2(imageWidth, imageHeight);
 
     auto* subWin = new SubWindow(windowCount);
     subWindows.push_back(subWin);
@@ -53,10 +73,166 @@ void MainWindow::update(AppData &appdata, const IOData &ioData, SerialManager *s
             subWin->update(ioData, serialManager);
     }
 
+
+    if(appdata.winNotMinimized && inputBarEnabled){
+
+        bool inside = false;
+
+        if(ioData.mouseCursorPositionRaw.y > inputBarPos.y &&
+            ioData.mouseCursorPositionRaw.y < (inputBarPos.y + inputBarSize.y)) {
+            if (ioData.mouseCursorPositionRaw.x > inputBarPos.x &&
+                ioData.mouseCursorPositionRaw.x < (inputBarPos.x + inputBarSize.x)) {
+                inside = true;
+            }
+        }
+
+        if(inside && !appdata.cursorOverInputTextBar)
+            appdata.cursorOverInputTextBar = true;
+        else if(!inside && appdata.cursorOverInputTextBar)
+            appdata.cursorOverInputTextBar = false;
+
+    }
+    else{
+        if(appdata.cursorOverInputTextBar)
+            appdata.cursorOverInputTextBar = false;
+    }
+
+
+    if(ioData.mouseBtnLeft == DOWN){
+        if(appdata.cursorOverInputTextBar) {
+            onInputTextBar = true;
+            showInputBarCaret = true;
+            caretCurrentTime = 0;
+
+            float clickDistance = ioData.mouseCursorPositionRaw.x - inputBarPos.x;
+            clickDistance -= iBarOffsetX;
+            clickDistance -= FunctionTools::norm2HeightFloat(2);                //offset fix
+
+            iTextBarBufferPC = 0;
+
+            std::string tString;
+            ImGui::PushFont(appdata.monoFont);
+
+            if(inputTextBarBuffer.empty())
+                caretXPos =  0;
+            else{
+                caretXPos = ImGui::CalcTextSize(inputTextBarBuffer.c_str()).x;
+
+                if(clickDistance > caretXPos)
+                    iTextBarBufferPC = inputTextBarBuffer.length();
+                else{
+
+                    for(size_t i = 0; i < inputTextBarBuffer.size(); i++){
+                        caretXPos = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (i + 1)).c_str()).x;
+
+                        if(clickDistance < caretXPos){
+
+                            float caretXPos0 = caretXPos;
+                            caretXPos = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (i)).c_str()).x;
+
+                            float diffCaretXUp = caretXPos0 - clickDistance;
+                            float diffCaretXDown = clickDistance - caretXPos;
+
+
+                            if(diffCaretXUp < diffCaretXDown){
+                                caretXPos = caretXPos0;
+                                iTextBarBufferPC = i + 1;
+                            }
+                            else
+                                iTextBarBufferPC = i;
+
+                            break;
+                        }
+                    }
+
+                }
+
+            }
+
+            ImGui::PopFont();
+
+        }
+        else
+            onInputTextBar = false;
+    }
+
+    if(onInputTextBar){
+
+        bool updateCaretPos = false;
+        bool postEndUpdate = false;
+        bool onlyUpdateOnIncrement = false;
+
+        if(!ioData.charBuffer.empty()){
+
+            for(size_t i = 0; i < ioData.charBuffer.size(); i++, iTextBarBufferPC++)
+                inputTextBarBuffer.insert(inputTextBarBuffer.begin() + iTextBarBufferPC, ioData.charBuffer.at(i));
+
+            updateCaretPos = true;
+            onlyUpdateOnIncrement = true;
+        }
+
+        if(ioData.keyLeft == DOWN){
+            if(iTextBarBufferPC > 0) {
+                iTextBarBufferPC--;
+                updateCaretPos = true;
+            }
+        }
+
+        if(ioData.keyRight == DOWN){
+            if(iTextBarBufferPC < inputTextBarBuffer.size()){
+                iTextBarBufferPC++;
+                updateCaretPos = true;
+            }
+        }
+
+        if(ioData.keyHome == DOWN) {
+            iTextBarBufferPC = 0;
+            iBarOffsetX = 0;
+            updateCaretPos = true;
+        }
+
+        if(ioData.keyEnd == DOWN) {
+            iTextBarBufferPC = inputTextBarBuffer.size();
+            postEndUpdate = true;
+            updateCaretPos = true;
+        }
+
+        if(ioData.keyBackspace == DOWN){
+            if(iTextBarBufferPC > 0) {
+                iTextBarBufferPC--;
+
+                inputTextBarBuffer.erase(inputTextBarBuffer.begin() + iTextBarBufferPC);
+                updateCaretPos = true;
+            }
+        }
+
+        if(ioData.keyDel == DOWN){
+            if(inputTextBarBuffer.size() > 0 && iTextBarBufferPC < inputTextBarBuffer.size()){
+               inputTextBarBuffer.erase(inputTextBarBuffer.begin() + iTextBarBufferPC);
+               updateCaretPos = true;
+            }
+        }
+
+
+        if(updateCaretPos) {
+            ImGui::PushFont(appdata.monoFont);
+            caretXPos = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
+            ImGui::PopFont();
+
+            if(postEndUpdate){
+                int caretMulitplier = static_cast<int>(caretXPos / inputBarSize.x);
+
+                iBarOffsetX = static_cast<float>(caretMulitplier * inputBarSize.x);
+                iBarOffsetX *= -1;
+            }
+
+            calculateInputBarOffset(onlyUpdateOnIncrement);
+        }
+    }
 }
 
 
-void MainWindow::draw(AppData &appData, SerialManager *serialManager) {
+void MainWindow::draw(const double &dt, AppData &appData, SerialManager *serialManager) {
 
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove
                                    | ImGuiWindowFlags_NoTitleBar
@@ -68,8 +244,6 @@ void MainWindow::draw(AppData &appData, SerialManager *serialManager) {
 
         winSize = ImGui::GetContentRegionAvail();       //5tat leak?
 
-        //std::cout<<"winSize: "<<winSize.x<<" "<<winSize.y<<std::endl;
-
         calculateSubWinSizes();
 
         for(auto* subWin : subWindows){
@@ -79,6 +253,7 @@ void MainWindow::draw(AppData &appData, SerialManager *serialManager) {
 
     ImGui::End();
 
+    updateAndPrintInputBar(dt, appData);
 
 }
 
@@ -90,21 +265,6 @@ MainWindow::~MainWindow() {
         subWindows.clear();
     }
 }
-
-/*
-void MainWindow::addConnection(AppData &appData) {
-
-    std::string tabName;
-    tabName.assign("COM");
-    tabName.append(std::to_string(appData.connectionCount));
-
-    appData.connectionCount++;
-
-    auto* subWin = subWindows.at(getFocusedSubWinIndex());
-    subWin->addTabPortConnection(tabName);
-
-}
-*/
 
 int MainWindow::getFocusedSubWinIndex() {
 
@@ -284,6 +444,203 @@ void MainWindow::checkAndResizeSubWindows(bool &cursorOverWinBorder, const IODat
         }
     }
 
+}
+
+void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData) {
+
+    static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove
+                                            | ImGuiWindowFlags_NoTitleBar
+                                            | ImGuiWindowFlags_NoCollapse;
+
+    SerialConnection *serialPtr = nullptr;
+    inputBarEnabled = false;
+
+    for(auto* subWin : subWindows){
+        if(subWin->isFocused() && subWin->anySelectedTab()){
+            serialPtr = subWin->getSerialConnection();
+            if(serialPtr != nullptr)
+                inputBarEnabled = true;
+            break;
+        }
+    }
+
+
+
+    ImGui::Begin("InputBar", NULL, windowFlags);
+
+    inputBarSize.x = winSize.x * 0.8f;
+    inputBarSize.y = FunctionTools::norm2HeightFloat(20);
+
+    inputBarPos = ImGui::GetCursorScreenPos();
+
+
+    ImGui::PushFont(appData.monoFont);
+    ImGui::PushID("iClipper");
+    ImGui::InvisibleButton("##iCanvas", inputBarSize);
+    /*
+    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    {
+        offset.x += ImGui::GetIO().MouseDelta.x;
+        offset.y += ImGui::GetIO().MouseDelta.y;
+    }
+    */
+    ImGui::PopID();
+
+    if(ImGui::IsItemVisible()){
+
+
+        const ImVec2 p0 = ImGui::GetItemRectMin();
+        const ImVec2 p1 = ImGui::GetItemRectMax();
+        static const float startSpaceX = FunctionTools::norm2HeightFloat(4);
+
+        ImVec2 textPos = ImVec2(p0.x + iBarOffsetX + startSpaceX, p0.y);
+        ImU32 tColor            = IM_COL32_WHITE;
+        ImDrawList* draw_list   = ImGui::GetWindowDrawList();
+
+
+        ImGui::PushClipRect(p0, p1, true);
+
+        if(appData.uiTheme == DARK)
+            tColor = DARK_INPUT_BG_COL;
+        else
+            tColor = LIGHT_INPUT_BG_COL;
+
+        draw_list->AddRectFilled(p0, p1, tColor);
+
+        if(appData.uiTheme == DARK)
+            tColor = IM_COL32_WHITE;
+        else
+            tColor = IM_COL32_BLACK;
+
+        draw_list->AddText(textPos, tColor, inputTextBarBuffer.c_str());
+
+
+        if(onInputTextBar) {
+            caretCurrentTime += dt;
+            if (caretCurrentTime > 700) {
+                caretCurrentTime = 0;
+
+                showInputBarCaret = !showInputBarCaret;
+            }
+
+            if(appData.uiTheme == DARK)
+                tColor = IM_COL32_WHITE;
+            else
+                tColor = IM_COL32_BLACK;
+
+            if (showInputBarCaret) {
+                draw_list->AddLine(ImVec2(p0.x + startSpaceX + caretXPos + iBarOffsetX, p0.y + startSpaceX),
+                                   ImVec2(p0.x + startSpaceX + caretXPos + iBarOffsetX, p1.y - startSpaceX),
+                                   tColor, 1);
+            }
+        }
+
+
+        ImGui::PopClipRect();
+
+
+    }
+
+    ImGui::PopFont();
+
+    /*
+    if(appData.uiTheme == DARK)
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, DARK_INPUT_BG_COL);
+    else
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, LIGHT_INPUT_BG_COL);
+
+
+    if(ImGui::BeginChild("inputBar", inputBarSize, false)){
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(FunctionTools::norm2Height(4), 1));
+
+        ImGui::PushFont(appData.monoFont);
+
+        */
+        //ImVec2 innerPos = ImGui::GetCursorPos();
+        //ImGui::SetCursorPos(innerPos);
+
+
+        /*
+        if(!inputTextBarBuffer.empty()) {
+            ImGuiListClipper iClipper;
+
+            iClipper.Begin(1);
+
+            while (iClipper.Step()) {
+                for (int i = iClipper.DisplayStart; i < iClipper.DisplayEnd; i++) {
+                    ImGui::TextUnformatted(inputTextBarBuffer.c_str());
+                }
+            }
+
+            iClipper.End();
+        }
+        */
+
+        //ImGui::Text(inputTextBarBuffer.c_str());
+
+    /*
+        if(onInputTextBar) {
+            caretCurrentTime += dt;
+            if (caretCurrentTime > 700) {
+                caretCurrentTime = 0;
+
+                showInputBarCaret = !showInputBarCaret;
+            }
+
+            if (showInputBarCaret) {
+                float tempWidth = FunctionTools::norm2HeightFloat(2);
+                float tempHeight = FunctionTools::norm2HeightFloat(20);
+
+
+                ImGui::SetCursorPos(ImVec2(caretXPos,0));
+
+                ImGui::Image((void *) (intptr_t) caretTexture, ImVec2(tempWidth, tempHeight), ImVec2(0, 0),
+                             ImVec2(1, 1));
+            }
+        }
+
+
+        ImGui::PopFont();
+
+        ImGui::PopStyleVar();
+    }
+    ImGui::EndChild();
+    */
+
+    //ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+
+    static char buf[12] = "";
+    ImGui::SetNextItemWidth(120);
+    ImGui::InputText("##inputBar", buf, sizeof(buf));
+
+    ImGui::SameLine();
+
+    ImGui::Button("Send");
+
+
+    ImGui::End();
+
+}
+
+void MainWindow::calculateInputBarOffset(bool onlyIncrement) {
+
+
+    if(onlyIncrement){
+        if ((caretXPos + iBarOffsetX) > (inputBarSize.x * 0.95f))
+            iBarOffsetX -= (inputBarSize.x * 0.1f);
+    }
+    else {
+        if ((caretXPos + iBarOffsetX) > (inputBarSize.x * 0.95f))
+            iBarOffsetX -= (inputBarSize.x * 0.1f);
+        else if ((caretXPos + iBarOffsetX) < (inputBarSize.x * 0.15f)) {
+            iBarOffsetX += (inputBarSize.x * 0.1f);
+
+            if (iBarOffsetX > 0)
+                iBarOffsetX = 0;
+        }
+    }
 }
 
 

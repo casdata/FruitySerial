@@ -20,7 +20,7 @@ public:
 
     void update(AppData &appdata, const IOData &ioData, SerialManager *serialManager);
 
-    void draw(AppData &appData, SerialManager *serialManager);
+    void draw(const double &dt, AppData &appData, SerialManager *serialManager);
 
     virtual ~MainWindow();
 
@@ -35,11 +35,29 @@ private:
 
     void newSubWindow(int &windowCount, const int &subWindowIndex);
 
+    void updateAndPrintInputBar(const double &dt, const AppData &appData);
+
+    void calculateInputBarOffset(bool onlyIncrement);
+
 
     std::vector<SubWindow*> subWindows;
     ImVec2 winSize;
     int resizingWindowIndex;
 
+    ImVec2 inputBarPos;
+    ImVec2 inputBarSize;
+    bool inputBarEnabled;
+
+    bool onInputTextBar;
+    bool showInputBarCaret;
+    double caretCurrentTime;
+
+    std::string inputTextBarBuffer;
+    int iTextBarBufferPC;
+    float caretXPos;
+    float iBarOffsetX;
+
+    GLuint caretTexture;
 
 };
 

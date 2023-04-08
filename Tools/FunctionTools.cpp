@@ -4,6 +4,7 @@
 
 #include <iomanip>
 #include "FunctionTools.h"
+#include "imgui_internal.h"
 
 bool FunctionTools::loadTextureFromFile(const char *filename, GLuint *outTexture, int *outWidth, int *outHeight) {
 

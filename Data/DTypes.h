@@ -92,15 +92,36 @@ typedef struct{
     int         windowPosY;
     int         windowSizeW;
     int         windowSizeH;
+    bool        winNotMinimized;
     AppState    appState;
     bool        cursorOverSubWinBorder;
+    bool        cursorOverInputTextBar;
     ImFont*     monoFont;
 } AppData;
 
 typedef struct{
     BtnState    mouseBtnRight;
     BtnState    mouseBtnLeft;
+    BtnState    keyLeft;
+    BtnState    keyRight;
+    BtnState    keyUp;
+    BtnState    keyDown;
+    BtnState    keyL_Ctrl;
+    BtnState    keyR_Ctrl;
+    BtnState    keyL_Shift;
+    BtnState    keyR_Shift;
+    BtnState    keyL_Alt;
+    BtnState    keyR_Alt;
+    BtnState    keyTab;
+    BtnState    keyBackspace;
+    BtnState    keyDel;
+    BtnState    keyEnter;
+    BtnState    keyEsc;
+    BtnState    keyHome;
+    BtnState    keyEnd;
+    std::string charBuffer;
     ImVec2      mouseCursorPosition;
+    ImVec2      mouseCursorPositionRaw;
 } IOData;
 
 
@@ -130,6 +151,9 @@ static const int RESIZE_OFFSET = 10;
 
 static const ImU32 DARK_WINDOW_BG_COL       = IM_COL32(0,0,0,255);
 static const ImU32 LIGHT_WINDOW_BG_COL      = IM_COL32(255,255,255,255);
+
+static const ImU32 DARK_INPUT_BG_COL        = IM_COL32(29, 47, 73, 255);
+static const ImU32 LIGHT_INPUT_BG_COL       = LIGHT_WINDOW_BG_COL;
 
 static const ImU32 DARK_BRACKET_COL         = IM_COL32(0, 255, 255, 255);
 static const ImU32 DARK_SPECIAL_UTF8_COL    = IM_COL32(255, 0, 0, 255);
