@@ -21,7 +21,6 @@ public:
     inline static GLuint settingsTexture;
     inline static GLuint separatorTexture;
     inline static ImVec2 textureSize;
-    inline static ImVec2 caretSize;
 
     explicit TabSerialWindow(SerialPortData *serialPortData, SerialConnection *serialConnection);
 

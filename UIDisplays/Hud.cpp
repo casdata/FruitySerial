@@ -49,6 +49,12 @@ Hud::Hud() {
     ret = FunctionTools::loadTextureFromFile("../Assets/uEmpty.png", &uEmptyBtnTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    ret = FunctionTools::loadTextureFromFile("../Assets/sun.png", &sunBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("../Assets/moon.png", &moonBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
     ret = FunctionTools::loadTextureFromFile("../Assets/withBar.png", &withBarTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
@@ -219,7 +225,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
 
 
         int spaceBetween = FunctionTools::norm2Height(8);
-        float iconWidth = FunctionTools::norm2Height(static_cast<int>(cornerIconSize->x));//FunctionTools::norm2HeightFloat(38);
+        float iconWidth = FunctionTools::norm2Height(static_cast<int>(cornerIconSize->x));
         float tempX = ImGui::GetWindowSize().x - iconWidth - spaceBetween;
 
         if(menuData.titleBar == TB_DISABLE) {
@@ -270,31 +276,38 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
             tempX += spaceBetween;
 
 
-
         ImGui::SetCursorPos(ImVec2(tempX, 0));
-        bool barBtnState = false;
+        bool myBtnState = false;
 
         if(menuData.titleBar == TB_ENABLE) {
             if (ImGui::ImageButton((void *) (intptr_t) withoutBarTexture, ImVec2(iconSize, iconSize), ImVec2(0, 0),
                                    ImVec2(1, 1), imagePadding))
-                barBtnState = true;
+                myBtnState = true;
         }
         else{
             if (ImGui::ImageButton((void *) (intptr_t) withBarTexture, ImVec2(iconSize, iconSize), ImVec2(0, 0),
                                    ImVec2(1, 1), imagePadding))
-                barBtnState = true;
+                myBtnState = true;
         }
 
-
-
-        if(barBtnState){
+        if(myBtnState){
             if(menuData.titleBar == TB_ENABLE)
                 menuData.titleBar = TB_2DISABLE;
             else if(menuData.titleBar == TB_DISABLE)
                 menuData.titleBar = TB_2ENABLE;
         }
 
+        tempX -= (spaceBetween + iconWidth);
 
+        ImGui::SetCursorPos(ImVec2(tempX, 0));
+        if(appData.uiTheme == DARK){
+            if(ImGui::ImageButton((void *)(intptr_t) moonBtnTexture, ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding))
+                appData.uiTheme = LIGHT;
+        }
+        else{
+            if(ImGui::ImageButton((void *)(intptr_t) sunBtnTexture, ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding))
+                appData.uiTheme = DARK;
+        }
 
 
         ImGui::PopStyleColor();

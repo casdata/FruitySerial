@@ -51,6 +51,8 @@ private:
     GLuint openBtnTexture = 0;
     GLuint saveAsBtnTexture = 0;
     GLuint saveBtnTexture = 0;
+    GLuint sunBtnTexture = 0;
+    GLuint moonBtnTexture = 0;
     GLuint withBarTexture = 0;
     GLuint withoutBarTexture = 0;
     GLuint minimizeTexture = 0;

@@ -39,6 +39,8 @@ private:
 
     void calculateInputBarOffset(bool onlyIncrement);
 
+    void deleteSelectedChars();
+
 
     std::vector<SubWindow*> subWindows;
     ImVec2 winSize;
@@ -48,16 +50,19 @@ private:
     ImVec2 inputBarSize;
     bool inputBarEnabled;
 
+    bool selectedInputText;
     bool onInputTextBar;
     bool showInputBarCaret;
     double caretCurrentTime;
 
     std::string inputTextBarBuffer;
     int iTextBarBufferPC;
+    int iTextBarBufferPC2;
     float caretXPos;
     float iBarOffsetX;
+    float selectedInputP0_x;
+    float selectedInputP1_x;
 
-    GLuint caretTexture;
 
 };
 

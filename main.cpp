@@ -56,12 +56,13 @@ int main(int, char**)
     Uint64 LAST = 0;
     double deltaTime = 0;
 
+
     MenuData menuData = {false, NORMAL, false,
                          TB_2ENABLE};
     AppData appData = {false,
                        1,
                        0,
-                       DARK,
+                       LIGHT,
                        0, 0,
                        0, 0,
                        false,
@@ -74,6 +75,8 @@ int main(int, char**)
                      OFF, OFF, OFF, OFF, OFF, OFF, OFF,
                      OFF, OFF,""};
     HitTestData hitTestData = {OFF, 0, 0};
+
+    UI_Theme myUITheme = LIGHT;
 
     if(!initSDL())
         return -1;
@@ -162,6 +165,11 @@ int main(int, char**)
         NOW = SDL_GetPerformanceCounter();
         deltaTime = (double)((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );                               //mS
 
+        if(myUITheme != appData.uiTheme){
+            myUITheme = appData.uiTheme;
+
+            setTheme(&appData);
+        }
 
         if(appData.cursorOverSubWinBorder && !appData.cursorOverInputTextBar)
             ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
