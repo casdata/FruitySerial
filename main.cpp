@@ -73,7 +73,7 @@ int main(int, char**)
     IOData ioData = {OFF, OFF, OFF, OFF,
                      OFF, OFF, OFF, OFF, OFF, OFF,
                      OFF, OFF, OFF, OFF, OFF, OFF, OFF,
-                     OFF, OFF,""};
+                     OFF, OFF, OFF, OFF, OFF, OFF, OFF, "", ""};
     HitTestData hitTestData = {OFF, 0, 0};
 
     UI_Theme myUITheme = LIGHT;
@@ -239,13 +239,34 @@ int main(int, char**)
                 else if(event.button.button == SDL_BUTTON_RIGHT)
                     ioData.mouseBtnRight = UP;
             }
-            if(event.type == SDL_TEXTINPUT)
+            if(event.type == SDL_TEXTINPUT) {
                 ioData.charBuffer.append(event.text.text);
                 //std::cout<<"-> "<<event.text.text<<std::endl;
+            }
 
 
             if(event.type == SDL_KEYDOWN){
                 switch(event.key.keysym.sym){
+                    case SDLK_c:
+                        if(SDL_GetModState() & KMOD_CTRL)
+                            ioData.keyCopy = DOWN;
+                        break;
+                    case SDLK_v:
+                        if(SDL_GetModState() & KMOD_CTRL) {
+                            ioData.keyPaste = DOWN;
+                            ioData.charBuffer.append(SDL_GetClipboardText());
+                        }
+                        break;
+                    case SDLK_x:
+                        if(SDL_GetModState() & KMOD_CTRL){
+                            std::cout<<"CUT <->"<<std::endl;
+                        }
+                        break;
+                    case SDLK_z:
+                        if(SDL_GetModState() & KMOD_CTRL){
+                            std::cout<<"UNDO "<<std::endl;
+                        }
+                        break;
                     case SDLK_LEFT:
                         ioData.keyLeft = DOWN;
                         break;
@@ -437,7 +458,7 @@ int main(int, char**)
         clockTime->update();
         serialManager->update();
 
-        hud->update(menuData, appData, ioData, serialManager);
+        hud->update(deltaTime, menuData, appData, ioData, serialManager);
 
         hud->statusBar();
 
@@ -718,7 +739,6 @@ void keyboardPostProcess(IOData *ioDat){
     if(!ioDat->charBuffer.empty())
         ioDat->charBuffer.clear();
 
-
     if(ioDat->keyLeft == DOWN)
         ioDat->keyLeft = ON;
     else if(ioDat->keyLeft == UP)
@@ -803,5 +823,20 @@ void keyboardPostProcess(IOData *ioDat){
         ioDat->keyEnd = ON;
     else if(ioDat->keyEnd == UP)
         ioDat->keyEnd = OFF;
+
+    if(ioDat->keyCopy == DOWN)
+        ioDat->keyCopy = OFF;
+
+    if(ioDat->keyPaste == DOWN)
+        ioDat->keyPaste = OFF;
+
+    if(ioDat->keyCut == DOWN)
+        ioDat->keyCut = OFF;
+
+    if(ioDat->keyUndo == DOWN)
+        ioDat->keyUndo = OFF;
+
+    if(ioDat->keyRedo == DOWN)
+        ioDat->keyRedo = OFF;
 
 }

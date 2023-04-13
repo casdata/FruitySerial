@@ -18,7 +18,7 @@ class MainWindow {
 public:
     explicit MainWindow();
 
-    void update(AppData &appdata, const IOData &ioData, SerialManager *serialManager);
+    void update(const double &dt, AppData &appdata, const IOData &ioData, SerialManager *serialManager);
 
     void draw(const double &dt, AppData &appData, SerialManager *serialManager);
 
@@ -32,6 +32,8 @@ private:
     void checkAndSplitWindow(int &windowCount);
     void checkClickAndFocus(const IOData &ioData, const AppState &appState);
     void checkAndResizeSubWindows(bool &cursorOverWinBorder, const IOData &ioData);
+    void checkMouseInsideInputTextBar(AppData &appdata, const IOData &ioData);
+    void checkInputTextBarIO(const double &dt, AppData &appdata, const IOData &ioData);
 
     void newSubWindow(int &windowCount, const int &subWindowIndex);
 

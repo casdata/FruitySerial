@@ -34,7 +34,7 @@ public:
     void statusBar();
     bool closeAppDialog(AppData &appFlags);
 
-    void update(const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager);
+    void update(const double &dt, const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager);
 
     void drawMainWin(const double &dt, AppData &appData, SerialManager *serialManager);
 

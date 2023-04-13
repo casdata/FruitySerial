@@ -406,8 +406,8 @@ bool Hud::closeAppDialog(AppData &appFlags){
 }
 
 
-void Hud::update(const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager) {
-    mainWin->update(appData, ioData, serialManager);
+void Hud::update(const double &dt, const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager) {
+    mainWin->update(dt, appData, ioData, serialManager);
 }
 
 

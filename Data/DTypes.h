@@ -119,7 +119,13 @@ typedef struct{
     BtnState    keyEsc;
     BtnState    keyHome;
     BtnState    keyEnd;
+    BtnState    keyCopy;
+    BtnState    keyPaste;
+    BtnState    keyCut;
+    BtnState    keyUndo;
+    BtnState    keyRedo;
     std::string charBuffer;
+    std::string copyBuffer;
     ImVec2      mouseCursorPosition;
     ImVec2      mouseCursorPositionRaw;
 } IOData;
@@ -184,6 +190,9 @@ static const ImU32 LIGHT_ESP_LOG_V_COL      = IM_COL32(148, 0, 223, 255);
 static const ImU32 CLOSE_BTN_OVER           = IM_COL32(231, 28, 28, 255);
 static const ImU32 CLOSE_BTN_PRESSED        = IM_COL32(214, 98, 98, 255);
 static const ImU32 CORNER_BTN_OVER          = IM_COL32(221, 221, 221, 255);
+
+static const ImU32 DARK_TEXT_SELECT         = IM_COL32(42, 83, 135, 255);
+static const ImU32 LIGHT_TEXT_SELECT        = IM_COL32(189, 218, 253, 255);
 
 static const char* TXT_ENCODING_ITEMS[]     = {"RAW-DEC", "RAW-HEX", "UTF-8", "UTF-8 RAW-DEC", "UTF-8 RAW-HEX", "UTF-8 SPECIAL", "UTF-8 ESP-LOG"};
 
