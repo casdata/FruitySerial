@@ -291,23 +291,48 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
         }
 
         if(myBtnState){
-            if(menuData.titleBar == TB_ENABLE)
+
+            char* temp = new char[1];
+
+            if(menuData.titleBar == TB_ENABLE) {
                 menuData.titleBar = TB_2DISABLE;
-            else if(menuData.titleBar == TB_DISABLE)
+                *(temp) = (char)0;
+            }
+            else if(menuData.titleBar == TB_DISABLE) {
                 menuData.titleBar = TB_2ENABLE;
+                *(temp) = (char)1;
+            }
+
+            bool isOk = FunctionTools::replaceData2File(dataFileName, 2, 1, temp);
+
+            delete[] temp;
         }
 
         tempX -= (spaceBetween + iconWidth);
 
         ImGui::SetCursorPos(ImVec2(tempX, 0));
-        if(appData.uiTheme == DARK){
-            if(ImGui::ImageButton((void *)(intptr_t) moonBtnTexture, ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding))
-                appData.uiTheme = LIGHT;
+
+        GLuint themeTexture;
+        if(appData.uiTheme == DARK)
+            themeTexture = moonBtnTexture;
+        else
+            themeTexture = sunBtnTexture;
+
+        if(ImGui::ImageButton((void *)(intptr_t)themeTexture, ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)) {
+
+            appData.uiTheme = (appData.uiTheme == LIGHT) ? DARK : LIGHT;
+
+
+            char* temp = new char[1];
+
+            *(temp) = (char)(appData.uiTheme == LIGHT) ? 0 : 1;
+
+            FunctionTools::replaceData2File(dataFileName, 1, 1, temp);
+
+            delete[] temp;
+
         }
-        else{
-            if(ImGui::ImageButton((void *)(intptr_t) sunBtnTexture, ImVec2(iconSize, iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding))
-                appData.uiTheme = DARK;
-        }
+
 
 
         ImGui::PopStyleColor();
@@ -359,18 +384,6 @@ bool Hud::closeAppDialog(AppData &appFlags){
 
         ImGui::Checkbox("Don't ask again", &dontAsk);
 
-        if(dontAsk == true && !appFlags.disableExitMessage){
-            appFlags.disableExitMessage = true;
-
-            char* temp = new char[1];
-            *(temp) = (char)1;
-
-            bool isOk = FunctionTools::replaceData2File(dataFileName, 0, 1, temp);
-
-            delete[] temp;
-
-        }
-
         ImGui::EndGroup();
 
         ImGui::Separator();
@@ -387,6 +400,20 @@ bool Hud::closeAppDialog(AppData &appFlags){
         int newXValue = FunctionTools::norm2Height(90);
 
         if(ImGui::Button("YES", ImVec2(newXValue, 0))){
+
+            if(dontAsk == true && !appFlags.disableExitMessage){
+                appFlags.disableExitMessage = true;
+
+                char* temp = new char[1];
+                *(temp) = (char)1;
+
+                bool isOk = FunctionTools::replaceData2File(dataFileName, 0, 1, temp);
+
+                delete[] temp;
+
+            }
+
+
             ImGui::CloseCurrentPopup();
             closeApp = true;
         }
@@ -395,6 +422,7 @@ bool Hud::closeAppDialog(AppData &appFlags){
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
         if(ImGui::Button("NO", ImVec2(newXValue, 0))){
+            dontAsk = false;
             ImGui::CloseCurrentPopup();
         }
 

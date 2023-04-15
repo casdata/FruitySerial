@@ -57,7 +57,8 @@ bool FunctionTools::replaceData2File(const char *fileName, const int position, c
         readFile.close();
 
         for(size_t i = 0; i < bytesSize; i++)
-            *(buffer + (i + position)) = *(data + i);
+            *(buffer + (i + position)) = (char)*(data + i);
+
 
         std::ofstream writeFile(fileName, std::ofstream::out | std::ofstream::trunc);
 

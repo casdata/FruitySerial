@@ -39,7 +39,7 @@ SerialManager *serialManager;
 ClockTime *clockTime;
 
 bool initSDL();
-void initApp(AppData* appData);
+void initApp(AppData* appData, MenuData* menuData);
 void setTheme(AppData* appData);
 void setStyleColorAppDark();
 void setStyleColorAppLight();
@@ -81,7 +81,7 @@ int main(int, char**)
     if(!initSDL())
         return -1;
 
-    initApp(&appData);
+    initApp(&appData, &menuData);
 
     // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -598,7 +598,7 @@ bool initSDL(){
     return true;
 }
 
-void initApp(AppData* appData) {
+void initApp(AppData* appData, MenuData* menuData) {
 
 #ifdef _WIN32
     if(mkdir("/")){
@@ -611,7 +611,7 @@ void initApp(AppData* appData) {
 
 #endif
 
-
+                                                                                                                        //data.bin file
 
     std::ifstream readFile(dataFileName);
 
@@ -622,6 +622,8 @@ void initApp(AppData* appData) {
 
         if(createFile.is_open()){
             createFile.put((char)0);
+            createFile.put((char)0);
+            createFile.put((char)1);
             createFile.put('~');
             createFile.close();
         }
@@ -640,8 +642,17 @@ void initApp(AppData* appData) {
 
         startAppData.read(buffer, length);
 
-        if(buffer[1] == '~' && buffer[0] == (char)1)
-            appData->disableExitMessage = true;
+        if(buffer[3] == '~'){
+            if(buffer[0] == (char)1)
+                appData->disableExitMessage = true;
+
+            if(buffer[1] == (char)1)
+                appData->uiTheme = DARK;
+
+            if(buffer[2] == (char)0)
+                menuData->titleBar = TB_2DISABLE;
+
+        }
 
         delete[] buffer;
 

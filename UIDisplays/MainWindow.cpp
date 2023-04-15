@@ -482,7 +482,7 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
     static double dClickCurrentTime = 1000;
 
     dClickCurrentTime += dt;
-    if (dClickCurrentTime < 700)
+    if (dClickCurrentTime < 400)
         selectWord = true;
     else
         dClickCurrentTime = 1000;
@@ -663,6 +663,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
 
                     selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
 
+                    caretXPos = selectedInputP1_x;
+
                 } else if (divMod != 0 && moveChange)
                     moveChange = false;
 
@@ -685,6 +687,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                         iTextBarBufferPC2 = inputTextBarBuffer.length();
 
                     selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
+
+                    caretXPos = selectedInputP1_x;
 
                 } else if (divMod != 0 && moveChange)
                     moveChange = false;
@@ -723,6 +727,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                             }
                         }
                     }
+
+                    caretXPos = selectedInputP1_x;
                 }
             }
 
@@ -786,29 +792,50 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
             caretCurrentTime = 0;
             showInputBarCaret = true;
 
-            if(selectedInputText) {
-                selectedInputText = false;
+            if(ioData.keyR_Shift == ON || ioData.keyL_Shift == ON){
 
-                if (iTextBarBufferPC < iTextBarBufferPC2)
-                    caretXPos = selectedInputP0_x;
-                else {
-                    iTextBarBufferPC = iTextBarBufferPC2;
-                    caretXPos = selectedInputP1_x;
+                if(!selectedInputText){
+                    selectedInputText = true;
+
+                    iTextBarBufferPC2 = iTextBarBufferPC;
                 }
 
-                int caretMulitplier = static_cast<int>(caretXPos / inputBarSize.x);
+                iTextBarBufferPC2--;
+                if(iTextBarBufferPC2 < 0)
+                    iTextBarBufferPC2 = 0;
 
-                iBarOffsetX = static_cast<float>(caretMulitplier * inputBarSize.x);
-                iBarOffsetX *= -1;
+                ImGui::PushFont(appdata.monoFont);
+                selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
+                selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
+                caretXPos = selectedInputP1_x;
 
-                if (iBarOffsetX > 0)
-                    iBarOffsetX = 0;
+                ImGui::PopFont();
 
             }
             else {
-                if (iTextBarBufferPC > 0) {
-                    iTextBarBufferPC--;
-                    updateCaretPos = true;
+                if (selectedInputText) {
+                    selectedInputText = false;
+
+                    if (iTextBarBufferPC < iTextBarBufferPC2)
+                        caretXPos = selectedInputP0_x;
+                    else {
+                        iTextBarBufferPC = iTextBarBufferPC2;
+                        caretXPos = selectedInputP1_x;
+                    }
+
+                    int caretMulitplier = static_cast<int>(caretXPos / inputBarSize.x);
+
+                    iBarOffsetX = static_cast<float>(caretMulitplier * inputBarSize.x);
+                    iBarOffsetX *= -1;
+
+                    if (iBarOffsetX > 0)
+                        iBarOffsetX = 0;
+
+                } else {
+                    if (iTextBarBufferPC > 0) {
+                        iTextBarBufferPC--;
+                        updateCaretPos = true;
+                    }
                 }
             }
         }
@@ -817,43 +844,102 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
             caretCurrentTime = 0;
             showInputBarCaret = true;
 
-            if(selectedInputText) {
-                selectedInputText = false;
+            if(ioData.keyR_Shift == ON || ioData.keyL_Shift == ON){
 
-                if (iTextBarBufferPC > iTextBarBufferPC2)
-                    caretXPos = selectedInputP0_x;
-                else {
-                    iTextBarBufferPC = iTextBarBufferPC2;
-                    caretXPos = selectedInputP1_x;
+                if(!selectedInputText){
+                    selectedInputText = true;
+
+                    iTextBarBufferPC2 = iTextBarBufferPC;
                 }
 
-                int caretMulitplier = static_cast<int>(caretXPos / inputBarSize.x);
+                iTextBarBufferPC2++;
+                if(iTextBarBufferPC2 > inputTextBarBuffer.length())
+                    iTextBarBufferPC2 = inputTextBarBuffer.length();
 
-                iBarOffsetX = static_cast<float>(caretMulitplier * inputBarSize.x);
-                iBarOffsetX *= -1;
+                ImGui::PushFont(appdata.monoFont);
+                selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
+                selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
+                caretXPos = selectedInputP1_x;
 
+                ImGui::PopFont();
 
             }
             else {
-                if (iTextBarBufferPC < inputTextBarBuffer.size()) {
-                    iTextBarBufferPC++;
-                    updateCaretPos = true;
+
+                if (selectedInputText) {
+                    selectedInputText = false;
+
+                    if (iTextBarBufferPC > iTextBarBufferPC2)
+                        caretXPos = selectedInputP0_x;
+                    else {
+                        iTextBarBufferPC = iTextBarBufferPC2;
+                        caretXPos = selectedInputP1_x;
+                    }
+
+                    int caretMulitplier = static_cast<int>(caretXPos / inputBarSize.x);
+
+                    iBarOffsetX = static_cast<float>(caretMulitplier * inputBarSize.x);
+                    iBarOffsetX *= -1;
+
+
+                } else {
+                    if (iTextBarBufferPC < inputTextBarBuffer.size()) {
+                        iTextBarBufferPC++;
+                        updateCaretPos = true;
+                    }
                 }
             }
         }
 
         if(ioData.keyHome == DOWN) {
-            selectedInputText = false;
-            iTextBarBufferPC = 0;
-            iBarOffsetX = 0;
-            updateCaretPos = true;
+
+            if(ioData.keyR_Shift == ON || ioData.keyL_Shift == ON){
+                if(!selectedInputText){
+                    selectedInputText = true;
+
+                    iTextBarBufferPC2 = iTextBarBufferPC;
+                }
+
+                iTextBarBufferPC2 = 0;
+
+                ImGui::PushFont(appdata.monoFont);
+                selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
+                selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
+                caretXPos = selectedInputP1_x;
+
+                ImGui::PopFont();
+            }
+            else {
+                selectedInputText = false;
+                iTextBarBufferPC = 0;
+                iBarOffsetX = 0;
+                updateCaretPos = true;
+            }
         }
 
         if(ioData.keyEnd == DOWN) {
-            selectedInputText = false;
-            iTextBarBufferPC = inputTextBarBuffer.size();
-            postEndUpdate = true;
-            updateCaretPos = true;
+            if(ioData.keyR_Shift == ON || ioData.keyL_Shift == ON){
+                if(!selectedInputText){
+                    selectedInputText = true;
+
+                    iTextBarBufferPC2 = iTextBarBufferPC;
+                }
+
+                iTextBarBufferPC2 = inputTextBarBuffer.length();
+
+                ImGui::PushFont(appdata.monoFont);
+                selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
+                selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
+                caretXPos = selectedInputP1_x;
+
+                ImGui::PopFont();
+            }
+            else {
+                selectedInputText = false;
+                iTextBarBufferPC = inputTextBarBuffer.size();
+                postEndUpdate = true;
+                updateCaretPos = true;
+            }
         }
 
         if(ioData.keyBackspace == DOWN){
