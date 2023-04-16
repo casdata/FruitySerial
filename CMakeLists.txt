@@ -68,7 +68,9 @@ add_executable(FruitySerial main.cpp
                             Data/LineData.cpp
                             Data/LineData.h
                             Tools/ClockTime.cpp
-                            Tools/ClockTime.h)
+                            Tools/ClockTime.h
+                            Tools/UndoRedo.cpp
+                            Tools/UndoRedo.h)
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)

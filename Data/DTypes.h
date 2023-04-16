@@ -144,6 +144,12 @@ typedef struct{
     int         windowSizeH;
 } HitTestData;
 
+typedef struct{
+    std::string     dataLine;
+    float           caretPos;
+    int             posIndex;
+} UndoRedoData;
+
 
 
 

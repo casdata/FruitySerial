@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "DTypes.h"
 #include "SerialManager.h"
+#include "UndoRedo.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -43,6 +44,7 @@ private:
 
     void deleteSelectedChars();
 
+    enum UndoRedoState{IDLE, NEW, UPDATE};
 
     std::vector<SubWindow*> subWindows;
     ImVec2 winSize;
@@ -65,6 +67,7 @@ private:
     float selectedInputP0_x;
     float selectedInputP1_x;
 
+    UndoRedo* undoRedo;
 
 };
 

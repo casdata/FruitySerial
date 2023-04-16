@@ -57,6 +57,8 @@ MainWindow::MainWindow() {
     subWindows.back()->setWidthPercentage(1.0f);
 
     resizingWindowIndex = -1;
+
+    undoRedo = new UndoRedo;
 }
 
 
@@ -114,6 +116,9 @@ MainWindow::~MainWindow() {
 
         subWindows.clear();
     }
+
+    delete undoRedo;
+
 }
 
 int MainWindow::getFocusedSubWinIndex() {
@@ -480,6 +485,7 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
     static bool inputBarPressed = false;
     static bool selectWord = false;
     static double dClickCurrentTime = 1000;
+    static UndoRedoState undoRedoState = IDLE;
 
     dClickCurrentTime += dt;
     if (dClickCurrentTime < 400)
@@ -773,19 +779,108 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                 deleteSelectedChars();
 
                 postEndUpdate = true;
+                undoRedoState = NEW;
             }
 
-            if(ioData.keyPaste == DOWN)
+            if(ioData.keyPaste == DOWN) {
                 postEndUpdate = true;
+                undoRedoState = NEW;
+            }
+
+
+
+            char lastChar;
+            if(inputTextBarBuffer.empty())
+                undoRedoState = NEW;
+
+            if(iTextBarBufferPC - 1 > 0)
+                lastChar = inputTextBarBuffer.at(iTextBarBufferPC - 1);
+            else
+                undoRedoState = NEW;
+
+
+            int lastIndex = undoRedo->getLastCaretIndex();                                                              //Check if user move the caret to different place. If it was changed new undo redo data to add.
+            if(lastIndex != -1 && lastIndex != iTextBarBufferPC){
+                int startIndex = iTextBarBufferPC;
+
+                if(lastIndex < startIndex){
+                   int tempIndex = startIndex;
+                   startIndex = lastIndex;
+                   lastIndex = tempIndex;
+                }
+
+
+                if(lastIndex >= inputTextBarBuffer.size())
+                    lastIndex = inputTextBarBuffer.size()-1;
+
+                if(lastIndex < 0)
+                    undoRedoState = NEW;
+                else {
+                    for (size_t i = startIndex; i < lastIndex; i++) {
+                        if (inputTextBarBuffer.at(i) == ' ') {
+                            undoRedoState = NEW;
+                            break;
+                        }
+                    }
+                }
+
+            }
+
 
 
             for (size_t i = 0; i < ioData.charBuffer.size(); i++, iTextBarBufferPC++)
                 inputTextBarBuffer.insert(inputTextBarBuffer.begin() + iTextBarBufferPC, ioData.charBuffer.at(i));
 
 
+
+            if(undoRedoState == IDLE){
+                bool notSpace = true;
+
+                if(lastChar == ' ')
+                    notSpace = false;
+
+                undoRedoState = UPDATE;
+
+                for(size_t i = 0; i < ioData.charBuffer.size(); i++){
+                    if(notSpace){
+                        if(ioData.charBuffer.at(i) == ' '){
+                            undoRedoState = NEW;
+                            break;
+                        }
+                    }
+                    else{
+                        if(ioData.charBuffer.at(i) != ' '){
+                            undoRedoState = NEW;
+                            break;
+                        }
+                    }
+                }
+            }
+
+
             updateCaretPos = true;
             onlyUpdateOnIncrement = true;
 
+        }
+
+        if(ioData.keyUndo == DOWN){
+
+            auto* myPtr = undoRedo->undo();
+
+            if(myPtr != nullptr){
+                inputTextBarBuffer.assign((*myPtr).dataLine);
+                iTextBarBufferPC = (*myPtr).posIndex;
+                caretXPos = (*myPtr).caretPos;
+            }
+        }
+        else if(ioData.keyRedo == DOWN){
+            auto* myPtr = undoRedo->redo();
+
+            if(myPtr != nullptr){
+                inputTextBarBuffer.assign((*myPtr).dataLine);
+                iTextBarBufferPC = (*myPtr).posIndex;
+                caretXPos = (*myPtr).caretPos;
+            }
         }
 
         if(ioData.keyLeft == DOWN){
@@ -990,6 +1085,27 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
             }
 
             calculateInputBarOffset(onlyUpdateOnIncrement);
+
+
+            switch(undoRedoState){
+                case UPDATE:
+                    undoRedo->updateUndoRedoData(inputTextBarBuffer, caretXPos, iTextBarBufferPC);
+                    undoRedoState = IDLE;
+                    break;
+                case IDLE:
+                    break;
+                case NEW:
+                    auto* undoRedoPtr = new UndoRedoData;
+                    (*undoRedoPtr).dataLine = inputTextBarBuffer;
+                    (*undoRedoPtr).caretPos = caretXPos;
+                    (*undoRedoPtr).posIndex = iTextBarBufferPC;
+
+                    undoRedo->addNewUndoRedoData(undoRedoPtr);
+                    undoRedoState = IDLE;
+                    break;
+
+            }
+
         }
 
     }

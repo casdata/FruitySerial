@@ -263,8 +263,14 @@ int main(int, char**)
                         }
                         break;
                     case SDLK_z:
-                        if(SDL_GetModState() & KMOD_CTRL){
-                            std::cout<<"UNDO "<<std::endl;
+                        if(SDL_GetModState() & KMOD_SHIFT){
+                            if(SDL_GetModState() & KMOD_CTRL)
+                                ioData.keyRedo = DOWN;
+
+                        }
+                        else{
+                            if(SDL_GetModState() & KMOD_CTRL)
+                                ioData.keyUndo= DOWN;
                         }
                         break;
                     case SDLK_LEFT:
