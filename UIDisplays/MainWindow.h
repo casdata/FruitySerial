@@ -44,7 +44,7 @@ private:
 
     void deleteSelectedChars();
 
-    enum UndoRedoState{IDLE, NEW, UPDATE};
+    enum UndoRedoState{IDLE_UR, NEW, UPDATE};
 
     std::vector<SubWindow*> subWindows;
     ImVec2 winSize;

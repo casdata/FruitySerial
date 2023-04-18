@@ -10,7 +10,6 @@ class LineData {
 public:
 
 private:
-
 };
 
 

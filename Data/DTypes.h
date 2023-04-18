@@ -150,6 +150,11 @@ typedef struct{
     int             posIndex;
 } UndoRedoData;
 
+typedef struct{
+    std::string str;
+    ImU32       strColor;
+} FormattedInputStr;
+
 
 
 

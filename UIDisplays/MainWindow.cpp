@@ -370,6 +370,40 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
         }
 
 
+        std::string strBuffer = "";
+        std::vector<FormattedInputStr> formattedStrList;
+
+        int strPC = 0;
+
+        while (strPC < inputTextBarBuffer.length()){
+
+            if(inputTextBarBuffer.at(strPC) == '['){
+
+                bool noOutOfSizeError = true;
+                while(inputTextBarBuffer.at(strPC) != ' ' ){
+                    strPC++;
+
+                    if(strPC >= inputTextBarBuffer.length()){
+                        noOutOfSizeError = false;
+                        break;
+                    }
+
+                }
+
+                if(noOutOfSizeError){
+
+                    if(inputTextBarBuffer.at(strPC) != '0' && ++strPC < inputTextBarBuffer.length()){
+
+                    }
+
+                }
+
+
+            }
+
+        }
+
+
         if(appData.uiTheme == DARK)
             tColor = IM_COL32_WHITE;
         else
@@ -485,7 +519,7 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
     static bool inputBarPressed = false;
     static bool selectWord = false;
     static double dClickCurrentTime = 1000;
-    static UndoRedoState undoRedoState = IDLE;
+    static UndoRedoState undoRedoState = IDLE_UR;
 
     dClickCurrentTime += dt;
     if (dClickCurrentTime < 400)
@@ -833,7 +867,7 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
 
 
 
-            if(undoRedoState == IDLE){
+            if(undoRedoState == IDLE_UR){
                 bool notSpace = true;
 
                 if(lastChar == ' ')
@@ -1044,6 +1078,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
 
                 deleteSelectedChars();
                 updateCaretPos = true;
+
+                undoRedoState = NEW;
             }
             else {
                 if (iTextBarBufferPC > 0) {
@@ -1062,6 +1098,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
 
                 deleteSelectedChars();
                 updateCaretPos = true;
+
+                undoRedoState = NEW;
             }
             else {
                 if (inputTextBarBuffer.size() > 0 && iTextBarBufferPC < inputTextBarBuffer.size()) {
@@ -1090,9 +1128,9 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
             switch(undoRedoState){
                 case UPDATE:
                     undoRedo->updateUndoRedoData(inputTextBarBuffer, caretXPos, iTextBarBufferPC);
-                    undoRedoState = IDLE;
+                    undoRedoState = IDLE_UR;
                     break;
-                case IDLE:
+                case IDLE_UR:
                     break;
                 case NEW:
                     auto* undoRedoPtr = new UndoRedoData;
@@ -1101,7 +1139,7 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                     (*undoRedoPtr).posIndex = iTextBarBufferPC;
 
                     undoRedo->addNewUndoRedoData(undoRedoPtr);
-                    undoRedoState = IDLE;
+                    undoRedoState = IDLE_UR;
                     break;
 
             }

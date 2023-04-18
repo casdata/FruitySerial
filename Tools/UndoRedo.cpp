@@ -26,7 +26,7 @@ void UndoRedo::addNewUndoRedoData(UndoRedoData *urData) {
 
     undoRedoDataList.push_back(urData);
 
-    if(undoRedoDataList.size() > 25){
+    if(undoRedoDataList.size() > 125){
         pc--;
 
         undoRedoDataList.at(0)->dataLine.clear();
