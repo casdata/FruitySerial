@@ -152,7 +152,8 @@ typedef struct{
 
 typedef struct{
     std::string str;
-    ImU32       strColor;
+    bool        simpleTxt;
+    int         mainStrIndex;
 } FormattedInputStr;
 
 
@@ -204,6 +205,12 @@ static const ImU32 CORNER_BTN_OVER          = IM_COL32(221, 221, 221, 255);
 
 static const ImU32 DARK_TEXT_SELECT         = IM_COL32(42, 83, 135, 255);
 static const ImU32 LIGHT_TEXT_SELECT        = IM_COL32(189, 218, 253, 255);
+
+//static const ImU32 DARK_SPECIAL_INPUT       = IM_COL32(255, 157, 5, 255);
+//static const ImU32 LIGHT_SPECIAL_INPUT      = IM_COL32(255, 114, 5, 255);
+
+static const ImU32 DARK_SPECIAL_INPUT       = IM_COL32(232, 155, 68, 255);
+static const ImU32 LIGHT_SPECIAL_INPUT      = IM_COL32(255, 105, 72, 255);
 
 static const char* TXT_ENCODING_ITEMS[]     = {"RAW-DEC", "RAW-HEX", "UTF-8", "UTF-8 RAW-DEC", "UTF-8 RAW-HEX", "UTF-8 SPECIAL", "UTF-8 ESP-LOG"};
 

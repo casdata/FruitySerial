@@ -37,6 +37,13 @@ public:
     static float norm2HeightFloat(const int &value, bool setLegacyHeight = false, int newHeight = 0);
     static int norm2Width(const int &value, bool setLegacyWidth = false, int newWidth = 0);
     static int norm2Height(const int &value, bool setLegacyHeight = false, int newHeight = 0);
+    static bool increasePC2NextSpace(const std::string* strBuffer, int* pCounter, const int lastIndex);
+    static bool increasePC2NextChar(const std::string* strBuffer, int* pCounter, const int lastIndex);
+    static int  numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, const int pCounter, const int lastIndex);
+    static bool isDEC_format(const std::string* strBuffer, int* pCounter, const int lastIndex);
+    static bool isStartHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
+    static bool isHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
+    static bool isBIN_format(const std::string* strBuffer, int* pCounter, const int lastIndex);
 };
 
 

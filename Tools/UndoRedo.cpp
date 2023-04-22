@@ -35,7 +35,6 @@ void UndoRedo::addNewUndoRedoData(UndoRedoData *urData) {
         undoRedoDataList.erase(undoRedoDataList.begin());
     }
 
-     std::cout<<"new -> "<<pc<<" "<<undoRedoDataList.size()<<std::endl;
 }
 
 void UndoRedo::addNewBeforeUndo(UndoRedoData *urData) {
@@ -50,13 +49,9 @@ void UndoRedo::addNewBeforeUndo(UndoRedoData *urData) {
 
 
 void UndoRedo::updateUndoRedoData(const std::string strLine, float caretPosX, float caretIndex) {
-    std::cout<<"update -> "<<pc<<" "<<undoRedoDataList.size()<<std::endl;
-
     undoRedoDataList.at(pc)->dataLine = strLine;
     undoRedoDataList.at(pc)->caretPos = caretPosX;
     undoRedoDataList.at(pc)->posIndex = caretIndex;
-
-
 }
 
 

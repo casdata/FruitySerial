@@ -419,5 +419,151 @@ int FunctionTools::norm2Width(const int &value, bool setLegacyWidth, int newWidt
     }
 }
 
+bool FunctionTools::increasePC2NextChar(const std::string *strBuffer, int *pCounter, const int lastIndex) {                                        //Returns false if no char found
+
+    bool noOutOfSizeError = true;
+
+    while(strBuffer->at(*pCounter) == ' '){
+        (*pCounter)++;
+
+        if(*pCounter >= lastIndex){
+            noOutOfSizeError = false;
+            break;
+        }
+    }
+
+    return noOutOfSizeError;
+}
+
+bool FunctionTools::increasePC2NextSpace(const std::string *strBuffer, int *pCounter, const int lastIndex) {
+
+    bool noOutOfSizeError = true;
+
+    while(strBuffer->at(*pCounter) != ' '){
+        (*pCounter)++;
+
+        if(*pCounter >= lastIndex){
+            noOutOfSizeError = false;
+            break;
+        }
+    }
+
+    return noOutOfSizeError;
+}
+
+int FunctionTools::numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, const int pCounter, const int lastIndex) {
+    int numOfChars = 0;
+
+    for(size_t i = (pCounter + 1); i <= lastIndex; i++){
+        if(strBuffer.at(i) == ' '){
+            numOfChars = i;
+            break;
+        }
+
+        numOfChars = i;
+    }
+
+    numOfChars -= pCounter;
+
+
+    return numOfChars;
+}
+
+bool FunctionTools::isDEC_format(const std::string *strBuffer, int *pCounter, const int lastIndex) {
+
+    bool isDecFormat = true;
+
+    for (size_t i = 0; i < 3; i++) {
+        if ((*pCounter) < lastIndex) {
+            if (strBuffer->at(*pCounter) < 0x30 || strBuffer->at(*pCounter) > 0x39) {
+                isDecFormat = false;
+                break;
+            }
+        } else {
+            isDecFormat = false;
+            break;
+        }
+
+        (*pCounter)++;
+    }
+
+    return isDecFormat;
+}
+
+bool FunctionTools::isStartHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
+
+    bool isHexFormat = false;
+
+    if(strBuffer.at(pCounter) == '0'){
+        pCounter++;
+
+        if(pCounter < lastIndex && (strBuffer.at(pCounter) == 'x' || strBuffer.at(pCounter) == 'X')){
+            int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
+
+            if(nextSpace < 4 && nextSpace > 1){
+                isHexFormat = true;
+
+                if(strBuffer.at(pCounter + nextSpace) == ' ' || strBuffer.at(pCounter + nextSpace) == ']'){
+                    pCounter++;
+
+                    for(size_t i = 0; i < (nextSpace - 1); i++){
+                        if(strBuffer.at(pCounter) < 0x30 || (strBuffer.at(pCounter) < 0x41 && strBuffer.at(pCounter) > 0x39)
+                                                            || (strBuffer.at(pCounter) > 0x46 && strBuffer.at(pCounter) < 0x61 )
+                                                            || strBuffer.at(pCounter) > 0x66)
+                            isHexFormat = false;
+
+                        pCounter++;
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    return isHexFormat;
+}
+
+bool FunctionTools::isHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
+
+    bool isHexFormat = false;
+
+    int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
+
+    if(nextSpace < 3 && nextSpace > 0){
+        isHexFormat = true;
+
+        if(strBuffer.at(pCounter + nextSpace) == ' ' || strBuffer.at(pCounter + nextSpace) == ']'){
+
+            for(size_t i = 0; i < nextSpace; i++){
+                if(strBuffer.at(pCounter) < 0x30 || (strBuffer.at(pCounter) < 0x41 && strBuffer.at(pCounter) > 0x39)
+                                                    || (strBuffer.at(pCounter) > 0x46 && strBuffer.at(pCounter) < 0x61 )
+                                                    || strBuffer.at(pCounter) > 0x66)
+                    isHexFormat = false;
+
+                pCounter++;
+            }
+        }
+        else
+            pCounter += nextSpace;
+    }
+    else
+        pCounter += nextSpace;
+
+    return isHexFormat;
+}
+
+bool FunctionTools::isBIN_format(const std::string *strBuffer, int *pCounter, const int lastIndex) {
+
+    bool isBinFormat = true;
+
+    return isBinFormat;
+}
+
+
+
+
+
+
 
 

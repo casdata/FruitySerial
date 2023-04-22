@@ -334,7 +334,7 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
     ImGui::InvisibleButton("##iCanvas", inputBarSize);
     ImGui::PopID();
 
-    if(ImGui::IsItemVisible()){
+    if(ImGui::IsItemVisible()) {
 
 
         const ImVec2 p0 = ImGui::GetItemRectMin();
@@ -342,27 +342,27 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
         static const float startSpaceX = FunctionTools::norm2HeightFloat(4);
 
         ImVec2 textPos = ImVec2(p0.x + iBarOffsetX + startSpaceX, p0.y);
-        ImU32 tColor            = IM_COL32_WHITE;
-        ImDrawList* draw_list   = ImGui::GetWindowDrawList();
+        ImU32 tColor = IM_COL32_WHITE;
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
 
         ImGui::PushClipRect(p0, p1, true);
 
-        if(appData.uiTheme == DARK)
+        if (appData.uiTheme == DARK)
             tColor = DARK_INPUT_BG_COL;
         else
             tColor = LIGHT_INPUT_BG_COL;
 
         draw_list->AddRectFilled(p0, p1, tColor);
 
-        if(selectedInputText){
+        if (selectedInputText) {
 
-            if(appData.uiTheme == DARK)
+            if (appData.uiTheme == DARK)
                 tColor = DARK_TEXT_SELECT;
             else
                 tColor = LIGHT_TEXT_SELECT;
 
-            ImVec2 rectP0 = ImVec2(p0.x + startSpaceX + iBarOffsetX + selectedInputP0_x , p0.y);
+            ImVec2 rectP0 = ImVec2(p0.x + startSpaceX + iBarOffsetX + selectedInputP0_x, p0.y);
             ImVec2 rectP1 = ImVec2(p0.x + startSpaceX + iBarOffsetX + selectedInputP1_x, p1.y);
 
             draw_list->AddRectFilled(rectP0, rectP1, tColor);
@@ -370,49 +370,194 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
         }
 
 
-        std::string strBuffer = "";
-        std::vector<FormattedInputStr> formattedStrList;
+
+        std::vector<FormattedInputStr*> formattedStrList;
 
         int strPC = 0;
+        int strBufferPC = 0;
+        int tempIndex = 0;
 
-        while (strPC < inputTextBarBuffer.length()){
 
-            if(inputTextBarBuffer.at(strPC) == '['){
+        formattedStrList.push_back(new FormattedInputStr);
 
-                bool noOutOfSizeError = true;
-                while(inputTextBarBuffer.at(strPC) != ' ' ){
-                    strPC++;
+        while(strPC < inputTextBarBuffer.length()) {
 
-                    if(strPC >= inputTextBarBuffer.length()){
-                        noOutOfSizeError = false;
-                        break;
+            //formattedStrList.
+
+            if (inputTextBarBuffer.at(strPC) == '[') {
+
+                tempIndex = formattedStrList.size() - 1;
+                formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC)));
+                formattedStrList.at(tempIndex)->simpleTxt = true;
+                formattedStrList.at(tempIndex)->mainStrIndex = strBufferPC;
+                strBufferPC = strPC;
+
+                formattedStrList.push_back(new FormattedInputStr);
+
+                int startIndex = strPC++;
+
+                int lastIndex = inputTextBarBuffer.find_first_of(']', strPC);
+
+                if (lastIndex != std::string::npos) {
+
+                    if (FunctionTools::increasePC2NextChar(&inputTextBarBuffer, &strPC, lastIndex)) {
+                        bool binaryType = false;
+                        bool decType = false;
+                        bool hexType = false;
+
+                        if ((inputTextBarBuffer.at(strPC) > 0x2F && inputTextBarBuffer.at(strPC) < 0x3A) &&
+                            (strPC + 1) < lastIndex) {
+                            switch (inputTextBarBuffer.at(strPC + 1)) {
+                                case 'b':
+                                case 'B':
+                                    binaryType = true;
+                                    break;
+                                case 'x':
+                                case 'X':
+                                    if (FunctionTools::isStartHEX_format(inputTextBarBuffer, strPC, lastIndex))
+                                        hexType = true;
+                                    break;
+                                default:
+                                    if (FunctionTools::isDEC_format(&inputTextBarBuffer, &strPC, lastIndex)) {
+                                        std::cout << "DEC" << std::endl;
+                                        decType = true;
+                                    }
+                                    //decType = true;
+                                    break;
+                            }
+
+                            if (hexType) {
+                                if(strPC != lastIndex){
+                                    while(strPC < lastIndex){
+                                        if(FunctionTools::increasePC2NextChar(&inputTextBarBuffer, &strPC, lastIndex)){
+                                            if(!FunctionTools::isHEX_format(inputTextBarBuffer, strPC, lastIndex))
+                                                hexType = false;
+                                        }
+                                    }
+                                }
+
+                                if(hexType) {
+
+                                    tempIndex = formattedStrList.size() - 1;
+                                    formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC) + 1));
+                                    formattedStrList.at(tempIndex)->simpleTxt = false;
+                                    formattedStrList.at(tempIndex)->mainStrIndex = strBufferPC;
+                                    strBufferPC = strPC;
+                                    strBufferPC++;                                                                      //increase it to compensate the increase of strPC at the end off the while loop cycle
+
+                                    formattedStrList.push_back(new FormattedInputStr);
+                                }
+
+                            }//END if(hexType)
+
+                        }//END if
+
                     }
 
                 }
+            }
 
-                if(noOutOfSizeError){
+            strPC++;
+        }
 
-                    if(inputTextBarBuffer.at(strPC) != '0' && ++strPC < inputTextBarBuffer.length()){
+        if(strPC != strBufferPC){
+            tempIndex = formattedStrList.size() - 1;
+            formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC)));
+            formattedStrList.at(tempIndex)->simpleTxt = true;
+            formattedStrList.at(tempIndex)->mainStrIndex = strBufferPC;
+        }
 
-                    }
+        ImVec2 tPos = textPos;
 
+        for(size_t i = 0; i < formattedStrList.size(); i++){
+
+            if(formattedStrList.at(i)->simpleTxt){
+                if (appData.uiTheme == DARK)
+                    tColor = IM_COL32_WHITE;
+                else
+                    tColor = IM_COL32_BLACK;
+
+                if(formattedStrList.at(i)->mainStrIndex > 0){
+                    tPos.x = textPos.x;
+                    tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (formattedStrList.at(i)->mainStrIndex)).c_str()).x;
+                    draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.c_str());
                 }
+                else
+                    draw_list->AddText(textPos, tColor, formattedStrList.at(i)->str.c_str());
+            }
 
+            else{
+
+                if(appData.uiTheme == DARK)
+                    tColor = DARK_SPECIAL_INPUT;
+                else
+                    tColor = LIGHT_SPECIAL_INPUT;
+
+                if(formattedStrList.at(i)->mainStrIndex > 0){
+                    tPos.x = textPos.x;
+                    tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (formattedStrList.at(i)->mainStrIndex)).c_str()).x;
+                    draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.c_str());
+                }
+                else
+                    draw_list->AddText(textPos, tColor, formattedStrList.at(i)->str.c_str());
+
+                /*
+
+                if(formattedStrList.at(i)->mainStrIndex > 0){
+                    tPos.x = textPos.x;
+                    tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (formattedStrList.at(i)->mainStrIndex)).c_str()).x;
+                    draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.substr(0, 1).c_str());
+                }
+                else
+                    draw_list->AddText(textPos, tColor, formattedStrList.at(i)->str.substr(0, 1).c_str());
+
+
+
+                if(appData.uiTheme == DARK)
+                    tColor = DARK_SPECIAL_UTF8_COL;
+                else
+                    tColor = LIGHT_SPECIAL_UTF8_COL;
+
+
+                tPos.x = textPos.x;
+                tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (formattedStrList.at(i)->mainStrIndex + 1)).c_str()).x;
+                draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.substr(1, formattedStrList.at(i)->str.length() - 2).c_str());
+
+                if(appData.uiTheme == DARK)
+                    tColor = DARK_BRACKET_COL;
+                else
+                    tColor = LIGHT_BRACKET_COL;
+
+
+                tPos.x = textPos.x;
+                tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0,
+                                                                        (formattedStrList.at(i)->mainStrIndex + (formattedStrList.at(i)->str.length() - 1))).c_str()).x;
+                draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.substr(formattedStrList.at(i)->str.length() - 1).c_str());
+
+                */
 
             }
+
+
+            delete formattedStrList.at(i);
 
         }
 
 
-        if(appData.uiTheme == DARK)
+
+
+        /*
+        if (appData.uiTheme == DARK)
             tColor = IM_COL32_WHITE;
         else
             tColor = IM_COL32_BLACK;
 
         draw_list->AddText(textPos, tColor, inputTextBarBuffer.c_str());
+        */
 
 
-        if(onInputTextBar) {
+
+        if (onInputTextBar) {
             caretCurrentTime += dt;
             if (caretCurrentTime > 700) {
                 caretCurrentTime = 0;
@@ -420,7 +565,7 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
                 showInputBarCaret = !showInputBarCaret;
             }
 
-            if(appData.uiTheme == DARK)
+            if (appData.uiTheme == DARK)
                 tColor = IM_COL32_WHITE;
             else
                 tColor = IM_COL32_BLACK;
@@ -479,7 +624,7 @@ void MainWindow::deleteSelectedChars() {
     if(iTextBarBufferPC < iTextBarBufferPC2)
         inputTextBarBuffer.erase(inputTextBarBuffer.begin() + iTextBarBufferPC,
                                  inputTextBarBuffer.begin() + iTextBarBufferPC2);
-    else {
+    else {                                                                                                      //CRASH HERE??????
         inputTextBarBuffer.erase(inputTextBarBuffer.begin() + iTextBarBufferPC2,
                                  inputTextBarBuffer.begin() + iTextBarBufferPC);
 
