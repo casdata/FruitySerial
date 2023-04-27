@@ -469,13 +469,15 @@ int FunctionTools::numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, c
     return numOfChars;
 }
 
-bool FunctionTools::isDEC_format(const std::string *strBuffer, int *pCounter, const int lastIndex) {
+bool FunctionTools::isStartDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
 
     bool isDecFormat = true;
 
+    int prePCounter = pCounter;
+
     for (size_t i = 0; i < 3; i++) {
-        if ((*pCounter) < lastIndex) {
-            if (strBuffer->at(*pCounter) < 0x30 || strBuffer->at(*pCounter) > 0x39) {
+        if (pCounter < lastIndex) {
+            if (strBuffer.at(pCounter) < 0x30 || strBuffer.at(pCounter) > 0x39) {
                 isDecFormat = false;
                 break;
             }
@@ -484,8 +486,70 @@ bool FunctionTools::isDEC_format(const std::string *strBuffer, int *pCounter, co
             break;
         }
 
-        (*pCounter)++;
+        pCounter++;
     }
+
+    if(isDecFormat){
+
+        int sumA = (static_cast<int>(strBuffer.at(prePCounter)) - 0x30) * 100;
+        sumA += (static_cast<int>(strBuffer.at(prePCounter + 1)) - 0x30) * 10;
+        sumA += static_cast<int>(strBuffer.at(prePCounter + 2)) - 0x30;
+
+        if(sumA > 255)
+            isDecFormat = false;
+    }
+
+    return isDecFormat;
+}
+
+bool FunctionTools::isDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
+    bool isDecFormat = false;
+
+    int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
+
+
+    if(nextSpace > 0 && nextSpace < 4){
+        isDecFormat = true;
+
+        if(strBuffer.at(pCounter + nextSpace) == ' ' || strBuffer.at(pCounter + nextSpace) == ']'){
+
+            for(size_t i = 0; i < nextSpace; i++){
+                if (strBuffer.at(pCounter) < 0x30 || strBuffer.at(pCounter) > 0x39)
+                    isDecFormat = false;
+
+                pCounter++;
+            }
+        }
+        else
+            pCounter += nextSpace;
+
+    }
+    else
+        pCounter += nextSpace;
+
+    /*
+     * int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
+
+    if(nextSpace < 3 && nextSpace > 0){
+        isHexFormat = true;
+
+        if(strBuffer.at(pCounter + nextSpace) == ' ' || strBuffer.at(pCounter + nextSpace) == ']'){
+
+            for(size_t i = 0; i < nextSpace; i++){
+                if(strBuffer.at(pCounter) < 0x30 || (strBuffer.at(pCounter) < 0x41 && strBuffer.at(pCounter) > 0x39)
+                                                    || (strBuffer.at(pCounter) > 0x46 && strBuffer.at(pCounter) < 0x61 )
+                                                    || strBuffer.at(pCounter) > 0x66)
+                    isHexFormat = false;
+
+                pCounter++;
+            }
+        }
+        else
+            pCounter += nextSpace;
+    }
+    else
+        pCounter += nextSpace;
+     */
 
     return isDecFormat;
 }

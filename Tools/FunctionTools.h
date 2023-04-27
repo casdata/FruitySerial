@@ -40,7 +40,8 @@ public:
     static bool increasePC2NextSpace(const std::string* strBuffer, int* pCounter, const int lastIndex);
     static bool increasePC2NextChar(const std::string* strBuffer, int* pCounter, const int lastIndex);
     static int  numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, const int pCounter, const int lastIndex);
-    static bool isDEC_format(const std::string* strBuffer, int* pCounter, const int lastIndex);
+    static bool isStartDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
+    static bool isDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
     static bool isStartHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
     static bool isHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
     static bool isBIN_format(const std::string* strBuffer, int* pCounter, const int lastIndex);

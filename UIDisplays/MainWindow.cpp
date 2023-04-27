@@ -404,6 +404,7 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
                         bool binaryType = false;
                         bool decType = false;
                         bool hexType = false;
+                        bool maskType = false;
 
                         if ((inputTextBarBuffer.at(strPC) > 0x2F && inputTextBarBuffer.at(strPC) < 0x3A) &&
                             (strPC + 1) < lastIndex) {
@@ -414,29 +415,36 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
                                     break;
                                 case 'x':
                                 case 'X':
-                                    if (FunctionTools::isStartHEX_format(inputTextBarBuffer, strPC, lastIndex))
+                                    if (FunctionTools::isStartHEX_format(inputTextBarBuffer, strPC, lastIndex)) {
+                                        maskType = true;
                                         hexType = true;
+                                    }
                                     break;
                                 default:
-                                    if (FunctionTools::isDEC_format(&inputTextBarBuffer, &strPC, lastIndex)) {
-                                        std::cout << "DEC" << std::endl;
+                                    if (FunctionTools::isStartDEC_format(inputTextBarBuffer, strPC, lastIndex)) {
+                                        maskType = true;
                                         decType = true;
                                     }
-                                    //decType = true;
                                     break;
                             }
 
-                            if (hexType) {
+                            if (maskType) {
                                 if(strPC != lastIndex){
                                     while(strPC < lastIndex){
                                         if(FunctionTools::increasePC2NextChar(&inputTextBarBuffer, &strPC, lastIndex)){
-                                            if(!FunctionTools::isHEX_format(inputTextBarBuffer, strPC, lastIndex))
-                                                hexType = false;
+                                            if(hexType) {
+                                                if (!FunctionTools::isHEX_format(inputTextBarBuffer, strPC, lastIndex))
+                                                    maskType = false;
+                                            }
+                                            if(decType){
+                                                if(!FunctionTools::isDEC_format(inputTextBarBuffer, strPC, lastIndex))
+                                                    maskType = false;
+                                            }
                                         }
                                     }
                                 }
 
-                                if(hexType) {
+                                if(maskType) {
 
                                     tempIndex = formattedStrList.size() - 1;
                                     formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC) + 1));
@@ -500,41 +508,6 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
                 }
                 else
                     draw_list->AddText(textPos, tColor, formattedStrList.at(i)->str.c_str());
-
-                /*
-
-                if(formattedStrList.at(i)->mainStrIndex > 0){
-                    tPos.x = textPos.x;
-                    tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (formattedStrList.at(i)->mainStrIndex)).c_str()).x;
-                    draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.substr(0, 1).c_str());
-                }
-                else
-                    draw_list->AddText(textPos, tColor, formattedStrList.at(i)->str.substr(0, 1).c_str());
-
-
-
-                if(appData.uiTheme == DARK)
-                    tColor = DARK_SPECIAL_UTF8_COL;
-                else
-                    tColor = LIGHT_SPECIAL_UTF8_COL;
-
-
-                tPos.x = textPos.x;
-                tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0, (formattedStrList.at(i)->mainStrIndex + 1)).c_str()).x;
-                draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.substr(1, formattedStrList.at(i)->str.length() - 2).c_str());
-
-                if(appData.uiTheme == DARK)
-                    tColor = DARK_BRACKET_COL;
-                else
-                    tColor = LIGHT_BRACKET_COL;
-
-
-                tPos.x = textPos.x;
-                tPos.x += ImGui::CalcTextSize(inputTextBarBuffer.substr(0,
-                                                                        (formattedStrList.at(i)->mainStrIndex + (formattedStrList.at(i)->str.length() - 1))).c_str()).x;
-                draw_list->AddText(tPos, tColor, formattedStrList.at(i)->str.substr(formattedStrList.at(i)->str.length() - 1).c_str());
-
-                */
 
             }
 
@@ -1078,6 +1051,13 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                 if(iTextBarBufferPC2 < 0)
                     iTextBarBufferPC2 = 0;
 
+                int caretMultiplier = static_cast<int>(caretXPos / inputBarSize.x);
+                iBarOffsetX = static_cast<float>(caretMultiplier * inputBarSize.x);
+                iBarOffsetX *= -1;
+
+                if(iBarOffsetX > 0)
+                    iBarOffsetX = 0;
+
                 ImGui::PushFont(appdata.monoFont);
                 selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
                 selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
@@ -1130,6 +1110,11 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                 if(iTextBarBufferPC2 > inputTextBarBuffer.length())
                     iTextBarBufferPC2 = inputTextBarBuffer.length();
 
+                int caretMulitplier = static_cast<int>(caretXPos / inputBarSize.x);
+
+                iBarOffsetX = static_cast<float>(caretMulitplier * inputBarSize.x);
+                iBarOffsetX *= -1;
+
                 ImGui::PushFont(appdata.monoFont);
                 selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
                 selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
@@ -1176,6 +1161,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
 
                 iTextBarBufferPC2 = 0;
 
+                iBarOffsetX = 0;
+
                 ImGui::PushFont(appdata.monoFont);
                 selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
                 selectedInputP1_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC2).c_str()).x;
@@ -1199,7 +1186,10 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                     iTextBarBufferPC2 = iTextBarBufferPC;
                 }
 
-                iTextBarBufferPC2 = inputTextBarBuffer.length();
+                iTextBarBufferPC = inputTextBarBuffer.size();
+
+                postEndUpdate = true;
+                updateCaretPos = true;
 
                 ImGui::PushFont(appdata.monoFont);
                 selectedInputP0_x = ImGui::CalcTextSize(inputTextBarBuffer.substr(0, iTextBarBufferPC).c_str()).x;
