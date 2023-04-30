@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_thread.h>
 
 
@@ -30,9 +31,18 @@
 #include "serial/serial.h"
 #include "SerialManager.h"
 #include "ClockTime.h"
+//#include "SDL_syswm.h"
 
+SDL_Window* gSplashWindow;
 SDL_Window* gWindow;
 SDL_GLContext gl_context;
+
+SDL_Surface* iconSurface = nullptr;
+SDL_Surface* gSplashSurface = nullptr;
+SDL_Surface* pngSplashSurface = nullptr;
+
+bool    splashEnable = true;
+double  splashCurrentTime = 0;
 
 Hud *hud;
 SerialManager *serialManager;
@@ -456,6 +466,24 @@ int main(int, char**)
         ImGui::End();
 
 
+        if(splashEnable){
+            splashCurrentTime += deltaTime;
+            if(splashCurrentTime > 1600 ){
+                splashEnable = false;
+
+                SDL_ShowWindow(gWindow);
+
+                SDL_FreeSurface(pngSplashSurface);
+                pngSplashSurface = nullptr;
+
+                SDL_DestroyWindow(gSplashWindow);
+                gSplashWindow = nullptr;
+
+                IMG_Quit();
+
+            }
+        }
+
 
         hud->drawMainWin(deltaTime, appData, serialManager);
 
@@ -508,6 +536,9 @@ int main(int, char**)
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+
+            if(splashEnable)
+                SDL_UpdateWindowSurface(gSplashWindow);
         }
 
         SDL_GL_SwapWindow(gWindow);
@@ -525,6 +556,8 @@ int main(int, char**)
 
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(gWindow);
+    SDL_FreeSurface(iconSurface);
+
     SDL_Quit();
 
     return 0;
@@ -562,11 +595,67 @@ bool initSDL(){
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);// | SDL_WINDOW_BORDERLESS);
-    gWindow = SDL_CreateWindow("Fruity Serial Terminal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, window_flags);  //1280, 980,
+
+    gSplashWindow = SDL_CreateWindow("Loading", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 470, 626, window_flags | SDL_WINDOW_BORDERLESS);
+    gl_context = SDL_GL_CreateContext(gSplashWindow);
+
+    //SDL_SetWindowOpacity(gSplashWindow, 0.9f);
+    /*
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+    SDL_GetWindowWMInfo(gSplashWindow, &wmInfo);
+    HWND hWnd = wmInfo.info.win.window;
+
+    SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE | WS_EX_LAYERED));
+
+    SetLayeredWindowAttributes(hWnd,RGB(255, 255, 255),0, LWA_COLORKEY );
+    */
+
+    gWindow = SDL_CreateWindow("Fruity Serial Terminal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, window_flags | SDL_WINDOW_HIDDEN );  //1280, 980,
     gl_context = SDL_GL_CreateContext(gWindow);
     SDL_GL_MakeCurrent(gWindow, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    int imgFlags = IMG_INIT_PNG;
+
+    SDL_Surface* loadedSurface = IMG_Load("../Assets/icon.png");
+    if(loadedSurface != nullptr){
+        iconSurface = SDL_ConvertSurface(loadedSurface, loadedSurface->format, 0);
+
+        if(iconSurface == nullptr)
+            std::cout << "ERROR: can't create png icon" << std::endl;
+        else
+            SDL_SetWindowIcon(gWindow, loadedSurface);
+
+
+
+        SDL_FreeSurface(loadedSurface);
+    }
+
+    loadedSurface = IMG_Load("../Assets/splash.png");
+    if(loadedSurface != nullptr){
+        pngSplashSurface = SDL_ConvertSurface(loadedSurface, loadedSurface->format, 0);
+
+        if(pngSplashSurface == nullptr)
+            std::cout << "ERROR: can't create png splash" << std::endl;
+        else{
+
+            if(!(IMG_Init(imgFlags) & imgFlags))
+                std::cout<<"SDL_image could not initialize!"<<std::endl;
+            else{
+                gSplashSurface = SDL_GetWindowSurface(gSplashWindow);
+                SDL_BlitSurface(pngSplashSurface, nullptr, gSplashSurface, nullptr);
+            }
+
+        }
+
+
+        SDL_FreeSurface(loadedSurface);
+    }
+
 
     SDL_DisplayMode dm;
     SDL_GetCurrentDisplayMode(0, &dm);

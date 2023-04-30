@@ -518,18 +518,6 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
 
 
-
-        /*
-        if (appData.uiTheme == DARK)
-            tColor = IM_COL32_WHITE;
-        else
-            tColor = IM_COL32_BLACK;
-
-        draw_list->AddText(textPos, tColor, inputTextBarBuffer.c_str());
-        */
-
-
-
         if (onInputTextBar) {
             caretCurrentTime += dt;
             if (caretCurrentTime > 700) {
@@ -558,15 +546,12 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
     ImGui::PopFont();
 
-
     ImGui::SameLine();
 
-    static char buf[12] = "";
-    ImGui::SetNextItemWidth(120);
-    ImGui::InputText("##inputBar", buf, sizeof(buf));
+    static int eolOp = 0;
+    //ImGui::Combo("##eolOption", &eolOp)
 
     ImGui::SameLine();
-
     ImGui::Button("Send");
 
 
@@ -980,8 +965,12 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
 
 
 
-            for (size_t i = 0; i < ioData.charBuffer.size(); i++, iTextBarBufferPC++)
-                inputTextBarBuffer.insert(inputTextBarBuffer.begin() + iTextBarBufferPC, ioData.charBuffer.at(i));
+            for (size_t i = 0; i < ioData.charBuffer.size(); i++, iTextBarBufferPC++) {
+                if(ioData.charBuffer.at(i) == 0xD || ioData.charBuffer.at(i) == 0xA)                                //carriage or new line char
+                    inputTextBarBuffer.insert(inputTextBarBuffer.begin() + iTextBarBufferPC, 0x20);                 //space char
+                else
+                    inputTextBarBuffer.insert(inputTextBarBuffer.begin() + iTextBarBufferPC, ioData.charBuffer.at(i));
+            }
 
 
 
@@ -1036,6 +1025,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
         }
 
         if(ioData.keyLeft == DOWN){
+            ImGui::SetKeyboardFocusHere();
+
             caretCurrentTime = 0;
             showInputBarCaret = true;
 
@@ -1095,6 +1086,8 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
         }
 
         if(ioData.keyRight == DOWN){
+            ImGui::SetKeyboardFocusHere();
+
             caretCurrentTime = 0;
             showInputBarCaret = true;
 

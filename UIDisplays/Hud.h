@@ -59,6 +59,7 @@ private:
     GLuint maximizeTexture = 0;
     GLuint maximize2Texture = 0;
     GLuint closeTexture = 0;
+    GLuint iconTexture = 0;
 
     GLuint uNewBtnTexture = 0;
     GLuint uOpenBtnTexture = 0;

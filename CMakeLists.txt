@@ -12,6 +12,7 @@ set(serial_PATH ${serial_PATH} ${CMAKE_SOURCE_DIR}/Serial)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 set(SDL2_PATH "SDL2")
 set(SDL2_IMAGE_PATH "SDL2")
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc")
 
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -70,7 +71,8 @@ add_executable(FruitySerial main.cpp
                             Tools/ClockTime.cpp
                             Tools/ClockTime.h
                             Tools/UndoRedo.cpp
-                            Tools/UndoRedo.h)
+                            Tools/UndoRedo.h
+                            ${APP_ICON_RESOURCE_WINDOWS})
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)

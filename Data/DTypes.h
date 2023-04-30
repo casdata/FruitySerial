@@ -221,6 +221,15 @@ static const char* BYTE_SIZE_ITEMS[]         = {"5", "6", "7", "8"};
 static const char* PARITY_ITEMS[]           = {"none", "odd", "even"};
 static const char* STOP_BITS_ITEMS[]        = {"1", "1.5", "2"};
 static const char* FLOW_CONTROL_ITEMS[]     = {"none", "software", "hardware"};
+
+static const char* EOL_ITEMS[]              = {"no line", "new line", "carriage return", "cr & lf"};
+
+/*
+ * noLine,
+    newLine,
+    carrieReturn,
+    crAndLf
+ */
 /*
  * RAW_DEC = 0,
     RAW_HEX,

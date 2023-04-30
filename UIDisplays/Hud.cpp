@@ -22,6 +22,9 @@ Hud::Hud() {
     ret = FunctionTools::loadTextureFromFile("../Assets/menuDarkUp.png", &menuDarkTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    ret  = FunctionTools::loadTextureFromFile("../Assets/icon.png", &iconTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
     ret = FunctionTools::loadTextureFromFile("../Assets/newBtn.png", &newBtnTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
@@ -95,18 +98,64 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
         else
             texture = menuLightTexture;
 
+        //if(menuData.titleBar != TB_ENABLE)
+            //texture = iconTexture;
+
         float iconSize = FunctionTools::norm2Height(static_cast<int>(menuBarIconSize->y));
         int imagePadding = FunctionTools::norm2Height(4);
 
+
+        if(menuData.titleBar != TB_ENABLE) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+
+            ImVec2 tempCursor0 = ImGui::GetCursorScreenPos();
+
+            if(ImGui::ImageButton((void*)(intptr_t)iconTexture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1),imagePadding)){
+                ImGui::OpenPopup("iconMenu");
+            }
+
+            ImGui::PopStyleColor();
+
+            ImGui::SetNextWindowPos(ImVec2(tempCursor0.x + FunctionTools::norm2Height(4), ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31)));
+            if(ImGui::BeginPopup("iconMenu")){
+                if(ImGui::MenuItem("Restore")){
+
+                }
+                ImGui::Spacing();
+
+                if(ImGui::MenuItem("Minimize")){
+
+                }
+                ImGui::Spacing();
+
+                if(ImGui::MenuItem("Maximize")){
+
+                }
+                ImGui::Separator();
+
+                if(ImGui::MenuItem("Close")){
+
+                }
+
+                ImGui::EndPopup();
+            }
+
+            ImGui::Spacing();
+
+        }
+
+
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+
+        ImVec2 tempCursor = ImGui::GetCursorScreenPos();
+
         if(ImGui::ImageButton((void*)(intptr_t)texture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)) {
             ImGui::OpenPopup("menuPopup");
         }
 
         ImGui::PopStyleColor();
 
-
-        ImGui::SetNextWindowPos(ImVec2(ImGui::GetWindowViewport()->Pos.x + FunctionTools::norm2Height(8),ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31)));
+        ImGui::SetNextWindowPos(ImVec2(tempCursor.x, ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31)));
 
         if(ImGui::BeginPopup("menuPopup")){
 
