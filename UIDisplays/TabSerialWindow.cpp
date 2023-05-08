@@ -368,11 +368,78 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
     ImGui::Image((void*)(intptr_t)separatorTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1));
 
 
+    //Input EOL
+    comboItem = static_cast<int>(serialConnection->getInputEol());
+    currentItem = comboItem;
+
+    tempWidth = tempHeight;
+    tempX -= (tempWidth + myCursorPos.x);
+    ImGui::SetNextItemWidth(tempWidth);
+    ImGui::SetCursorPos(ImVec2(tempX, tempY));
+
+    GLuint tempTexture = lightBtn0RedTexture;
+
+    if(uiTheme == DARK){
+        switch(currentItem){
+            case 1:
+                tempTexture = darkBtn1RedTexture;
+                break;
+            case 2:
+                tempTexture = darkBtn2RedTexture;
+                break;
+            case 3:
+                tempTexture = darkBtn3RedTexture;
+                break;
+            default:
+                tempTexture = darkBtn0RedTexture;
+        }
+    }
+    else{
+        switch(currentItem){
+            case 1:
+                tempTexture = lightBtn1RedTexture;
+                break;
+            case 2:
+                tempTexture = lightBtn2RedTexture;
+                break;
+            case 3:
+                tempTexture = lightBtn3RedTexture;
+                break;
+            default:
+                tempTexture = lightBtn0RedTexture;
+        }
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+    if(ImGui::ImageButton((void*)(intptr_t)tempTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
+        ImGui::OpenPopup("eolInputPopup");
+
+    ImGui::PopStyleColor();
+
+    if(ImGui::BeginPopup("eolInputPopup")){
+        ImGui::Text("EOL");
+        ImGui::Separator();
+
+        bool selected = false;
+
+        for(size_t i = 0; i < IM_ARRAYSIZE(EOL_ITEMS); i++){
+            selected = (i == comboItem) ? true : false;
+            if(ImGui::Selectable(EOL_ITEMS[i], selected))
+                currentItem = i;
+        }
+
+        if(currentItem != comboItem)
+            serialConnection->setInputEol(static_cast<serialEndOfLine>(currentItem));
+
+        ImGui::EndPopup();
+    }
+
+
     //Encoding buttons
     int arrowPressed = -1;
 
     tempWidth = tempHeight;
-    tempX -= (tempWidth + myCursorPos.x);
+    tempX -= (tempWidth + (myCursorPos.x));
     ImGui::SetNextItemWidth(tempWidth);
     ImGui::SetCursorPos(ImVec2(tempX, tempY));
 
@@ -403,7 +470,6 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
 
 
     //Encoding format
-    static int tempInt = 0;
     comboItem = static_cast<int>(serialConnection->getTextEncoding());
 
     currentItem = comboItem;

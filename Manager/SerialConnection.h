@@ -60,6 +60,12 @@ public:
     void setAutoScroll(bool state);
     bool getAutoScroll();
 
+    serialEndOfLine getInputEol();
+    void setInputEol(serialEndOfLine inputEOL);
+
+    serialEndOfLine getOutputEol();
+    void setOutputEol(serialEndOfLine outputEOL);
+
     void update(ClockTime *clockTime);
     void printLines(const UI_Theme& uiTheme);
 

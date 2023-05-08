@@ -199,6 +199,21 @@ bool SerialConnection::getAutoScroll() {
     return autoScroll;
 }
 
+serialEndOfLine SerialConnection::getInputEol() {
+    return inputEolType;
+}
+
+void SerialConnection::setInputEol(serialEndOfLine inputEOL) {
+    inputEolType = inputEOL;
+}
+
+serialEndOfLine SerialConnection::getOutputEol() {
+    return outputEolType;
+}
+
+void SerialConnection::setOutputEol(serialEndOfLine outputEOL) {
+    outputEolType = outputEOL;
+}
 
 void SerialConnection::update(ClockTime *clockTime) {
     checkAndReadPort(clockTime);

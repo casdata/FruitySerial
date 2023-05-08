@@ -20,6 +20,17 @@ public:
     inline static GLuint timestampTexture;
     inline static GLuint settingsTexture;
     inline static GLuint separatorTexture;
+
+    inline static GLuint darkBtn0RedTexture;
+    inline static GLuint darkBtn1RedTexture;
+    inline static GLuint darkBtn2RedTexture;
+    inline static GLuint darkBtn3RedTexture;
+
+    inline static GLuint lightBtn0RedTexture;
+    inline static GLuint lightBtn1RedTexture;
+    inline static GLuint lightBtn2RedTexture;
+    inline static GLuint lightBtn3RedTexture;
+
     inline static ImVec2 textureSize;
 
     explicit TabSerialWindow(SerialPortData *serialPortData, SerialConnection *serialConnection);

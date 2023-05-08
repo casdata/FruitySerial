@@ -69,6 +69,22 @@ private:
 
     UndoRedo* undoRedo;
 
+    GLuint lightSendTexture;
+    GLuint darkSendTexture;
+    ImVec2 sendTextureSize;
+
+    GLuint darkBtn0Texture;
+    GLuint darkBtn1Texture;
+    GLuint darkBtn2Texture;
+    GLuint darkBtn3Texture;
+
+    GLuint lightBtn0Texture;
+    GLuint lightBtn1Texture;
+    GLuint lightBtn2Texture;
+    GLuint lightBtn3Texture;
+
+    GLuint sepTexture;
+
 };
 
 

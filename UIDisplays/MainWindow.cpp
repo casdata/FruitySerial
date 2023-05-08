@@ -51,6 +51,86 @@ MainWindow::MainWindow() {
     ret = FunctionTools::loadTextureFromFile("../Assets/pause.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    texturePtr = &TabSerialWindow::darkBtn0RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn0Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn1RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn1Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn2RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn2Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn3RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn3Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn0RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn0Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn1RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn1Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn2RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn2Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn3RedTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn3Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+
+    texturePtr = &darkSendTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightSend.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    sendTextureSize = ImVec2(imageWidth, imageHeight);
+
+    texturePtr = &lightSendTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightSend.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn0Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn0.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn1Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn1.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn2Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn2.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn3Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn3.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+
+    texturePtr = &lightBtn0Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn0.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &lightBtn1Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn1.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &lightBtn2Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn2.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &lightBtn3Texture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn3.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+
+    texturePtr = &sepTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/separator.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
 
     auto* subWin = new SubWindow(windowCount);
     subWindows.push_back(subWin);
@@ -320,14 +400,130 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
     }
 
 
-
     ImGui::Begin("InputBar", NULL, windowFlags);
 
-    inputBarSize.x = winSize.x * 0.8f;
-    inputBarSize.y = FunctionTools::norm2HeightFloat(20);
 
     inputBarPos = ImGui::GetCursorScreenPos();
 
+    ImVec2 myCursorPos = ImGui::GetCursorPos();
+
+
+    int comboItem = 0;
+
+    if(inputBarEnabled)
+        comboItem = static_cast<int>(serialPtr->getOutputEol());
+
+    int currentItem = comboItem;
+
+    float tempWidth = FunctionTools::norm2HeightFloat(18);
+    float tempHeight = tempWidth;//static_cast<int>(sendTextureSize.y));//24);
+
+    float tempX = ImGui::GetWindowSize().x - (myCursorPos.x * 2) - tempWidth;
+
+    int imagePadding = FunctionTools::norm2Height(1);
+
+
+    ImGui::SetCursorPos(ImVec2(tempX, myCursorPos.y));
+    ImGui::SetNextItemWidth(tempWidth);
+
+    GLuint tempTexture = lightBtn0Texture;
+
+    if(appData.uiTheme == DARK){
+        switch(currentItem){
+            case 1:
+                tempTexture = darkBtn1Texture;
+                break;
+            case 2:
+                tempTexture = darkBtn2Texture;
+                break;
+            case 3:
+                tempTexture = darkBtn3Texture;
+                break;
+            default:
+                tempTexture = darkBtn0Texture;
+                break;
+        }
+    }
+    else{
+        switch(currentItem){
+            case 1:
+                tempTexture = lightBtn1Texture;
+                break;
+            case 2:
+                tempTexture = lightBtn2Texture;
+                break;
+            case 3:
+                tempTexture = lightBtn3Texture;
+                break;
+            default:
+                tempTexture = lightBtn0Texture;
+                break;
+        }
+    }
+
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+    if(ImGui::ImageButton((void*)(intptr_t)tempTexture, ImVec2(tempWidth, tempHeight), ImVec2(0, 0), ImVec2(1, 1), imagePadding))
+        ImGui::OpenPopup("eolOutputPopup");
+
+    ImGui::PopStyleColor();
+
+    if(ImGui::BeginPopup("eolOutputPopup")){
+        ImGui::Text("EOL");
+        ImGui::Separator();
+
+        bool selected = false;
+
+        for(size_t i = 0; i < IM_ARRAYSIZE(EOL_ITEMS); i++){
+            selected = (i == comboItem) ? true : false;
+            if(ImGui::Selectable(EOL_ITEMS[i], selected))
+                currentItem = i;
+        }
+
+        if(currentItem != comboItem && inputBarEnabled)
+            serialPtr->setOutputEol(static_cast<serialEndOfLine>(currentItem));
+
+        ImGui::EndPopup();
+    }
+
+
+    //Separator
+    tempWidth = FunctionTools::norm2HeightFloat(6);
+    tempX -= (tempWidth + myCursorPos.x);
+
+    ImGui::SetCursorPos(ImVec2(tempX, myCursorPos.y));
+    ImGui::Image((void*)(intptr_t)sepTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1));
+
+
+
+
+
+    tempWidth = FunctionTools::norm2HeightFloat(36);
+    tempX -= ((myCursorPos.x * 2) + tempWidth);
+
+    float sendBtnX = tempX;
+    ImGui::SetCursorPos(ImVec2(sendBtnX, myCursorPos.y));
+
+    tempTexture = lightSendTexture;
+
+    if(appData.uiTheme == DARK)
+        tempTexture = darkSendTexture;
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+    if(ImGui::ImageButton((void*)(intptr_t)tempTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1), imagePadding)){
+
+    }
+
+    ImGui::PopStyleColor();
+
+
+
+    inputBarSize.x = sendBtnX - (myCursorPos.x * 2);
+    inputBarSize.y = FunctionTools::norm2HeightFloat(20);
+
+    ImGui::SetCursorScreenPos(inputBarPos);
 
     ImGui::PushFont(appData.monoFont);
     ImGui::PushID("iClipper");
@@ -335,7 +531,6 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
     ImGui::PopID();
 
     if(ImGui::IsItemVisible()) {
-
 
         const ImVec2 p0 = ImGui::GetItemRectMin();
         const ImVec2 p1 = ImGui::GetItemRectMax();
@@ -381,8 +576,6 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
         formattedStrList.push_back(new FormattedInputStr);
 
         while(strPC < inputTextBarBuffer.length()) {
-
-            //formattedStrList.
 
             if (inputTextBarBuffer.at(strPC) == '[') {
 
@@ -546,14 +739,6 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
     ImGui::PopFont();
 
-    ImGui::SameLine();
-
-    static int eolOp = 0;
-    //ImGui::Combo("##eolOption", &eolOp)
-
-    ImGui::SameLine();
-    ImGui::Button("Send");
-
 
     ImGui::End();
 
@@ -582,7 +767,7 @@ void MainWindow::deleteSelectedChars() {
     if(iTextBarBufferPC < iTextBarBufferPC2)
         inputTextBarBuffer.erase(inputTextBarBuffer.begin() + iTextBarBufferPC,
                                  inputTextBarBuffer.begin() + iTextBarBufferPC2);
-    else {                                                                                                      //CRASH HERE??????
+    else {                                                                                                              //CRASH HERE??????
         inputTextBarBuffer.erase(inputTextBarBuffer.begin() + iTextBarBufferPC2,
                                  inputTextBarBuffer.begin() + iTextBarBufferPC);
 

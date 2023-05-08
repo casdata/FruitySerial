@@ -60,7 +60,7 @@ typedef enum {
 } serialBaudrate;
 
 typedef enum {
-    noLine,
+    noLine = 0,
     newLine,
     carrieReturn,
     crAndLf
@@ -222,7 +222,8 @@ static const char* PARITY_ITEMS[]           = {"none", "odd", "even"};
 static const char* STOP_BITS_ITEMS[]        = {"1", "1.5", "2"};
 static const char* FLOW_CONTROL_ITEMS[]     = {"none", "software", "hardware"};
 
-static const char* EOL_ITEMS[]              = {"no line", "new line", "carriage return", "cr & lf"};
+//static const char* EOL_ITEMS[]              = {"no line", "new line", "carriage return", "cr & lf"};
+static const char* EOL_ITEMS[]              = {"0: no line", "1: LF - new line", "2: CR - carriage return", "3: CR + LF"};
 
 /*
  * noLine,

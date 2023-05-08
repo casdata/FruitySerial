@@ -155,7 +155,7 @@ int main(int, char**)
     IM_ASSERT(appData.monoFont != NULL);
 
     // Our state
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.55f, 0.55f, 0.90f, 1.00f);
 
     hud = new Hud();
@@ -443,7 +443,8 @@ int main(int, char**)
 
         //std::cout<<"-> "<<appData.appState<<std::endl;
 
-        //ImGui::ShowDemoWindow(&show_demo_window);
+        if(show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
 
         //ImGuiID dockspace_id = ImGui::GetMainViewport()->ID;
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
@@ -454,7 +455,7 @@ int main(int, char**)
             ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags | ImGuiDockNodeFlags_DockSpace);
             ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-            auto dock_id_down = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.10f, nullptr, &dockspace_id);    //0.07f
+            auto dock_id_down = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.074f, nullptr, &dockspace_id);    //0.07f
 
             ImGui::DockBuilderDockWindow("Main Window", dockspace_id);
             ImGui::DockBuilderDockWindow("InputBar", dock_id_down);
@@ -596,10 +597,23 @@ bool initSDL(){
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
+    SDL_DisplayMode dm;
+    SDL_GetCurrentDisplayMode(0, &dm);
+    std::cout<<"DisplayMode: "<<dm.w<<" "<<dm.h<<std::endl;
+
+    int testWidth = dm.w;
+    int testHeight = dm.h;
+
+    //testWidth = 1280;
+    //testHeight = 720;
+
+    FunctionTools::norm2Width(0, true, testWidth);
+    FunctionTools::norm2Height(0, true, testHeight);
+    FunctionTools::norm2HeightFloat(0, true, testHeight);
 
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);// | SDL_WINDOW_BORDERLESS);
 
-    gSplashWindow = SDL_CreateWindow("Loading", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 470, 626, window_flags | SDL_WINDOW_BORDERLESS);
+    gSplashWindow = SDL_CreateWindow("Loading", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,FunctionTools::norm2Height(470), FunctionTools::norm2Height(626), window_flags | SDL_WINDOW_BORDERLESS);
     gl_context = SDL_GL_CreateContext(gSplashWindow);
 
     //SDL_SetWindowOpacity(gSplashWindow, 0.9f);
@@ -613,6 +627,7 @@ bool initSDL(){
 
     SetLayeredWindowAttributes(hWnd,RGB(255, 255, 255),0, LWA_COLORKEY );
     */
+
 
     gWindow = SDL_CreateWindow("Fruity Serial Terminal", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, window_flags | SDL_WINDOW_HIDDEN );  //1280, 980,
     gl_context = SDL_GL_CreateContext(gWindow);
@@ -657,19 +672,7 @@ bool initSDL(){
     }
 
 
-    SDL_DisplayMode dm;
-    SDL_GetCurrentDisplayMode(0, &dm);
-    std::cout<<"DisplayMode: "<<dm.w<<" "<<dm.h<<std::endl;
 
-    int testWidth = dm.w;
-    int testHeight = dm.h;
-
-    //testWidth = 1280;
-    //testHeight = 720;
-
-    FunctionTools::norm2Width(0, true, testWidth);
-    FunctionTools::norm2Height(0, true, testHeight);
-    FunctionTools::norm2HeightFloat(0, true, testHeight);
 
 
     SDL_SetWindowMinimumSize(gWindow, 400, 300);
