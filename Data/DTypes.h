@@ -76,6 +76,13 @@ typedef enum {
     UTF_8_ESP_LOG
 } TextEncoding;
 
+typedef enum {
+    STR_TXT = 0,
+    STR_DEC,
+    STR_HEX,
+    STR_OCT
+} StrDataType;
+
 typedef struct{
     bool exitApp;
     MaximizeState maximize;
@@ -97,6 +104,7 @@ typedef struct{
     bool        cursorOverSubWinBorder;
     bool        cursorOverInputTextBar;
     ImFont*     monoFont;
+    bool        disableInBarInfoBtn;
 } AppData;
 
 typedef struct{
@@ -152,7 +160,7 @@ typedef struct{
 
 typedef struct{
     std::string str;
-    bool        simpleTxt;
+    StrDataType strDataType;
     int         mainStrIndex;
 } FormattedInputStr;
 

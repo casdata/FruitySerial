@@ -79,7 +79,8 @@ int main(int, char**)
                        IDLE,
                        false,
                        false,
-                       nullptr};
+                       nullptr,
+                       false};
     IOData ioData = {OFF, OFF, OFF, OFF,
                      OFF, OFF, OFF, OFF, OFF, OFF,
                      OFF, OFF, OFF, OFF, OFF, OFF, OFF,
@@ -722,6 +723,7 @@ void initApp(AppData* appData, MenuData* menuData) {
             createFile.put((char)0);
             createFile.put((char)0);
             createFile.put((char)1);
+            createFile.put((char)0);
             createFile.put('~');
             createFile.close();
         }
@@ -740,7 +742,7 @@ void initApp(AppData* appData, MenuData* menuData) {
 
         startAppData.read(buffer, length);
 
-        if(buffer[3] == '~'){
+        if(buffer[4] == '~'){
             if(buffer[0] == (char)1)
                 appData->disableExitMessage = true;
 
@@ -749,6 +751,9 @@ void initApp(AppData* appData, MenuData* menuData) {
 
             if(buffer[2] == (char)0)
                 menuData->titleBar = TB_2DISABLE;
+
+            if(buffer[3] == (char)1)
+                appData->disableInBarInfoBtn = true;
 
         }
 

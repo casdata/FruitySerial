@@ -128,6 +128,10 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
          static float wSizeX = FunctionTools::norm2HeightFloat(330);
          static float wSizeY = FunctionTools::norm2HeightFloat(266);
          ImGui::SetNextWindowSize(ImVec2(wSizeX, wSizeY));
+
+         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f,0.5f));
+
          ImGui::Begin(nameId.c_str(), &serialSettings, windowFlags);
 
 

@@ -84,6 +84,9 @@ private:
     GLuint lightBtn3Texture;
 
     GLuint sepTexture;
+    GLuint infoTexture;
+
+    bool inputBarInfoWindow;
 
 };
 

@@ -451,6 +451,22 @@ bool FunctionTools::increasePC2NextSpace(const std::string *strBuffer, int *pCou
     return noOutOfSizeError;
 }
 
+bool FunctionTools::increasePC2NextSpaceOrLimit(const std::string *strBuffer, int *pCounter, const int lastIndex) {
+
+    bool noOutOfSizeError = true;
+
+    while(strBuffer->at(*pCounter) != ' ' && strBuffer->at(*pCounter) != ']' ){
+        (*pCounter)++;
+
+        if(*pCounter >= lastIndex){
+            noOutOfSizeError = false;
+            break;
+        }
+    }
+
+    return noOutOfSizeError;
+}
+
 int FunctionTools::numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, const int pCounter, const int lastIndex) {
     int numOfChars = 0;
 
@@ -527,31 +543,70 @@ bool FunctionTools::isDEC_format(const std::string &strBuffer, int &pCounter, co
     else
         pCounter += nextSpace;
 
-    /*
-     * int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
 
-    if(nextSpace < 3 && nextSpace > 0){
-        isHexFormat = true;
+    return isDecFormat;
+}
+
+
+bool FunctionTools::isStartOCT_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
+
+    bool isOctFormat = false;
+
+    if(strBuffer.at(pCounter) == '0'){
+        pCounter++;
+
+        if(pCounter < lastIndex && (strBuffer.at(pCounter) == 'o' || strBuffer.at(pCounter) == 'O')){
+            int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
+
+            if(nextSpace < 5 && nextSpace > 1){
+                isOctFormat = true;
+
+                if(strBuffer.at(pCounter + nextSpace) == ' ' || strBuffer.at(pCounter + nextSpace) == ']'){
+                    pCounter++;
+
+                    for(size_t i = 0; i < (nextSpace - 1); i++){
+                        if(strBuffer.at(pCounter) < 0x30 || strBuffer.at(pCounter) > 0x37)
+                            isOctFormat = false;
+
+                        pCounter++;
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    return isOctFormat;
+}
+
+bool FunctionTools::isOCT_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
+    bool isOctFormat = false;
+
+    int nextSpace = numberOfChars2SpaceOrCloseKey(strBuffer, pCounter, lastIndex);
+
+
+    if(nextSpace > 0 && nextSpace < 5){
+        isOctFormat = true;
 
         if(strBuffer.at(pCounter + nextSpace) == ' ' || strBuffer.at(pCounter + nextSpace) == ']'){
 
             for(size_t i = 0; i < nextSpace; i++){
-                if(strBuffer.at(pCounter) < 0x30 || (strBuffer.at(pCounter) < 0x41 && strBuffer.at(pCounter) > 0x39)
-                                                    || (strBuffer.at(pCounter) > 0x46 && strBuffer.at(pCounter) < 0x61 )
-                                                    || strBuffer.at(pCounter) > 0x66)
-                    isHexFormat = false;
+                if (strBuffer.at(pCounter) < 0x30 || strBuffer.at(pCounter) > 0x37)
+                    isOctFormat = false;
 
                 pCounter++;
             }
         }
         else
             pCounter += nextSpace;
+
     }
     else
         pCounter += nextSpace;
-     */
 
-    return isDecFormat;
+
+    return isOctFormat;
 }
 
 bool FunctionTools::isStartHEX_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
@@ -622,6 +677,136 @@ bool FunctionTools::isBIN_format(const std::string *strBuffer, int *pCounter, co
     bool isBinFormat = true;
 
     return isBinFormat;
+}
+
+std::string FunctionTools::hexStr2ByteStr(const std::string &strBuffer) {
+    std::string byteStr = std::string();
+
+    int strSizeLimit = strBuffer.size();
+
+    int pCounter = 3;
+
+    int intValue = 0;
+
+
+    if(increasePC2NextSpaceOrLimit(&strBuffer, &pCounter, strSizeLimit)) {
+
+        std::string intStr = strBuffer.substr(3, (pCounter - 3));
+
+        intValue = std::stoi(intStr, 0, 16);
+        byteStr.push_back(static_cast<char>(intValue));
+
+        if(increasePC2NextChar(&strBuffer, &pCounter, strSizeLimit)) {
+
+            while (pCounter < (strSizeLimit - 1)) {
+
+                int pCounterB = pCounter;
+
+                if (increasePC2NextSpaceOrLimit(&strBuffer, &pCounterB, strSizeLimit)) {
+                    intStr = strBuffer.substr(pCounter, (pCounterB - pCounter));
+
+                    intValue = std::stoi(intStr, 0, 16);
+                    byteStr.push_back(static_cast<char>(intValue));
+
+                    pCounter = pCounterB;
+
+                    if(!increasePC2NextChar(&strBuffer, &pCounter, strSizeLimit))
+                        break;
+
+                }
+                else
+                    break;
+            }
+        }
+
+    }
+
+    return byteStr;
+}
+
+std::string FunctionTools::decStr2ByteStr(const std::string &strBuffer) {
+    std::string byteStr = std::string();
+    std::string intStr = strBuffer.substr(1, 3);
+
+    int strSizeLimit = strBuffer.size();
+
+    int pCounter = 4;
+
+    int intValue = std::stoi(intStr);
+
+    byteStr.push_back(static_cast<char>(intValue));
+
+    if(increasePC2NextChar(&strBuffer, &pCounter, strSizeLimit)) {
+
+        while (pCounter < (strSizeLimit - 1)) {
+
+            int pCounterB = pCounter;
+
+            if(increasePC2NextSpaceOrLimit(&strBuffer, &pCounterB, strSizeLimit)){
+
+                intStr = strBuffer.substr(pCounter, (pCounterB - pCounter));
+
+                intValue = std::stoi(intStr);
+                byteStr.push_back(static_cast<char>(intValue));
+
+                pCounter = pCounterB;
+
+                if(!increasePC2NextChar(&strBuffer, &pCounter, strSizeLimit))
+                    break;
+            }
+            else
+                break;
+
+        }
+
+    }
+
+    return byteStr;
+}
+
+std::string FunctionTools::octStr2ByteStr(const std::string &strBuffer) {
+    std::string byteStr = std::string();
+
+    int strSizeLimit = strBuffer.size();
+
+    int pCounter = 3;
+
+    int intValue = 0;
+
+
+    if(increasePC2NextSpaceOrLimit(&strBuffer, &pCounter, strSizeLimit)) {
+
+        std::string intStr = strBuffer.substr(3, (pCounter - 3));
+
+        intValue = std::stoi(intStr, 0, 8);
+        byteStr.push_back(static_cast<char>(intValue));
+
+        if(increasePC2NextChar(&strBuffer, &pCounter, strSizeLimit)) {
+
+            while (pCounter < (strSizeLimit - 1)) {
+
+                int pCounterB = pCounter;
+
+                if (increasePC2NextSpaceOrLimit(&strBuffer, &pCounterB, strSizeLimit)) {
+                    intStr = strBuffer.substr(pCounter, (pCounterB - pCounter));
+
+                    intValue = std::stoi(intStr, 0, 8);
+                    byteStr.push_back(static_cast<char>(intValue));
+
+                    pCounter = pCounterB;
+
+                    if(!increasePC2NextChar(&strBuffer, &pCounter, strSizeLimit))
+                        break;
+
+                }
+                else
+                    break;
+            }
+        }
+
+    }
+
+    return byteStr;
 }
 
 

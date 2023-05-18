@@ -13,6 +13,8 @@ MainWindow::MainWindow() {
     inputBarPos = ImVec2(0,0);
     inputBarSize = ImVec2(0,0);
 
+    inputBarInfoWindow = false;
+
     selectedInputText = false;
     onInputTextBar = false;
     inputBarEnabled = false;
@@ -127,10 +129,14 @@ MainWindow::MainWindow() {
     ret = FunctionTools::loadTextureFromFile("../Assets/lightbtn3.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
-
     texturePtr = &sepTexture;
     ret = FunctionTools::loadTextureFromFile("../Assets/separator.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
+
+    texturePtr = &infoTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/info.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
 
     auto* subWin = new SubWindow(windowCount);
     subWindows.push_back(subWin);
@@ -186,6 +192,178 @@ void MainWindow::draw(const double &dt, AppData &appData, SerialManager *serialM
     ImGui::End();
 
     updateAndPrintInputBar(dt, appData);
+
+    if(inputBarInfoWindow){
+
+        ImGuiWindowFlags infoWinFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+        //ImGui::SetScrollX()
+        static float wSizeX = FunctionTools::norm2HeightFloat(760);
+        static float wSizeY = FunctionTools::norm2HeightFloat(440);
+        ImGui::SetNextWindowSize(ImVec2(wSizeX, wSizeY));
+
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f,0.5f));
+
+        ImGui::Begin("Info: Send raw bytes", &inputBarInfoWindow, infoWinFlags);
+
+            ImVec4 specialCol = ImVec4(1.0f, 0.4117f, 0.2823f, 1.0f);
+            ImVec4 importantCol = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);//ImVec4(1.0f, 0.2862f, 0.1764f, 1.0f);
+            ImVec4 greenCol = ImVec4(0.0509f, 0.6666f, 0.3882f, 1.0f);
+            ImVec4 blueCol = ImVec4(0.0f, 0.0f, 0.8745f, 1.0f);
+            ImVec4 purpleCol = ImVec4(0.5803f, 0.0f, 0.8745f, 1.0f);
+
+            if(appData.uiTheme == DARK){
+                specialCol = ImVec4(1.0f, 0.4117f, 0.2823f, 1.0f);
+                greenCol = ImVec4(0.0509f, 0.8980f, 0.3882f, 1.0f);
+                blueCol = ImVec4(0.0f, 0.5098f, 1.0f, 1.0f);
+                purpleCol = ImVec4(0.5803f, 0.2666f, 1.0f, 1.0f);
+            }
+
+            ImGui::Bullet();
+            ImGui::TextColored(blueCol ,"Decimal format");
+            ImGui::Text("       Open square bracket ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" three numeric characters ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" close square bracket: [DDD]");
+
+
+            ImGui::TextColored(greenCol, "        Single byte example:");
+            ImGui::SameLine(0,0);
+            ImGui::Text("    \"This is ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(specialCol, "[097]");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" test\" => \"This is a test\"");
+
+            ImGui::TextColored(greenCol, "        Multiple byte example:");
+            ImGui::SameLine(0,0);
+            ImGui::Text("  \"");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(specialCol, "[084 104 105 115 32]");
+            ImGui::SameLine(0,0);
+            ImGui::Text("is a test\" => \"This is a test\"");
+
+
+            ImGui::NewLine();
+
+            ImGui::TextColored(importantCol, "       Important: the first byte in decimal format has to be three digits, fill with");
+            ImGui::TextColored(importantCol, "       zeros if the number is lower. Other bytes do not require zeros filling.");
+
+            ImGui::NewLine();
+            ImGui::NewLine();
+
+            ImGui::Bullet();
+            ImGui::TextColored(blueCol,"Octal format");
+            ImGui::Text("       Open square bracket ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" zero ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" letter \"o\" ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" octal characters ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" close square bracket: [0oOOO]");
+
+
+            ImGui::TextColored(greenCol, "        Single byte example:");
+            ImGui::SameLine(0,0);
+            ImGui::Text("    \"This is ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(specialCol, "[0o141]");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" test\" => \"This is a test\"");
+
+            ImGui::TextColored(greenCol, "        Multiple byte example:");
+            ImGui::SameLine(0,0);
+            ImGui::Text("  \"");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(specialCol, "[0o124 150 151 163 40]");
+            ImGui::SameLine(0,0);
+            ImGui::Text("is a test\" => \"This is a test\"");
+
+
+            ImGui::NewLine();
+            ImGui::NewLine();
+
+            ImGui::Bullet();
+            ImGui::TextColored(blueCol,"Hexadecimal format");
+            ImGui::Text("       Open square bracket ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" zero ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" letter \"x\" ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" hex characters ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(purpleCol, "+");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" close square bracket: [0xHH]");
+
+            ImGui::TextColored(greenCol, "        Single byte example:");
+            ImGui::SameLine(0,0);
+            ImGui::Text("    \"This is ");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(specialCol, "[0x61]");
+            ImGui::SameLine(0,0);
+            ImGui::Text(" test\" => \"This is a test\"");
+
+            ImGui::TextColored(greenCol, "        Multiple byte example:");
+            ImGui::SameLine(0,0);
+            ImGui::Text("  \"");
+            ImGui::SameLine(0,0);
+            ImGui::TextColored(specialCol, "[0x54 68 69 73 20]");
+            ImGui::SameLine(0,0);
+            ImGui::Text("is a test\" => \"This is a test\"");
+
+            ImGui::NewLine();
+            ImGui::NewLine();
+
+
+            bool infoBtn = appData.disableInBarInfoBtn;
+
+            ImGui::Checkbox("Hide information button", &appData.disableInBarInfoBtn);
+            if(ImGui::IsItemHovered()){
+                ImGui::BeginTooltip();
+                ImGui::Text("Hide the information button that accesses this window.");
+                ImGui::Text("Can be enabled again from the settings window.");
+                ImGui::EndTooltip();
+            }
+
+            if(infoBtn != appData.disableInBarInfoBtn){
+                char* temp = new char[1];
+
+                *(temp) = static_cast<char>(appData.disableInBarInfoBtn);
+
+                FunctionTools::replaceData2File(dataFileName, 3, 1, temp);
+
+                delete[] temp;
+
+            }
+
+
+
+        ImGui::End();
+    }
 
 }
 
@@ -383,6 +561,8 @@ void MainWindow::checkAndResizeSubWindows(bool &cursorOverWinBorder, const IODat
 
 void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData) {
 
+    bool sendData2Serial = false;
+
     static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove
                                             | ImGuiWindowFlags_NoTitleBar
                                             | ImGuiWindowFlags_NoCollapse;
@@ -496,14 +676,33 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
     ImGui::Image((void*)(intptr_t)sepTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1));
 
 
+    //Info BTN
+    if(!appData.disableInBarInfoBtn) {
+        tempWidth = FunctionTools::norm2HeightFloat(18);
+        tempX -= ((myCursorPos.x * 2) + tempWidth);
+
+        ImGui::SetCursorPos(ImVec2(tempX, myCursorPos.y));
+
+        if (inputBarInfoWindow)
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+        else
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
 
 
+        if (ImGui::ImageButton((void *) (intptr_t) infoTexture, ImVec2(tempWidth, tempHeight), ImVec2(0, 0),
+                               ImVec2(1, 1), imagePadding))
+            inputBarInfoWindow = true;
+
+        ImGui::PopStyleColor();
+    }
+
+
+    //Send BTN
 
     tempWidth = FunctionTools::norm2HeightFloat(36);
     tempX -= ((myCursorPos.x * 2) + tempWidth);
 
-    float sendBtnX = tempX;
-    ImGui::SetCursorPos(ImVec2(sendBtnX, myCursorPos.y));
+    ImGui::SetCursorPos(ImVec2(tempX, myCursorPos.y));
 
     tempTexture = lightSendTexture;
 
@@ -513,14 +712,22 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
 
     if(ImGui::ImageButton((void*)(intptr_t)tempTexture, ImVec2(tempWidth, tempHeight), ImVec2(0,0), ImVec2(1,1), imagePadding)){
+        if(inputBarEnabled && !inputTextBarBuffer.empty()){
 
+            sendData2Serial = true;
+            //serialPtr->write2Port(inputTextBarBuffer);
+
+            //if(inputBarEnabled)
+                //comboItem = static_cast<int>(serialPtr->getOutputEol());
+
+            //std::cout<<"-> "<<inputBarEnabled<<" "<<inputTextBarBuffer<<std::endl;
+        }
     }
 
     ImGui::PopStyleColor();
 
 
-
-    inputBarSize.x = sendBtnX - (myCursorPos.x * 2);
+    inputBarSize.x = tempX - (myCursorPos.x * 2);
     inputBarSize.y = FunctionTools::norm2HeightFloat(20);
 
     ImGui::SetCursorScreenPos(inputBarPos);
@@ -581,7 +788,7 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
                 tempIndex = formattedStrList.size() - 1;
                 formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC)));
-                formattedStrList.at(tempIndex)->simpleTxt = true;
+                formattedStrList.at(tempIndex)->strDataType = STR_TXT;
                 formattedStrList.at(tempIndex)->mainStrIndex = strBufferPC;
                 strBufferPC = strPC;
 
@@ -595,6 +802,7 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
                     if (FunctionTools::increasePC2NextChar(&inputTextBarBuffer, &strPC, lastIndex)) {
                         bool binaryType = false;
+                        bool octType = false;
                         bool decType = false;
                         bool hexType = false;
                         bool maskType = false;
@@ -602,6 +810,13 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
                         if ((inputTextBarBuffer.at(strPC) > 0x2F && inputTextBarBuffer.at(strPC) < 0x3A) &&
                             (strPC + 1) < lastIndex) {
                             switch (inputTextBarBuffer.at(strPC + 1)) {
+                                case 'o':
+                                case 'O':
+                                    if(FunctionTools::isStartOCT_format(inputTextBarBuffer, strPC, lastIndex)){
+                                        maskType = true;
+                                        octType = true;
+                                    }
+                                    break;
                                 case 'b':
                                 case 'B':
                                     binaryType = true;
@@ -633,6 +848,10 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
                                                 if(!FunctionTools::isDEC_format(inputTextBarBuffer, strPC, lastIndex))
                                                     maskType = false;
                                             }
+                                            if(octType){
+                                                if(!FunctionTools::isOCT_format(inputTextBarBuffer, strPC, lastIndex))
+                                                    maskType = false;
+                                            }
                                         }
                                     }
                                 }
@@ -641,7 +860,15 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
                                     tempIndex = formattedStrList.size() - 1;
                                     formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC) + 1));
-                                    formattedStrList.at(tempIndex)->simpleTxt = false;
+
+                                    if(hexType)
+                                        formattedStrList.at(tempIndex)->strDataType = STR_HEX;
+                                    else if(decType)
+                                        formattedStrList.at(tempIndex)->strDataType = STR_DEC;
+                                    else
+                                        formattedStrList.at(tempIndex)->strDataType = STR_OCT;
+
+                                    //formattedStrList.at(tempIndex)->simpleTxt = false;
                                     formattedStrList.at(tempIndex)->mainStrIndex = strBufferPC;
                                     strBufferPC = strPC;
                                     strBufferPC++;                                                                      //increase it to compensate the increase of strPC at the end off the while loop cycle
@@ -664,15 +891,45 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
         if(strPC != strBufferPC){
             tempIndex = formattedStrList.size() - 1;
             formattedStrList.at(tempIndex)->str.assign(inputTextBarBuffer.substr(strBufferPC, (strPC - strBufferPC)));
-            formattedStrList.at(tempIndex)->simpleTxt = true;
+            formattedStrList.at(tempIndex)->strDataType = STR_TXT;
             formattedStrList.at(tempIndex)->mainStrIndex = strBufferPC;
         }
 
         ImVec2 tPos = textPos;
 
+
+        if(sendData2Serial){
+            std::string strByteBuffer = std::string();
+
+            for(size_t i = 0; i < formattedStrList.size(); i++){
+
+                switch(formattedStrList.at(i)->strDataType){
+                    case STR_TXT:
+                        strByteBuffer.append(formattedStrList.at(i)->str);
+                        break;
+                    case STR_HEX:
+                        strByteBuffer.append(FunctionTools::hexStr2ByteStr(formattedStrList.at(i)->str));
+                        break;
+                    case STR_DEC:
+                        strByteBuffer.append(FunctionTools::decStr2ByteStr(formattedStrList.at(i)->str));
+                        break;
+                    case STR_OCT:
+                        strByteBuffer.append(FunctionTools::octStr2ByteStr(formattedStrList.at(i)->str));
+                        break;
+                    default:
+
+                        break;
+                }
+
+            }
+
+            serialPtr->write2Port(strByteBuffer);
+        }
+
+
         for(size_t i = 0; i < formattedStrList.size(); i++){
 
-            if(formattedStrList.at(i)->simpleTxt){
+            if(formattedStrList.at(i)->strDataType == STR_TXT){
                 if (appData.uiTheme == DARK)
                     tColor = IM_COL32_WHITE;
                 else
@@ -688,7 +945,6 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
             }
 
             else{
-
                 if(appData.uiTheme == DARK)
                     tColor = DARK_SPECIAL_INPUT;
                 else

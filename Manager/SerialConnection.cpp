@@ -536,6 +536,9 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                                     case 31:
                                         FunctionTools::printSpecialUTF8("US", uiTheme, postBuffActive, postBuff);
                                         break;
+                                    case 127:
+                                        FunctionTools::printSpecialUTF8("DEL", uiTheme, postBuffActive, postBuff);
+                                        break;
                                     default:
                                         postBuff.push_back(*strIt);
                                         postBuffActive = true;
@@ -690,6 +693,17 @@ void SerialConnection::checkAndReadPort(ClockTime *clockTime) {
 
 void SerialConnection::write2Port(const std::string &data) {
 
+    /*
+    std::string testo = "";
+    testo.append("Hello");
+    testo.push_back((char)4);
+    testo.push_back((char)127);
+    testo.append(" and ");
+    testo.push_back((char)13);
+    testo.append(" no more :)");
+    */
+
+    mySerial->write(data);
 }
 
 
