@@ -11,6 +11,7 @@
 #include "DTypes.h"
 #include "SerialManager.h"
 #include "UndoRedo.h"
+#include "SendLog.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -68,6 +69,7 @@ private:
     float selectedInputP1_x;
 
     UndoRedo* undoRedo;
+    SendLog* sendLog;
 
     GLuint lightSendTexture;
     GLuint darkSendTexture;
@@ -87,6 +89,7 @@ private:
     GLuint infoTexture;
 
     bool inputBarInfoWindow;
+    bool send2SerialEnter;
 
 };
 

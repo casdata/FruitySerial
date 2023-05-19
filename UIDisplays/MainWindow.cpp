@@ -30,6 +30,8 @@ MainWindow::MainWindow() {
     selectedInputP0_x = 0;
     selectedInputP1_x = 0;
 
+    send2SerialEnter = false;
+
     GLuint *texturePtr = &TabSerialWindow::timestampTexture;
 
     bool ret = FunctionTools::loadTextureFromFile("../Assets/timestamp.png", texturePtr, &imageWidth, &imageHeight);
@@ -145,6 +147,7 @@ MainWindow::MainWindow() {
     resizingWindowIndex = -1;
 
     undoRedo = new UndoRedo;
+    sendLog = new SendLog();
 }
 
 
@@ -377,6 +380,8 @@ MainWindow::~MainWindow() {
 
     delete undoRedo;
 
+    delete sendLog;
+
 }
 
 int MainWindow::getFocusedSubWinIndex() {
@@ -561,7 +566,7 @@ void MainWindow::checkAndResizeSubWindows(bool &cursorOverWinBorder, const IODat
 
 void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData) {
 
-    bool sendData2Serial = false;
+    bool sendData2Serial = send2SerialEnter;
 
     static ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove
                                             | ImGuiWindowFlags_NoTitleBar
@@ -899,6 +904,8 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
 
 
         if(sendData2Serial){
+            send2SerialEnter = false;
+
             std::string strByteBuffer = std::string();
 
             for(size_t i = 0; i < formattedStrList.size(); i++){
@@ -924,6 +931,19 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
             }
 
             serialPtr->write2Port(strByteBuffer);
+
+            sendLog->addNewLog(inputTextBarBuffer);
+
+            inputTextBarBuffer.clear();
+
+            caretCurrentTime = 0;
+            iTextBarBufferPC = 0;
+            iTextBarBufferPC2 = 0;
+            caretXPos = 0;
+            iBarOffsetX = 0;
+
+            selectedInputP0_x = 0;
+            selectedInputP1_x = 0;
         }
 
 
@@ -1059,6 +1079,7 @@ void MainWindow::checkMouseInsideInputTextBar(AppData &appdata, const IOData &io
 
 void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const IOData &ioData) {
 
+    bool overdriveEndBtn = false;
     static bool moveChange = false;
     static bool inputBarPressed = false;
     static bool selectWord = false;
@@ -1465,6 +1486,18 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
             }
         }
 
+        if(ioData.keyUp == DOWN && sendLog->dataOnLogList()){
+            inputTextBarBuffer.clear();
+            inputTextBarBuffer.assign(*sendLog->getPreviousLog());
+            overdriveEndBtn = true;
+        }
+
+        if(ioData.keyDown == DOWN && sendLog->dataOnLogList()){
+            inputTextBarBuffer.clear();
+            inputTextBarBuffer.assign(*sendLog->getNextLog());
+            overdriveEndBtn = true;
+        }
+
         if(ioData.keyLeft == DOWN){
             ImGui::SetKeyboardFocusHere();
 
@@ -1612,7 +1645,7 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
             }
         }
 
-        if(ioData.keyEnd == DOWN) {
+        if(ioData.keyEnd == DOWN || overdriveEndBtn) {
             if(ioData.keyR_Shift == ON || ioData.keyL_Shift == ON){
                 if(!selectedInputText){
                     selectedInputText = true;
@@ -1676,6 +1709,11 @@ void MainWindow::checkInputTextBarIO(const double &dt, AppData &appdata, const I
                     updateCaretPos = true;
                 }
             }
+        }
+
+        if(ioData.keyEnter == DOWN){
+            if(inputBarEnabled && !inputTextBarBuffer.empty())
+                send2SerialEnter = true;
         }
 
 
