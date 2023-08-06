@@ -18,7 +18,7 @@ find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 
-add_subdirectory(serial)
+add_subdirectory(Serial)
 
 add_library(imgui
         ${imgui_SOURCE_DIR}/imgui.cpp
@@ -83,6 +83,6 @@ target_link_libraries(${PROJECT_NAME}
                         ${SDL2_IMAGE_LIBRARY}
                         imgui
                         serial
-                        mingw32
+                        #mingw32
                         )
 

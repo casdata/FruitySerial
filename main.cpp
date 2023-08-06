@@ -145,13 +145,14 @@ int main(int, char**)
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     //io.Fonts->AddFontDefault();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/ProggyClean.ttf", FunctionTools::norm2HeightFloat(14.0f));
+    //io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/ProggyClean.ttf", FunctionTools::norm2HeightFloat(14.0f));    //win
+    io.Fonts->AddFontFromFileTTF("../imGui/misc/fonts/ProggyClean.ttf", FunctionTools::norm2HeightFloat(14.0f));
     //io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* monoFont = io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/JetBrainsMono-Regular.ttf", 16.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/Osaka Regular-Mono.otf", 16.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    appData.monoFont = io.Fonts->AddFontFromFileTTF("../imgui/misc/fonts/JetBrainsMono-Regular.ttf", FunctionTools::norm2HeightFloat(16.0f), NULL, io.Fonts->GetGlyphRangesJapanese());
+    appData.monoFont = io.Fonts->AddFontFromFileTTF("../imGui/misc/fonts/JetBrainsMono-Regular.ttf", FunctionTools::norm2HeightFloat(16.0f), NULL, io.Fonts->GetGlyphRangesJapanese());
 
     IM_ASSERT(appData.monoFont != NULL);
 
