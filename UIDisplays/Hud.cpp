@@ -149,26 +149,47 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
 
+        static bool fileBtnSelected = false;
+        static bool editBtnSelected = false;
+        static bool helpBtnSelected = false;
 
         if(menuShown) {
+
+            bool fileState = false;
+            bool editState = false;
+            bool helpState = false;
 
             ImGui::PopStyleColor();
 
             ImVec2 tempPos = ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31));
             ImGui::SetNextWindowPos(tempPos);
 
-            if(ImGui::Button("File")) {
-                //ImGui::CloseCurrentPopup();
-                //menuShown = false;
-                //std::cout<<"File pressed!"<<std::endl;
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+
+            if(fileBtnSelected) {
+                ImGui::PopStyleColor();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+            }
+
+            if(ImGui::Button("File")){
+
             }
 
             if(ioData.mouseCursorPositionRaw.x > tempPos.x && ioData.mouseCursorPositionRaw.x < ImGui::GetCursorScreenPos().x
                && (ioData.mouseCursorPositionRaw.y > ImGui::GetWindowViewport()->Pos.y && ioData.mouseCursorPositionRaw.y < tempPos.y)){
-
+                if(!fileState){
+                    ImGui::CloseCurrentPopup();
+                    ImGui::OpenPopup("fileMenu");
+                }
             }
 
 
+            if(ImGui::IsPopupOpen("fileMenu")) {
+                fileState = true;
+                fileBtnSelected = true;
+                editBtnSelected = false;
+                helpBtnSelected = false;
+            }
 
             if(ImGui::BeginPopup("fileMenu")){
 
@@ -219,21 +240,37 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
                 ImGui::EndPopup();
             }
 
-            //std::cout<<"-> "<<ImGui::IsItemActivated()<<" "<<ImGui::IsItemActive()<<" "<<ImGui::IsItemDeactivated()<<" "<<ImGui::IsItemFocused()<<std::endl;
-
-
             tempPos = ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31));
             ImGui::SetNextWindowPos(tempPos);
 
 
-            if(ImGui::Button("Edit"))
-                ImGui::OpenPopup("editMenu");
+            if(editBtnSelected) {
+                ImGui::PopStyleColor();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+            }
+            else {
+                ImGui::PopStyleColor();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+            }
 
-            if(ioData.mouseCursorPositionRaw.x > tempPos.x && ioData.mouseCursorPositionRaw.x < ImGui::GetCursorScreenPos().x
-               && (ioData.mouseCursorPositionRaw.y > ImGui::GetWindowViewport()->Pos.y && ioData.mouseCursorPositionRaw.y < tempPos.y)){
+            if(ImGui::Button("Edit")){
 
             }
 
+            if(ioData.mouseCursorPositionRaw.x > tempPos.x && ioData.mouseCursorPositionRaw.x < ImGui::GetCursorScreenPos().x
+               && (ioData.mouseCursorPositionRaw.y > ImGui::GetWindowViewport()->Pos.y && ioData.mouseCursorPositionRaw.y < tempPos.y)){
+                if(!editState){
+                    ImGui::CloseCurrentPopup();
+                    ImGui::OpenPopup("editMenu");
+                }
+            }
+
+            if(ImGui::IsPopupOpen("editMenu")) {
+                editState = true;
+                fileBtnSelected = false;
+                editBtnSelected = true;
+                helpBtnSelected = false;
+            }
 
             if(ImGui::BeginPopup("editMenu")){
 
@@ -258,15 +295,35 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
             tempPos = ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31));
             ImGui::SetNextWindowPos(tempPos);
 
-            if(ImGui::Button("Help")) {
-                ImGui::OpenPopup("helpMenu");
+            if(helpBtnSelected) {
+                ImGui::PopStyleColor();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
             }
+            else {
+                ImGui::PopStyleColor();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+            }
+
+            if(ImGui::Button("Help")){
+
+            }
+
+            ImGui::PopStyleColor();
 
             if(ioData.mouseCursorPositionRaw.x > tempPos.x && ioData.mouseCursorPositionRaw.x < ImGui::GetCursorScreenPos().x
                && (ioData.mouseCursorPositionRaw.y > ImGui::GetWindowViewport()->Pos.y && ioData.mouseCursorPositionRaw.y < tempPos.y)){
-
+                if(!helpState){
+                    ImGui::CloseCurrentPopup();
+                    ImGui::OpenPopup("helpMenu");
+                }
             }
 
+            if(ImGui::IsPopupOpen("helpMenu")) {
+                helpState = true;
+                fileBtnSelected = false;
+                editBtnSelected = false;
+                helpBtnSelected = true;
+            }
 
             if(ImGui::BeginPopup("helpMenu")){
 
@@ -282,102 +339,23 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
                 ImGui::EndPopup();
             }
 
+            if(!fileState && !editState && !helpState)
+                menuShown = false;
 
-
-
-            /*
-            if (ImGui::BeginMenu("File")) {
-
-                ImGui::Spacing();
-
-                int uIconSize = FunctionTools::norm2Height(11);
-
-                ImGui::Image((void *) (intptr_t) uNewBtnTexture, ImVec2(uIconSize, uIconSize));
-                ImGui::SameLine();
-
-                if (ImGui::MenuItem("New", "Ctrl + n")) {
-
-                }
-                ImGui::Spacing();
-                ImGui::Spacing();
-
-                ImGui::Image((void *) (intptr_t) uOpenBtnTexture, ImVec2(uIconSize, uIconSize));
-                ImGui::SameLine();
-                if (ImGui::MenuItem("Open", "Ctrl + o")) {
-
-                }
-                ImGui::Spacing();
-                ImGui::Spacing();
-
-                ImGui::Image((void *) (intptr_t) uSaveBtnTexture, ImVec2(uIconSize, uIconSize));
-                ImGui::SameLine();
-                if (ImGui::MenuItem("Save", "Ctrl + s")) {
-
-                }
-                ImGui::Spacing();
-                ImGui::Spacing();
-
-                ImGui::Image((void *) (intptr_t) uSaveAsBtnTexture, ImVec2(uIconSize, uIconSize));
-                ImGui::SameLine();
-                if (ImGui::MenuItem("Save As", "Ctrl + Alt + s")) {
-
-                }
-                ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::Spacing();
-
-                ImGui::Image((void *) (intptr_t) uEmptyBtnTexture, ImVec2(uIconSize, uIconSize));
-                ImGui::SameLine();
-                if (ImGui::MenuItem("Exit", "Alt + F4")) {
-                    menuData.exitApp = true;
-                }
-
-                ImGui::EndMenu();
+            if(ImGui::IsKeyPressed(ImGuiKey_Escape)){
+                ImGui::CloseCurrentPopup();
+                menuShown = false;
             }
-            ImGui::Spacing();
-            ImGui::Spacing();
-
-            if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::BeginMenu("Connections")) {
-
-                    if (ImGui::MenuItem("One")) {
-
-                    }
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    if (ImGui::MenuItem("Two")) {
-
-                    }
-                    ImGui::Spacing();
-
-                    ImGui::EndMenu();
-                }
-
-                ImGui::EndMenu();
-            }
-
-            ImGui::Spacing();
-            ImGui::Spacing();
-
-            if (ImGui::BeginMenu("Help")) {
-                if (ImGui::MenuItem("Help")) {
-
-                }
-                ImGui::Spacing();
-                ImGui::Spacing();
-                if (ImGui::MenuItem("About")) {
-
-                }
-                ImGui::EndMenu();
-            }
-
-            ImGui::Spacing();
-            */
 
             ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
 
         }
         else{
+
+            fileBtnSelected = false;
+            editBtnSelected = false;
+            helpBtnSelected = false;
+
             if(ImGui::ImageButton((void*)(intptr_t)texture, ImVec2(iconSize,iconSize), ImVec2(0,0), ImVec2(1,1), imagePadding)) {
                 menuShown = true;
                 ImGui::OpenPopup("fileMenu");
