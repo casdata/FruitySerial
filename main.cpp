@@ -157,7 +157,7 @@ int main(int, char**)
     IM_ASSERT(appData.monoFont != NULL);
 
     // Our state
-    bool show_demo_window = false;
+    bool show_demo_window = true;
     ImVec4 clear_color = ImVec4(0.55f, 0.55f, 0.90f, 1.00f);
 
     hud = new Hud();

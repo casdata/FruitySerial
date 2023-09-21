@@ -60,8 +60,85 @@ void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
 
                     if (serialManager->anyPortAvailable()) {
 
-                        size_t i = 0;
+                        bool selectIt = false;
+                        int baudrateIndex = 4;
+                        int textEncoding = 5;
+
+                        size_t baudIndex = 0;
+                        size_t textEnIndex = 0;
                         for (const auto& port: serialManager->getAvailablePortList()) {
+                            if(ImGui::BeginMenu(port.c_str())){
+
+                                if(ImGui::Selectable("Ok"))
+                                    selectIt = true;
+
+                                ImGui::Spacing();
+
+                                if(ImGui::BeginMenu("Baudrate")){
+                                    baudIndex = 0;
+                                    for(auto baudItem : BAUDRATE_ITEMS){
+                                        if(ImGui::BeginMenu(baudItem)){
+
+                                            if(ImGui::Selectable("Ok")) {
+                                                baudrateIndex = baudIndex;
+                                                selectIt = true;
+                                            }
+
+                                            ImGui::Spacing();
+
+                                            if(ImGui::BeginMenu("Text Encoding")){
+                                                textEnIndex = 0;
+                                                for(auto textEnco : TXT_ENCODING_ITEMS){
+                                                    if(ImGui::Selectable(textEnco)){
+                                                        baudrateIndex = baudIndex;
+                                                        textEncoding = textEnIndex;
+                                                        selectIt = true;
+                                                    }
+                                                    ImGui::Spacing();
+                                                    textEnIndex++;
+                                                }
+
+                                                ImGui::EndMenu();
+                                            }
+
+                                            ImGui::EndMenu();
+                                        }
+                                        ImGui::Spacing();
+                                        baudIndex++;
+                                    }
+
+                                    ImGui::EndMenu();
+                                }
+
+                                ImGui::EndMenu();
+
+                                if(selectIt){
+                                    std::cout<<"-> "<<baudrateIndex<<std::endl;
+                                    SerialPortData *serialPtr = serialManager->getSerialPortDataByPortName(port);
+                                    if(serialPtr != nullptr) {
+                                        SerialConnection *serialConnection = serialManager->newSerialConnection(port);
+                                        serialConnection->setBaudrate(static_cast<serialBaudrate>(baudrateIndex));
+                                        serialConnection->setTextEnconding(static_cast<TextEncoding>(textEncoding));
+                                        addTabPortConnection(serialPtr, serialConnection);
+                                    }
+
+                                    break;
+                                }
+
+                                /*
+                                SerialPortData *serialPtr = serialManager->getSerialPortDataByPortName(port);
+                                if(serialPtr != nullptr) {
+                                    SerialConnection *serialConnection = serialManager->newSerialConnection(port);
+                                    addTabPortConnection(serialPtr, serialConnection);
+                                }
+
+                                break;
+                                */
+                            }
+
+
+
+                            /*
                             if (ImGui::Selectable(port.c_str())) {
                                 SerialPortData *serialPtr = serialManager->getSerialPortDataByPortName(port);
                                 if(serialPtr != nullptr) {
@@ -71,8 +148,8 @@ void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
 
                                 break;
                             }
+                            */
                             ImGui::Spacing();
-                            i++;
                         }
                     }
                 }
