@@ -37,6 +37,9 @@ Hud::Hud() {
     ret = FunctionTools::loadTextureFromFile("../Assets/saveBtn.png", &saveBtnTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    ret = FunctionTools::loadTextureFromFile("../Assets/rewindBtn.png", &rewindTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
     ret = FunctionTools::loadTextureFromFile("../Assets/uNewBtn.png", &uNewBtnTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
@@ -84,7 +87,7 @@ Hud::Hud() {
 
 
 
-void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
+void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
 
     static bool menuShown = false;
 
@@ -384,6 +387,14 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, const IOData &ioData) {
 
             }
 
+            if (ImGui::ImageButton((void *) (intptr_t) rewindTexture, ImVec2(iconSize, iconSize), ImVec2(0,0),
+                                   ImVec2(1,1), imagePadding)){
+                appData.appState = REWIND;
+
+                ioData.rewindPorts.clear();
+
+            }
+
         }
 
 
@@ -597,8 +608,13 @@ bool Hud::closeAppDialog(AppData &appFlags){
 }
 
 
-void Hud::update(const double &dt, const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager) {
+void Hud::update(const double &dt, const MenuData &menuFlags, AppData &appData, IOData &ioData, SerialManager *serialManager) {
     mainWin->update(dt, appData, ioData, serialManager);
+
+    if(appData.appState == REWIND) {
+        rewindSessionDialog(appData, ioData);
+    }
+
 }
 
 
@@ -606,6 +622,67 @@ void Hud::drawMainWin(const double &dt, AppData &appData, SerialManager *serialM
 
     mainWin->draw(dt, appData, serialManager);
 
+}
+
+void Hud::rewindSessionDialog(AppData &appData, IOData &ioData){
+
+    ImGui::OpenPopup("Rewind session");
+
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f,0.5f));
+
+
+    if(ImGui::BeginPopup("Rewind session", NULL)){
+
+        float imageSize = FunctionTools::norm2HeightFloat(40);
+
+        ImGui::Image((void*)(intptr_t)rewindTexture, ImVec2(imageSize, imageSize));
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();
+        ImGui::Text("Rewind to previous session?");
+        ImGui::Spacing();
+
+        for(std::string mystr : ioData.rewindPorts){
+            ImGui::Text(mystr.c_str());
+            ImGui::Spacing();
+        }
+
+        ImGui::EndGroup();
+
+        ImGui::Separator();
+
+
+        ImGuiStyle &style = ImGui::GetStyle();
+
+
+        float posX = ImGui::GetWindowWidth() - style.ItemSpacing.x;
+        posX -= (FunctionTools::norm2Height(180) + style.ItemSpacing.x);
+
+        ImGui::SetCursorPosX(posX);
+
+        int newXValue = FunctionTools::norm2Height(90);
+
+        if(ImGui::Button("YES", ImVec2(newXValue, 0))){
+
+
+            ImGui::CloseCurrentPopup();
+        }
+
+
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if(ImGui::Button("NO", ImVec2(newXValue, 0))){
+
+            appData.appState = IDLE;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+
+    }
 }
 
 

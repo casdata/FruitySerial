@@ -19,6 +19,8 @@ SerialConnection::SerialConnection(const std::string &port) {
     scroll2Bottom = false;
     autoScroll = true;
     listening = true;
+
+    save2binFile();
 }
 
 std::string SerialConnection::getPortName() {
@@ -704,6 +706,51 @@ void SerialConnection::write2Port(const std::string &data) {
     */
 
     mySerial->write(data);
+}
+
+
+void SerialConnection::save2binFile(){
+    std::fstream startPortSaveData(portTempSaveFileName, std::ios::out | std::ios::in);
+
+    if(startPortSaveData.is_open()){
+        startPortSaveData.seekg(0, startPortSaveData.end);
+        int length = startPortSaveData.tellg();
+        startPortSaveData.seekg(0, startPortSaveData.beg);
+
+        int portIndex = -1;
+
+        if(length > 0){
+            char* preBuffer = new char [length];
+
+            startPortSaveData.read(preBuffer, length);
+
+            int innerPC = 0;
+            for(size_t i = 0; i < length; i++){
+                if(preBuffer[i] == '>'){
+                    innerPC = i + 1;
+                    break;
+                }
+            }
+
+        }
+        else {
+            startPortSaveData.put('>');
+            startPortSaveData.write(portName.c_str(), portName.length());
+            startPortSaveData.put(':');
+            startPortSaveData.put(static_cast<char>(mySerial->getBaudrate()));
+            startPortSaveData.put(static_cast<char>(mySerial->getBytesize()));
+            startPortSaveData.put(static_cast<char>(mySerial->getParity()));
+            startPortSaveData.put(static_cast<char>(mySerial->getStopbits()));
+            startPortSaveData.put(static_cast<char>(mySerial->getFlowcontrol()));
+            startPortSaveData.put(static_cast<char>(inputEolType));
+            startPortSaveData.put(static_cast<char>(outputEolType));
+            startPortSaveData.put(static_cast<char>(textEncoding));
+            startPortSaveData.put(static_cast<int>(timeStamp));
+        }
+
+
+    }
+
 }
 
 

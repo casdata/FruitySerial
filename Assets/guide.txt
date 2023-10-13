@@ -1,0 +1,13 @@
+portsSave file structure
+>       port delimeter
+pn      port name
+:       end port name
+br      baudRate byte (index)
+bs      byteSize byte (index)
+pa      parity byte (index)
+sb      stopbit byte (index)
+fc      flowcontrol byte (index)
+ieol    input eol byte (index)
+oeol    output eol byte (index)
+te      text encoding byte (index)
+ts      time stamp bool 0 - 1

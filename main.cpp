@@ -89,6 +89,8 @@ int main(int, char**)
 
     UI_Theme myUITheme = LIGHT;
 
+
+
     if(!initSDL())
         return -1;
 
@@ -395,10 +397,6 @@ int main(int, char**)
 
                 }
             }
-
-
-
-
 
         }
 
@@ -726,6 +724,18 @@ void initApp(AppData* appData, MenuData* menuData) {
             createFile.put((char)1);
             createFile.put((char)0);
             createFile.put('~');
+            createFile.close();
+        }
+    }
+
+    std::ifstream portReadFile(portTempSaveFileName);
+
+    if(portReadFile.is_open())
+        portReadFile.close();
+    else{
+        std::ofstream createFile(portTempSaveFileName);
+
+        if(createFile.is_open()) {
             createFile.close();
         }
     }

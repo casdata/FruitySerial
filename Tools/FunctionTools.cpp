@@ -811,7 +811,34 @@ std::string FunctionTools::octStr2ByteStr(const std::string &strBuffer) {
 
 
 
+int FunctionTools::strMatchInBuffer(const char* innerBuffer, const int length, const std::string &strReference){
+    int foundIndex = -1;
 
+    size_t i = 0, j = -1;
+    while(i < length){
+        if(innerBuffer[i] == '>'){
+            j = i + 1;
+        }
+        else if(innerBuffer[i] == ':' && j != -1){
+            char* subStr = new char[i - j];
+            //strReference.compare()
+
+            delete[] subStr;
+        }
+
+        i++;
+    }
+
+    /*
+    size_t j = 0;
+    for(size_t i = 0; i < length; i++){
+        if(innerBuffer[i] == '>'){
+
+        }
+    }*/
+
+    return foundIndex;
+}
 
 
 

@@ -154,20 +154,27 @@ MainWindow::MainWindow() {
 
 void MainWindow::update(const double &dt, AppData &appdata, const IOData &ioData, SerialManager *serialManager) {
 
-    checkAndSplitWindow(appdata.windowCount);
 
-    if(appdata.appState == IDLE) {
-        checkClickAndFocus(ioData, appdata.appState);
-        checkAndResizeSubWindows(appdata.cursorOverSubWinBorder, ioData);
+    switch(appdata.appState){
+        case IDLE:
+            checkAndSplitWindow(appdata.windowCount);
 
-        for(auto* subWin : subWindows)
-            subWin->update(ioData, serialManager);
+            checkClickAndFocus(ioData, appdata.appState);
+            checkAndResizeSubWindows(appdata.cursorOverSubWinBorder, ioData);
+
+            for(auto* subWin : subWindows)
+                subWin->update(ioData, serialManager);
+
+            checkMouseInsideInputTextBar(appdata, ioData);
+
+            checkInputTextBarIO(dt, appdata, ioData);
+
+            break;
+        case REWIND:
+
+
+            break;
     }
-
-
-    checkMouseInsideInputTextBar(appdata, ioData);
-
-    checkInputTextBarIO(dt, appdata, ioData);
 
 
 }

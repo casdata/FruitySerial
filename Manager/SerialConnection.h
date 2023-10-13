@@ -76,6 +76,7 @@ public:
 private:
 
     void checkAndReadPort(ClockTime *clockTime);
+    void save2binFile();
     //void printUtf8Line(char std::string& )
 
     std::string portName;

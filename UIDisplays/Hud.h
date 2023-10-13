@@ -30,17 +30,18 @@ class Hud {
 public:
     explicit Hud();
 
-    void menuBar(MenuData &menuData, AppData &appData, const IOData &ioData);
+    void menuBar(MenuData &menuData, AppData &appData, IOData &ioData);
     void statusBar();
     bool closeAppDialog(AppData &appFlags);
 
-    void update(const double &dt, const MenuData &menuFlags, AppData &appData, const IOData &ioData, SerialManager *serialManager);
+    void update(const double &dt, const MenuData &menuFlags, AppData &appData, IOData &ioData, SerialManager *serialManager);
 
     void drawMainWin(const double &dt, AppData &appData, SerialManager *serialManager);
 
     virtual ~Hud();
 
 private:
+    void rewindSessionDialog(AppData &appData, IOData &ioData);
 
     MainWindow* mainWin;
 
@@ -51,6 +52,7 @@ private:
     GLuint openBtnTexture = 0;
     GLuint saveAsBtnTexture = 0;
     GLuint saveBtnTexture = 0;
+    GLuint rewindTexture = 0;
     GLuint sunBtnTexture = 0;
     GLuint moonBtnTexture = 0;
     GLuint withBarTexture = 0;

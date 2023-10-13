@@ -51,6 +51,9 @@ public:
     static std::string hexStr2ByteStr(const std::string &strBuffer);
     static std::string decStr2ByteStr(const std::string &strBuffer);
     static std::string octStr2ByteStr(const std::string &strBuffer);
+    static int strMatchInBuffer(const char* innerBuffer, const int length, const std::string &strReference);
+
+    //static bool updatePortSave2File(const std::string &portName, const int baudrateIndex, const int txtEncoding, )
 };
 
 

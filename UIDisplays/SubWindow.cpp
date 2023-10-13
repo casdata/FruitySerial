@@ -120,6 +120,7 @@ void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
                                         serialConnection->setBaudrate(static_cast<serialBaudrate>(baudrateIndex));
                                         serialConnection->setTextEnconding(static_cast<TextEncoding>(textEncoding));
                                         addTabPortConnection(serialPtr, serialConnection);
+
                                     }
 
                                     break;

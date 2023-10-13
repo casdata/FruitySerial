@@ -9,7 +9,7 @@
 
 typedef enum {DARK, CLASSIC, LIGHT} UI_Theme;
 typedef enum {OFF, DOWN, UP, ON} BtnState;
-typedef enum {IDLE, SAVE, LOAD, MENU} AppState;
+typedef enum {IDLE, SAVE, LOAD, MENU, REWIND} AppState;
 typedef enum {DISABLE, EN_TIME} TimeStamp;
 typedef enum {TB_2DISABLE, TB_DISABLE, TB_2ENABLE, TB_ENABLE} TitleBar;
 typedef enum {SET_2MAXIMIZE, MAXIMIZE, SET_2NORMAL, NORMAL} MaximizeState;
@@ -136,6 +136,7 @@ typedef struct{
     std::string copyBuffer;
     ImVec2      mouseCursorPosition;
     ImVec2      mouseCursorPositionRaw;
+    std::vector<std::string> rewindPorts;
 } IOData;
 
 
@@ -168,6 +169,7 @@ typedef struct{
 
 
 const char* const dataFileName = "data.bin";
+const char* const portTempSaveFileName = "portsSave.bin";
 
 static const float LEGACY_WIDTH = 1920.0f;
 static const float LEGACY_HEIGHT = 1080.0f;
