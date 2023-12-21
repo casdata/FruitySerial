@@ -661,8 +661,8 @@ bool initSDL(){
             if(!(IMG_Init(imgFlags) & imgFlags))
                 std::cout<<"SDL_image could not initialize!"<<std::endl;
             else{
-                gSplashSurface = SDL_GetWindowSurface(gSplashWindow);
-                SDL_BlitSurface(pngSplashSurface, nullptr, gSplashSurface, nullptr);
+                //gSplashSurface = SDL_GetWindowSurface(gSplashWindow);                                                 //COMMENT IN ORDER TO WORK WITH ARCH LINUX
+                //SDL_BlitSurface(pngSplashSurface, nullptr, gSplashSurface, nullptr);
             }
 
         }

@@ -83,6 +83,6 @@ target_link_libraries(${PROJECT_NAME}
                         ${SDL2_IMAGE_LIBRARY}
                         imgui
                         serial
-                        mingw32
+                        #mingw32
                         )
 

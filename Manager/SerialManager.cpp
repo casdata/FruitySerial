@@ -89,7 +89,7 @@ std::vector<std::string> SerialManager::getAvailablePortList() {
     std::vector<std::string> availablePortsList;
 
     for(auto* serialPortData : portsDataList){
-        if(!serialPortData->used && serialPortData->enable)
+        if(!serialPortData->used && serialPortData->enable && serialPortData->portInfo.hardware_id.compare("n/a"))
             availablePortsList.push_back(serialPortData->portInfo.port);
     }
 
