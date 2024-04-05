@@ -159,7 +159,7 @@ int main(int, char**)
     IM_ASSERT(appData.monoFont != NULL);
 
     // Our state
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.55f, 0.55f, 0.90f, 1.00f);
 
     hud = new Hud();
@@ -488,8 +488,6 @@ int main(int, char**)
 
         hud->drawMainWin(deltaTime, appData, serialManager);
 
-        //ImGui::ShowDemoWindow();  //5tat
-
         clockTime->update();
         serialManager->update();
 
@@ -661,8 +659,8 @@ bool initSDL(){
             if(!(IMG_Init(imgFlags) & imgFlags))
                 std::cout<<"SDL_image could not initialize!"<<std::endl;
             else{
-                //gSplashSurface = SDL_GetWindowSurface(gSplashWindow);                                                 //COMMENT IN ORDER TO WORK WITH ARCH LINUX
-                //SDL_BlitSurface(pngSplashSurface, nullptr, gSplashSurface, nullptr);
+                gSplashSurface = SDL_GetWindowSurface(gSplashWindow);                                                 //COMMENT IN ORDER TO WORK WITH ARCH LINUX
+                SDL_BlitSurface(pngSplashSurface, nullptr, gSplashSurface, nullptr);
             }
 
         }

@@ -66,9 +66,7 @@ add_executable(FruitySerial main.cpp
                             Manager/SerialManager.h
                             Manager/SerialConnection.cpp
                             Manager/SerialConnection.h
-                            Data/LineData.cpp
-                            Data/LineData.h
-                            Tools/ClockTime.cpp
+        Tools/ClockTime.cpp
                             Tools/ClockTime.h
                             Tools/UndoRedo.cpp
                             Tools/UndoRedo.h

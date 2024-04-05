@@ -15,10 +15,10 @@ SerialConnection::SerialConnection(const std::string &port) {
 
     timeStamp = DISABLE;
     textEncoding = UTF_8_SPECIAL;
+    fruits = WITH_FRUITS;
 
     scroll2Bottom = false;
     autoScroll = true;
-    listening = true;
 
     save2binFile();
 }
@@ -40,14 +40,6 @@ void SerialConnection::closeConnection() {
 
 bool SerialConnection::isConnectionOpen() {
     return mySerial->isOpen();
-}
-
-void SerialConnection::swapListening() {
-    listening = !listening;
-}
-
-bool SerialConnection::isListening() {
-    return listening;
 }
 
 
@@ -174,6 +166,22 @@ TextEncoding SerialConnection::getTextEncoding() {
     return textEncoding;
 }
 
+void SerialConnection::setFruits(Fruits myFruits){
+    this->fruits = myFruits;
+}
+
+Fruits SerialConnection::getFruits(){
+    return fruits;
+}
+
+bool SerialConnection::areFruitsEnabled(){
+    return fruits == WITH_FRUITS;
+}
+
+void SerialConnection::swapFruits(){
+    fruits = fruits == WITH_FRUITS ? NO_FRUITS : WITH_FRUITS;
+}
+
 void SerialConnection::setTimeStamp(bool state) {
     timeStamp = state ? EN_TIME : DISABLE;
 }
@@ -183,7 +191,7 @@ void SerialConnection::swapTimeStamp() {
 }
 
 bool SerialConnection::isTimeStampEnabled() {
-    return timeStamp == EN_TIME ? true : false;
+    return timeStamp == EN_TIME;
 }
 
 bool SerialConnection::getScroll2Bottom() {
@@ -226,10 +234,15 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
     ImGuiListClipper clipper;
 
+    bool inColor = false;
+    ImU32 txtColor = 0;
+    ImU32 previousTxtColor = 0;
+
     clipper.Begin(dataLines.size());
 
     while(clipper.Step()){
-        for(int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++){
+        for(int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++){                                                 //for each line
+
             if(!(dataLines.at(i)).empty()) {
                 preBuff.assign(dataLines.at(i));
 
@@ -430,18 +443,110 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                     ImGui::NewLine();
                 }
-                else{
+                else {
 
                     bool postBuffActive = false;
 
-                    for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++){
+                    for (strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++) {
 
-                        switch(textEncoding){
+                        switch (textEncoding) {
                             case UTF_8:
-                                postBuff.push_back(*strIt);
+
+                                if (*strIt == '[' && fruits == WITH_FRUITS) {
+
+                                    bool showIt = true;
+
+                                    int strPC = std::distance(preBuff.begin(), strIt);
+                                    strPC++;
+
+                                    int endIndex = -1;
+
+                                    for (size_t j = strPC; j < preBuff.length(); j++) {
+                                        if (preBuff.at(j) == ']') {
+                                            endIndex = j;
+                                            break;
+                                        }
+                                    }
+
+
+                                    if (endIndex != -1 && (strPC < preBuff.length())) {
+
+                                        switch (preBuff.at(strPC)) {
+                                            case 't':
+                                                strPC++;
+                                                if (strPC < preBuff.length()) {
+                                                    if (preBuff.at(strPC) == ']') {
+                                                        if(inColor){
+                                                            inColor = false;
+
+                                                            if(postBuffActive){
+                                                                postBuffActive = false;
+
+                                                                ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+                                                                ImGui::TextUnformatted(postBuff.c_str());
+                                                                ImGui::SameLine(0,0);
+                                                                postBuff.assign(std::string());
+                                                                ImGui::PopStyleColor();
+                                                            }
+                                                        }
+
+                                                        showIt = false;
+                                                    } else if (preBuff.at(strPC) == ' ') {
+                                                        strPC++;
+
+                                                        if (FunctionTools::decodeColor(&preBuff, &strPC, endIndex,
+                                                                                       &txtColor, &previousTxtColor, uiTheme)) {
+                                                            if(postBuffActive){
+                                                                postBuffActive = false;
+
+                                                                if(inColor)
+                                                                    ImGui::PushStyleColor(ImGuiCol_Text, previousTxtColor);
+
+                                                                ImGui::TextUnformatted(postBuff.c_str());
+                                                                ImGui::SameLine(0,0);
+
+                                                                if(inColor)
+                                                                    ImGui::PopStyleColor();
+
+                                                                postBuff.assign(std::string());
+                                                            }
+
+                                                            inColor = true;
+                                                            showIt = false;
+                                                        }
+                                                    }
+
+                                                }
+
+                                                break;
+                                            case 'b':
+
+                                                break;
+                                            case 'a':
+
+                                                break;
+                                            case 'h':
+
+                                                break;
+                                            default:
+
+                                                break;
+                                        }
+
+                                    }
+
+                                    if (showIt)
+                                        postBuff.push_back(*strIt);
+                                    else
+                                        strIt = preBuff.begin() + endIndex;
+                                }
+                                else {
+                                    postBuff.push_back(*strIt);
+                                    postBuffActive = true;
+                                }
                                 break;
                             case UTF_8_SPECIAL:
-                                switch(static_cast<int>(*strIt)){
+                                switch (static_cast<int>(*strIt)) {
                                     case 0:
                                         FunctionTools::printSpecialUTF8("NUL", uiTheme, postBuffActive, postBuff);
                                         break;
@@ -548,18 +653,20 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                                 }
                                 break;
                             case UTF_8_RAW_DEC:
-                                if(static_cast<int>(*strIt) < 32)
-                                    FunctionTools::printDECorHEX_UTF8(true, *strIt, uiTheme, postBuffActive, postBuff);
-                                else{
+                                if (static_cast<int>(*strIt) < 32)
+                                    FunctionTools::printDECorHEX_UTF8(true, *strIt, uiTheme, postBuffActive,
+                                                                      postBuff);
+                                else {
                                     postBuff.push_back(*strIt);
                                     postBuffActive = true;
                                 }
 
                                 break;
                             case UTF_8_RAW_HEX:
-                                if(static_cast<int>(*strIt) < 32)
-                                    FunctionTools::printDECorHEX_UTF8(false, *strIt, uiTheme, postBuffActive, postBuff);
-                                else{
+                                if (static_cast<int>(*strIt) < 32)
+                                    FunctionTools::printDECorHEX_UTF8(false, *strIt, uiTheme, postBuffActive,
+                                                                      postBuff);
+                                else {
                                     postBuff.push_back(*strIt);
                                     postBuffActive = true;
                                 }
@@ -571,14 +678,23 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                     }
 
-                    switch(textEncoding){
+
+                    switch (textEncoding) {
                         case UTF_8:
+
+                            if (inColor && fruits == WITH_FRUITS)
+                                ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
                             ImGui::TextUnformatted(postBuff.c_str());
+
+                            if (inColor && fruits == WITH_FRUITS)
+                                ImGui::PopStyleColor();
+
                             break;
                         case UTF_8_SPECIAL:
                         case UTF_8_RAW_DEC:
                         case UTF_8_RAW_HEX:
-                            if(postBuffActive)
+                            if (postBuffActive)
                                 ImGui::TextUnformatted(postBuff.c_str());
 
                             ImGui::NewLine();
@@ -603,18 +719,42 @@ void SerialConnection::checkAndReadPort(ClockTime *clockTime) {
     if(mySerial->isOpen()){
         size_t bytesBuff = mySerial->available();
 
-        if(bytesBuff > 0){
+        if(bytesBuff > 0) {
             std::string strBuff;
             mySerial->read(strBuff, bytesBuff);
 
-            if(listening) {
-                if (dataLines.empty()) {
-                    dataLines.push_back(std::string());
-                    scroll2Bottom = true;
-                }
+            if (dataLines.empty()) {
+                dataLines.push_back(std::string());
+                scroll2Bottom = true;
+            }
 
-                std::string strLine = dataLines.back();
-                dataLines.pop_back();
+            std::string strLine = dataLines.back();
+            dataLines.pop_back();
+
+            if (strLine.empty()) {
+                strLine.append(clockTime->getTimestamp());
+                strLine.push_back(static_cast<char>(0x20));                 //space
+                FunctionTools::unicode2Utf8(0xBB, strLine);
+                strLine.push_back(static_cast<char>(0x20));                 //space
+            }
+
+
+            auto &dataLinesRef = dataLines;
+            auto &scroll2BottomRef = scroll2Bottom;
+
+            auto addNewLine = [&strLine, &dataLinesRef, &scroll2BottomRef]() {
+                dataLinesRef.push_back(strLine);
+                strLine.assign(std::string());
+                scroll2BottomRef = true;
+            };
+
+            std::string::iterator strIt;
+
+            bool crSet = false;                                                                                         //carrie return set
+
+            for (strIt = strBuff.begin(); strIt != strBuff.end(); strIt++) {
+
+                bool preSetCr = false;
 
                 if (strLine.empty()) {
                     strLine.append(clockTime->getTimestamp());
@@ -623,72 +763,45 @@ void SerialConnection::checkAndReadPort(ClockTime *clockTime) {
                     strLine.push_back(static_cast<char>(0x20));                 //space
                 }
 
+                strLine.push_back(*strIt);
 
-                auto &dataLinesRef = dataLines;
-                auto &scroll2BottomRef = scroll2Bottom;
+                switch (*strIt) {
+                    case 10:                                                                                            //new line LF
 
-                auto addNewLine = [&strLine, &dataLinesRef, &scroll2BottomRef]() {
-                    dataLinesRef.push_back(strLine);
-                    strLine.assign(std::string());
-                    scroll2BottomRef = true;
-                };
-
-                std::string::iterator strIt;
-
-                bool crSet = false;                                                                                         //carrie return set
-
-                for (strIt = strBuff.begin(); strIt != strBuff.end(); strIt++) {
-
-                    bool preSetCr = false;
-
-                    if (strLine.empty()) {
-                        strLine.append(clockTime->getTimestamp());
-                        strLine.push_back(static_cast<char>(0x20));                 //space
-                        FunctionTools::unicode2Utf8(0xBB, strLine);
-                        strLine.push_back(static_cast<char>(0x20));                 //space
-                    }
-
-                    strLine.push_back(*strIt);
-
-                    switch (*strIt) {
-                        case 10:                                                                                            //new line LF
-
-                            switch (inputEolType) {
-                                case newLine:
-                                    addNewLine();
-                                    break;
-                                case crAndLf:
-                                    if (crSet)
-                                        addNewLine();
-                                    break;
-                                default:
-
-                                    break;
-                            }
-
-
-                            break;
-                        case 13:                                                                                            //carrie return CR
-
-                            if (inputEolType == carrieReturn)
+                        switch (inputEolType) {
+                            case newLine:
                                 addNewLine();
-                            else
-                                preSetCr = true;
+                                break;
+                            case crAndLf:
+                                if (crSet)
+                                    addNewLine();
+                                break;
+                            default:
 
-                            break;
-                    }
-
-                    if (preSetCr)
-                        crSet = true;
-                    else
-                        crSet = false;
+                                break;
+                        }
 
 
+                        break;
+                    case 13:                                                                                            //carrie return CR
+
+                        if (inputEolType == carrieReturn)
+                            addNewLine();
+                        else
+                            preSetCr = true;
+
+                        break;
                 }
 
-                dataLines.push_back(strLine);
+                if (preSetCr)
+                    crSet = true;
+                else
+                    crSet = false;
+
 
             }
+
+            dataLines.push_back(strLine);
         }
     }
 }

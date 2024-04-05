@@ -55,6 +55,10 @@ MainWindow::MainWindow() {
     ret = FunctionTools::loadTextureFromFile("../Assets/pause.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
+    texturePtr = &TabSerialWindow::fruitsTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/fruits.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
     texturePtr = &TabSerialWindow::darkBtn0RedTexture;
     ret = FunctionTools::loadTextureFromFile("../Assets/darkbtn0Red.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
@@ -172,6 +176,14 @@ void MainWindow::update(const double &dt, AppData &appdata, const IOData &ioData
             break;
         case REWIND:
 
+            break;
+        case SAVE:
+
+            break;
+        case LOAD:
+
+            break;
+        case MENU:
 
             break;
     }
@@ -668,7 +680,7 @@ void MainWindow::updateAndPrintInputBar(const double &dt, const AppData &appData
         bool selected = false;
 
         for(size_t i = 0; i < IM_ARRAYSIZE(EOL_ITEMS); i++){
-            selected = (i == comboItem) ? true : false;
+            selected = (i == comboItem);
             if(ImGui::Selectable(EOL_ITEMS[i], selected))
                 currentItem = i;
         }

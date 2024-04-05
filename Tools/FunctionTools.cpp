@@ -485,6 +485,122 @@ int FunctionTools::numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, c
     return numOfChars;
 }
 
+bool FunctionTools::decodeColor(const std::string *strBuffer, int *pCounter, const int lastIndex, ImU32 *nColor, ImU32 *prevColor, const UI_Theme &uiTheme){
+    bool isOk = false;
+
+    typedef enum {NONE, TYPE_3, TYPE_6} HexType;
+    HexType hexType = NONE;
+
+    if(strBuffer->at(*pCounter) == '#'){
+
+        int temp_pCounter = (*pCounter) + 1;
+        if(increasePC2NextSpaceOrLimit(strBuffer, &temp_pCounter, (lastIndex + 1))){
+            if((temp_pCounter - *pCounter) == 7) {
+                hexType = TYPE_6;
+                isOk = true;
+            }
+            else if((temp_pCounter - *pCounter) == 4) {
+                hexType = TYPE_3;
+                isOk = true;
+            }
+        }
+
+
+        if(hexType != NONE){
+            for(size_t i = (*pCounter + 1); i < temp_pCounter; i++){
+                if(strBuffer->at(i) < 0x30 || (strBuffer->at(i) < 0x41 && strBuffer->at(i) > 0x39)
+                   || (strBuffer->at(i) > 0x46 && strBuffer->at(i) < 0x61 )
+                   || strBuffer->at(i) > 0x66){
+                    hexType = NONE;
+                    isOk = false;
+                    break;
+                }
+            }
+        }
+
+        if(hexType != NONE && temp_pCounter != lastIndex){
+            if(increasePC2NextChar(strBuffer, &temp_pCounter, (lastIndex + 1))){
+                if(strBuffer->at(temp_pCounter) != ']')
+                    isOk = false;
+            }
+            else
+                isOk = false;
+        }
+
+        if(isOk){
+            int rValue = 0;
+            int gValue = 0;
+            int bValue = 0;
+
+            std::string intStr;
+
+            switch(hexType){
+                case TYPE_3:
+                    intStr = strBuffer->substr((*pCounter + 1), 1);
+                    rValue = std::stoi(intStr, 0, 16);
+                    rValue = (rValue * 255)/15;
+
+                    intStr = strBuffer->substr((*pCounter + 2), 1);
+                    gValue = std::stoi(intStr, 0, 16);
+                    gValue = (gValue * 255)/15;
+
+                    intStr = strBuffer->substr((*pCounter + 3), 1);
+                    bValue = std::stoi(intStr, 0, 16);
+                    bValue = (bValue * 255)/15;
+
+                    *prevColor = *nColor;
+                    *nColor = IM_COL32(rValue, gValue, bValue, 255);
+
+                    break;
+                case TYPE_6:
+                    intStr = strBuffer->substr((*pCounter + 1), 2);
+                    rValue = std::stoi(intStr, 0, 16);
+
+                    intStr = strBuffer->substr((*pCounter + 3), 2);
+                    gValue = std::stoi(intStr, 0, 16);
+
+                    intStr = strBuffer->substr((*pCounter + 5), 2);
+                    bValue = std::stoi(intStr, 0, 16);
+
+                    *prevColor = *nColor;
+                    *nColor = IM_COL32(rValue, gValue, bValue, 255);
+
+                    break;
+                default:
+
+                    break;
+            }
+        }
+    }
+    else if(strBuffer->at(*pCounter) != ' '){
+        std::string colorStr = strBuffer->substr(*pCounter, (lastIndex - *pCounter));
+
+        std::unordered_map<std::string, ImU32>::const_iterator mapIt;
+
+        if(uiTheme == DARK){
+            mapIt = darkColorMap.find(colorStr);
+
+            if(mapIt != darkColorMap.end()){
+                *prevColor = *nColor;
+                *nColor = mapIt->second;
+                isOk = true;
+            }
+        }
+        else{
+            mapIt = lightColorMap.find(colorStr);
+
+            if(mapIt != lightColorMap.end()){
+                *prevColor = *nColor;
+                *nColor = mapIt->second;
+                isOk = true;
+            }
+        }
+    }
+
+
+    return isOk;
+}
+
 bool FunctionTools::isStartDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex) {
 
     bool isDecFormat = true;

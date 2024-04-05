@@ -27,8 +27,6 @@ public:
     void closeConnection();
     bool isConnectionOpen();
 
-    void swapListening();
-    bool isListening();
 
     void setTimeout(const uint32_t timeout);
     uint32_t getTimeout();
@@ -50,6 +48,11 @@ public:
 
     void setTextEnconding(TextEncoding txtEncoding);
     TextEncoding getTextEncoding();
+
+    void setFruits(Fruits myFruits);
+    Fruits getFruits();
+    bool areFruitsEnabled();
+    void swapFruits();
 
     void setTimeStamp(bool state);
     void swapTimeStamp();
@@ -77,6 +80,8 @@ private:
 
     void checkAndReadPort(ClockTime *clockTime);
     void save2binFile();
+
+
     //void printUtf8Line(char std::string& )
 
     std::string portName;
@@ -86,11 +91,10 @@ private:
     serialEndOfLine outputEolType;
 
     TimeStamp timeStamp;
+    Fruits fruits;
     TextEncoding textEncoding;
     bool scroll2Bottom;
     bool autoScroll;
-    bool listening;
-
 };
 
 

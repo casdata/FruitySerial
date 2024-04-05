@@ -10,6 +10,7 @@
 #include "stb_image.h"
 #include "imgui.h"
 #include "DTypes.h"
+#include <unordered_map>
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
@@ -41,6 +42,7 @@ public:
     static bool increasePC2NextChar(const std::string* strBuffer, int* pCounter, const int lastIndex);
     static bool increasePC2NextSpaceOrLimit(const std::string *strBuffer, int *pCounter, const int lastIndex);
     static int  numberOfChars2SpaceOrCloseKey(const std::string &strBuffer, const int pCounter, const int lastIndex);
+    static bool decodeColor(const std::string *strBuffer, int *pCounter, const int lastIndex, ImU32 *nColor, ImU32 *prevColor, const UI_Theme &uiTheme);
     static bool isStartDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
     static bool isDEC_format(const std::string &strBuffer, int &pCounter, const int lastIndex);
     static bool isStartOCT_format(const std::string &strBuffer, int &pCounter, const int lastIndex);

@@ -5,12 +5,14 @@
 #ifndef MASTERSERIALMONITOR_DTYPES_H
 #define MASTERSERIALMONITOR_DTYPES_H
 
+#include <unordered_map>
 #include "serial/serial.h"
 
 typedef enum {DARK, CLASSIC, LIGHT} UI_Theme;
 typedef enum {OFF, DOWN, UP, ON} BtnState;
 typedef enum {IDLE, SAVE, LOAD, MENU, REWIND} AppState;
 typedef enum {DISABLE, EN_TIME} TimeStamp;
+typedef enum {NO_FRUITS, WITH_FRUITS} Fruits;
 typedef enum {TB_2DISABLE, TB_DISABLE, TB_2ENABLE, TB_ENABLE} TitleBar;
 typedef enum {SET_2MAXIMIZE, MAXIMIZE, SET_2NORMAL, NORMAL} MaximizeState;
 
@@ -222,6 +224,43 @@ static const ImU32 LIGHT_TEXT_SELECT        = IM_COL32(189, 218, 253, 255);
 static const ImU32 DARK_SPECIAL_INPUT       = IM_COL32(232, 155, 68, 255);
 static const ImU32 LIGHT_SPECIAL_INPUT      = IM_COL32(255, 105, 72, 255);
 
+static const ImU32 LIGHT_RED                = LIGHT_ESP_LOG_E_COL;
+static const ImU32 LIGHT_BLUE               = LIGHT_ESP_LOG_D_COL;
+static const ImU32 LIGHT_PURPLE             = LIGHT_ESP_LOG_V_COL;
+static const ImU32 LIGHT_GREEN              = LIGHT_ESP_LOG_I_COL;
+static const ImU32 LIGHT_YELLOW             = LIGHT_ESP_LOG_W_COL;
+
+static const ImU32 LIGHT_WHITE              = IM_COL32(255, 255, 255, 255);
+static const ImU32 LIGHT_SILVER             = IM_COL32(192, 192, 192, 255);
+static const ImU32 LIGHT_GRAY               = IM_COL32(170, 170, 170, 255);
+static const ImU32 LIGHT_BLACK              = IM_COL32(0,0,0,255);
+static const ImU32 LIGHT_MAROON             = IM_COL32(170, 0, 0, 255);
+static const ImU32 LIGHT_OLIVE              = IM_COL32(170, 170, 0, 255);
+static const ImU32 LIGHT_LIME               = IM_COL32(0, 255, 0, 255);
+static const ImU32 LIGHT_AQUA               = IM_COL32(0, 255, 255, 255);
+static const ImU32 LIGHT_TEAL               = IM_COL32(0, 170, 170, 255);
+static const ImU32 LIGHT_NAVY               = IM_COL32(0,0,170,255);
+static const ImU32 LIGHT_FUCHSIA            = IM_COL32(255, 0, 255, 255);
+
+
+static const ImU32 DARK_RED                = DARK_ESP_LOG_E_COL;
+static const ImU32 DARK_BLUE               = DARK_ESP_LOG_D_COL;
+static const ImU32 DARK_PURPLE             = DARK_ESP_LOG_V_COL;
+static const ImU32 DARK_GREEN              = DARK_ESP_LOG_I_COL;
+static const ImU32 DARK_YELLOW             = DARK_ESP_LOG_W_COL;
+
+static const ImU32 DARK_WHITE              = IM_COL32(255, 255, 255, 255);
+static const ImU32 DARK_SILVER             = IM_COL32(192, 192, 192, 255);
+static const ImU32 DARK_GRAY               = IM_COL32(128, 128, 128, 255);
+static const ImU32 DARK_BLACK              = IM_COL32(0,0,0,255);
+static const ImU32 DARK_MAROON             = IM_COL32(128, 0, 0, 255);
+static const ImU32 DARK_OLIVE              = IM_COL32(128, 128, 0, 255);
+static const ImU32 DARK_LIME               = IM_COL32(0, 255, 0, 255);
+static const ImU32 DARK_AQUA               = IM_COL32(0, 255, 255, 255);
+static const ImU32 DARK_TEAL               = IM_COL32(0, 128, 128, 255);
+static const ImU32 DARK_NAVY               = IM_COL32(0,0,128,255);
+static const ImU32 DARK_FUCHSIA            = IM_COL32(255, 0, 255, 255);
+
 static const char* TXT_ENCODING_ITEMS[]     = {"RAW-DEC", "RAW-HEX", "UTF-8", "UTF-8 RAW-DEC", "UTF-8 RAW-HEX", "UTF-8 SPECIAL", "UTF-8 ESP-LOG"};
 
 static const char* BAUDRATE_ITEMS[]         = {"300 baud","1200 baud", "2400 baud", "4800 baud", "9600 baud", "19200 baud",
@@ -234,6 +273,45 @@ static const char* FLOW_CONTROL_ITEMS[]     = {"none", "software", "hardware"};
 
 //static const char* EOL_ITEMS[]              = {"no line", "new line", "carriage return", "cr & lf"};
 static const char* EOL_ITEMS[]              = {"0: no line", "1: LF - new line", "2: CR - carriage return", "3: CR + LF"};
+
+static const std::unordered_map<std::string, ImU32> lightColorMap = {
+        {"red", LIGHT_ESP_LOG_E_COL},
+        {"blue", LIGHT_ESP_LOG_D_COL},
+        {"purple", LIGHT_ESP_LOG_V_COL},
+        {"green", LIGHT_ESP_LOG_I_COL},
+        {"yellow", LIGHT_ESP_LOG_W_COL},
+        { "white", IM_COL32(255, 255, 255, 255)},
+        { "silver", IM_COL32(192, 192, 192, 255)},
+        { "gray", IM_COL32(170, 170, 170, 255)},
+        { "black", IM_COL32(0,0,0,255)},
+        { "maroon", IM_COL32(170, 0, 0, 255)},
+        { "olive", IM_COL32(170, 170, 0, 255)},
+        { "lime", IM_COL32(0, 255, 0, 255)},
+        { "aqua", IM_COL32(0, 255, 255, 255)},
+        { "teal", IM_COL32(0, 170, 170, 255)},
+        { "navy", IM_COL32(0,0,170,255)},
+        { "fuchsia", IM_COL32(255, 0, 255, 255)}
+};
+
+static const std::unordered_map<std::string, ImU32> darkColorMap = {
+        {"red", DARK_ESP_LOG_E_COL},
+        {"blue", DARK_ESP_LOG_D_COL},
+        {"purple", DARK_ESP_LOG_V_COL},
+        {"green", DARK_ESP_LOG_I_COL},
+        {"yellow", DARK_ESP_LOG_W_COL},
+        { "white", IM_COL32(255, 255, 255, 255)},
+        { "silver", IM_COL32(192, 192, 192, 255)},
+        { "gray", IM_COL32(128, 128, 128, 255)},
+        { "black", IM_COL32(0,0,0,255)},
+        { "maroon", IM_COL32(128, 0, 0, 255)},
+        { "olive", IM_COL32(128, 128, 0, 255)},
+        { "lime", IM_COL32(0, 255, 0, 255)},
+        { "aqua", IM_COL32(0, 255, 255, 255)},
+        { "teal", IM_COL32(0, 128, 128, 255)},
+        { "navy", IM_COL32(0,0,128,255)},
+        { "fuchsia", IM_COL32(255, 0, 255, 255)}
+};
+
 
 /*
  * noLine,

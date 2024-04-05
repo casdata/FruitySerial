@@ -427,7 +427,7 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
         bool selected = false;
 
         for(size_t i = 0; i < IM_ARRAYSIZE(EOL_ITEMS); i++){
-            selected = (i == comboItem) ? true : false;
+            selected = (i == comboItem);
             if(ImGui::Selectable(EOL_ITEMS[i], selected))
                 currentItem = i;
         }
@@ -514,7 +514,7 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
         bool selected = false;
 
         for(size_t i = 0; i < IM_ARRAYSIZE(TXT_ENCODING_ITEMS); i++){
-            selected = (i == comboItem) ? true : false;
+            selected = (i == comboItem);
             if(ImGui::Selectable(TXT_ENCODING_ITEMS[i], selected))
                 currentItem = i;
         }
@@ -574,6 +574,23 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
 
     if(ImGui::ImageButton((void*)(intptr_t)timestampTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
         serialConnection->swapTimeStamp();
+
+    ImGui::PopStyleColor();
+
+    tempX += (tempWidth + myCursorPos.x);
+
+    ImGui::SetCursorPos(ImVec2(tempX, tempY));
+
+
+    if(serialConnection->areFruitsEnabled())
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+    else
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+
+    if(ImGui::ImageButton((void*)(intptr_t)fruitsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
+        serialConnection->swapFruits();
+
 
     ImGui::PopStyleColor();
 
