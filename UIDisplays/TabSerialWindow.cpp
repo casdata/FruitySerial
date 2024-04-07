@@ -66,6 +66,7 @@ void TabSerialWindow::freePort() {
 
 void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiTheme) {
 
+    static const float offset30 = FunctionTools::norm2HeightFloat(30);
 
      if(ImGui::BeginTabItem(tabName.c_str(), &open, ImGuiTabItemFlags_None)) {
 
@@ -95,10 +96,12 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
              if(serialConnection->getScroll2Bottom())
                  ImGui::SetScrollHereY(1.0f);
 
-             if(!serialConnection->getAutoScroll() && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+
+             if(!serialConnection->getAutoScroll() && (ImGui::GetScrollY() + offset30) >= ImGui::GetScrollMaxY())
                  serialConnection->setAutoScroll(true);
-             else if(serialConnection->getAutoScroll() && ImGui::GetScrollY() < ImGui::GetScrollMaxY())
+             else if(serialConnection->getAutoScroll() && (ImGui::GetScrollY() + offset30) < ImGui::GetScrollMaxY())
                  serialConnection->setAutoScroll(false);
+
 
              ImGui::PopStyleVar();
          }
@@ -151,7 +154,7 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
                 ImVec2 marker_min = ImVec2(pos.x + wrap_width, pos.y);
                 ImVec2 marker_max = ImVec2(pos.x + wrap_width + wrap_offset, pos.y + ImGui::GetTextLineHeight());
                 ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
-                    ImGui::Text(tabSerialPortData->portInfo.hardware_id.c_str());
+                    ImGui::Text("%s", tabSerialPortData->portInfo.hardware_id.c_str());
                 ImGui::PopTextWrapPos();
 
 
@@ -160,7 +163,7 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
                 ImGui::TableSetColumnIndex(0);
                 ImGui::Text("Port:");
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text(tabSerialPortData->portInfo.port.c_str());
+                ImGui::Text("%s", tabSerialPortData->portInfo.port.c_str());
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
@@ -171,7 +174,7 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
                 marker_min = ImVec2(pos.x + wrap_width, pos.y);
                 marker_max = ImVec2(pos.x + wrap_width + wrap_offset, pos.y + ImGui::GetTextLineHeight());
                 ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
-                    ImGui::Text(tabSerialPortData->portInfo.description.c_str());
+                    ImGui::Text("%s", tabSerialPortData->portInfo.description.c_str());
                 ImGui::PopTextWrapPos();
 
 
@@ -568,11 +571,17 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
     ImGui::SetCursorPos(ImVec2(tempX, tempY));
 
     if(serialConnection->isTimeStampEnabled())
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
-    else
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+        texturePtr = &timestampTexture;
+    else{
+        if(uiTheme == DARK)
+            texturePtr = &timestampDisDarkTexture;
+        else
+            texturePtr = &timestampDisLightTexture;
+    }
 
-    if(ImGui::ImageButton((void*)(intptr_t)timestampTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+
+    if(ImGui::ImageButton((void*)(intptr_t)*texturePtr, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
         serialConnection->swapTimeStamp();
 
     ImGui::PopStyleColor();
@@ -583,12 +592,18 @@ void TabSerialWindow::drawTopBar(const UI_Theme& uiTheme) {
 
 
     if(serialConnection->areFruitsEnabled())
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
-    else
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
+        texturePtr = &fruitsTexture;
+    else{
+        if(uiTheme == DARK)
+            texturePtr = &fruitsDisDarkTexture;
+        else
+            texturePtr = &fruitsDisLightTexture;
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_WindowBg));
 
 
-    if(ImGui::ImageButton((void*)(intptr_t)fruitsTexture, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
+    if(ImGui::ImageButton((void*)(intptr_t)*texturePtr, ImVec2(tempWidth, tempWidth), ImVec2(0,0), ImVec2(1,1), imagePadding))
         serialConnection->swapFruits();
 
 

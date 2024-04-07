@@ -18,7 +18,11 @@ public:
     inline static GLuint playTexture;
     inline static GLuint pauseTexture;
     inline static GLuint timestampTexture;
+    inline static GLuint timestampDisLightTexture;
+    inline static GLuint timestampDisDarkTexture;
     inline static GLuint fruitsTexture;
+    inline static GLuint fruitsDisLightTexture;
+    inline static GLuint fruitsDisDarkTexture;
     inline static GLuint settingsTexture;
     inline static GLuint separatorTexture;
 

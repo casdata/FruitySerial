@@ -306,13 +306,19 @@ void FunctionTools::unicode2Utf8(unsigned int unicode, std::string &str) {
 }
 
 void FunctionTools::printDECorHEX_UTF8(bool&& decType, const char charData, const UI_Theme &uiTheme, bool &postBuffActive,
-                                       std::string &postBuff) {
+                                       std::string &postBuff, const bool inColor, const Fruits *fruits, const ImU32 *txtColor) {
 
     if(postBuffActive){
         postBuffActive = false;
 
+        if (inColor && *fruits == WITH_FRUITS)
+            ImGui::PushStyleColor(ImGuiCol_Text, *txtColor);
+
         ImGui::TextUnformatted(postBuff.c_str());
         ImGui::SameLine(0,0);
+
+        if (inColor && *fruits == WITH_FRUITS)
+            ImGui::PopStyleColor();
 
         postBuff.assign(std::string());
     }
@@ -346,14 +352,20 @@ void FunctionTools::printDECorHEX_UTF8(bool&& decType, const char charData, cons
 
 }
 
-void FunctionTools::printSpecialUTF8(std::string&& name, const UI_Theme &uiTheme, bool& postBuffActive, std::string& postBuff) {
+void FunctionTools::printSpecialUTF8(std::string&& name, const UI_Theme &uiTheme, bool& postBuffActive, std::string& postBuff, const bool inColor, const Fruits *fruits, const ImU32 *txtColor) {
 
 
     if(postBuffActive) {
         postBuffActive = false;
 
+        if (inColor && *fruits == WITH_FRUITS)
+            ImGui::PushStyleColor(ImGuiCol_Text, *txtColor);
+
         ImGui::TextUnformatted(postBuff.c_str());
         ImGui::SameLine(0,0);
+
+        if (inColor && *fruits == WITH_FRUITS)
+            ImGui::PopStyleColor();
 
         postBuff.assign(std::string());
     }

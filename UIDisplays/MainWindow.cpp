@@ -39,6 +39,14 @@ MainWindow::MainWindow() {
 
     TabSerialWindow::textureSize = ImVec2(imageWidth, imageHeight);
 
+    texturePtr = &TabSerialWindow::timestampDisLightTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/timestampDisableLight.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::timestampDisDarkTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/timestampDisableDark.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
     texturePtr = &TabSerialWindow::settingsTexture;
     ret = FunctionTools::loadTextureFromFile("../Assets/comSettings.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
@@ -56,7 +64,15 @@ MainWindow::MainWindow() {
     IM_ASSERT(ret);
 
     texturePtr = &TabSerialWindow::fruitsTexture;
-    ret = FunctionTools::loadTextureFromFile("../Assets/fruits.png", texturePtr, &imageWidth, &imageHeight);
+    ret = FunctionTools::loadTextureFromFile("../Assets/orange.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::fruitsDisDarkTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/orangeDisableDark.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::fruitsDisLightTexture;
+    ret = FunctionTools::loadTextureFromFile("../Assets/orangeDisableLight.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
     texturePtr = &TabSerialWindow::darkBtn0RedTexture;

@@ -31,7 +31,7 @@ public:
     explicit Hud();
 
     void menuBar(MenuData &menuData, AppData &appData, IOData &ioData);
-    void statusBar();
+    void statusBar(const double *deltaTime);
     bool closeAppDialog(AppData &appFlags);
 
     void update(const double &dt, const MenuData &menuFlags, AppData &appData, IOData &ioData, SerialManager *serialManager);

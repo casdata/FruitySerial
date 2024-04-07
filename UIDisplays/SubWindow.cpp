@@ -169,7 +169,7 @@ void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
                 ImGui::EndPopup();
             }
 
-            bool multiTabs = tabSerialWindows.size() > 1 ? true : false;
+            bool multiTabs = tabSerialWindows.size() > 1;
 
             for(auto* tabSerialWin : tabSerialWindows)
                 tabSerialWin->draw(multiTabs, appData.monoFont, appData.uiTheme);
@@ -240,7 +240,7 @@ bool SubWindow::isWindowSplitting() {
         }
     }
 
-    return (splitTabIndex > -1) ? true : false;
+    return (splitTabIndex > -1);
 }
 
 

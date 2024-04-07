@@ -370,10 +370,11 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
             ImGui::PopStyleColor();
 
             ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
+            /*
 
             if (ImGui::ImageButton((void *) (intptr_t) newBtnTexture, ImVec2(iconSize, iconSize), ImVec2(0, 0),
                                    ImVec2(1, 1), imagePadding)) {
-                ImGui::OpenPopup("sergio");
+                ImGui::OpenPopup("");
             }
 
             if (ImGui::ImageButton((void *) (intptr_t) openBtnTexture, ImVec2(iconSize, iconSize), ImVec2(0, 0),
@@ -394,6 +395,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
                 ioData.rewindPorts.clear();
 
             }
+            */
 
         }
 
@@ -520,15 +522,26 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
 }
 
 
-void Hud::statusBar() {
+void Hud::statusBar(const double *deltaTime) {
 
-    ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
+    static double messageCurrentTime = 0;
+
+    auto* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;// | ImGuiWindowFlags_NoBackground;
     float height = ImGui::GetFrameHeight();
 
     if (ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, height, window_flags)) {
         if (ImGui::BeginMenuBar()) {
-            ImGui::Text("Happy status bar");
+
+            messageCurrentTime += *deltaTime;
+
+            if(messageCurrentTime >= 10000){
+                messageCurrentTime = 10000;
+                ImGui::Text("Alpha Version - Build 0001");
+            }
+            else
+                ImGui::Text("Alpha Version - Build 0001 | In development by casdata");
+
             ImGui::EndMenuBar();
         }
         ImGui::End();
@@ -575,7 +588,7 @@ bool Hud::closeAppDialog(AppData &appFlags){
 
         if(ImGui::Button("YES", ImVec2(newXValue, 0))){
 
-            if(dontAsk == true && !appFlags.disableExitMessage){
+            if(dontAsk && !appFlags.disableExitMessage){
                 appFlags.disableExitMessage = true;
 
                 char* temp = new char[1];
@@ -632,7 +645,7 @@ void Hud::rewindSessionDialog(AppData &appData, IOData &ioData){
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f,0.5f));
 
 
-    if(ImGui::BeginPopup("Rewind session", NULL)){
+    if(ImGui::BeginPopup("Rewind session")){
 
         float imageSize = FunctionTools::norm2HeightFloat(40);
 
@@ -646,7 +659,7 @@ void Hud::rewindSessionDialog(AppData &appData, IOData &ioData){
         ImGui::Spacing();
 
         for(std::string mystr : ioData.rewindPorts){
-            ImGui::Text(mystr.c_str());
+            ImGui::Text("%s", mystr.c_str());
             ImGui::Spacing();
         }
 

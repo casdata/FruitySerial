@@ -78,6 +78,8 @@ public:
     virtual ~SerialConnection();
 private:
 
+    void checkFruitsCommands(std::string::iterator &strIt, std::string &preBuff,  std::string &postBuff,
+                             bool *postBuffActive, bool *inColor, const UI_Theme& uiTheme, ImU32 *txtColor, ImU32 *previousTxtColor);
     void checkAndReadPort(ClockTime *clockTime);
     void save2binFile();
 

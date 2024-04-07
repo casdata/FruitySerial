@@ -269,12 +269,15 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                 std::string::iterator strIt;
 
+                bool postBuffActive = false;
+
                 if(textEncoding == RAW_DEC || textEncoding == RAW_HEX){
                     std::stringstream sStream;
 
-                    bool postBuffActive = false;
-
                     for(strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++) {
+
+                        if (*strIt == '[' && fruits == WITH_FRUITS)
+                            checkFruitsCommands(strIt, preBuff, postBuff, &postBuffActive, &inColor, uiTheme, &txtColor, &previousTxtColor);
 
                         if(textEncoding == RAW_DEC)
                             sStream<<std::setfill('0')<<std::setw(3)<<std::dec<<static_cast<int>(*strIt);
@@ -284,8 +287,15 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                         if(static_cast<int>(*strIt) < 32){
                             if(postBuffActive){
                                 postBuffActive = false;
+
+                                if (inColor && fruits == WITH_FRUITS)
+                                    ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
                                 ImGui::TextUnformatted(postBuff.c_str());
                                 ImGui::SameLine(0,0);
+
+                                if(inColor && fruits == WITH_FRUITS)
+                                    ImGui::PopStyleColor();
 
                                 postBuff.assign(std::string());
                             }
@@ -314,8 +324,15 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                     }
 
-                    if(postBuffActive)
+                    if(postBuffActive) {
+                        if (inColor && fruits == WITH_FRUITS)
+                            ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
                         ImGui::TextUnformatted(postBuff.c_str());
+
+                        if(inColor && fruits == WITH_FRUITS)
+                            ImGui::PopStyleColor();
+                    }
 
                     ImGui::NewLine();
 
@@ -327,6 +344,9 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
                     if(preBuff.length() > 24){
 
+                        bool pushColor = false;
+                        int offsetStart = 0;
+
                         if(static_cast<int>(preBuff.at(16)) == 0x1B &&
                                 static_cast<int>(preBuff.at(17)) == 0x5B &&
                                 static_cast<int>(preBuff.at(18)) == 0x30 &&
@@ -335,7 +355,7 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                                 static_cast<int>(preBuff.at(22)) == 0x6D){
 
                             nullData = false;
-                            bool pushColor = false;
+                            pushColor = false;
 
                             switch(static_cast<int>(preBuff.at(21))){
                                 case 0x31:                                                                              //E
@@ -362,37 +382,15 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                                     break;
                             }
 
-                            for(size_t j = 23; j < preBuff.length(); j++){
-
-                                if(static_cast<int>(preBuff.at(j)) == 0x1B && (j + 5) < preBuff.length()){
-                                    if(static_cast<int>(preBuff.at(j + 1)) == 0x5B &&
-                                            static_cast<int>(preBuff.at(j + 2)) == 0x30 &&
-                                            static_cast<int>(preBuff.at(j + 3)) == 0x6D &&
-                                            static_cast<int>(preBuff.at(j + 4)) == 0xD &&
-                                            static_cast<int>(preBuff.at(j + 5)) == 0xA){
-
-                                        break;
-                                    }
-                                }
-                                else
-                                    postBuff.push_back(preBuff.at(j));
-
-                            }
-
-                            ImGui::TextUnformatted(postBuff.c_str());
-                            ImGui::SameLine(0,0);
-
-                            if(pushColor)
-                                ImGui::PopStyleColor();
+                            //for(size_t j = 23; j < preBuff.length(); j++){
+                            offsetStart = 23;
 
                         }
-
-
                         else if(static_cast<int>(preBuff.at(17)) == 0x20 &&
                                  static_cast<int>(preBuff.at(18)) == 0x28){
 
                             nullData = false;
-                            bool pushColor = false;
+                            pushColor = false;
 
                             switch(static_cast<int>(preBuff.at(16))){
                                 case 0x44:                                                                              //D debug
@@ -411,29 +409,44 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                                     break;
                             }
 
-                            for(size_t j = 16; j < preBuff.length(); j++){
+                            offsetStart = 16;
 
-                                if(static_cast<int>(preBuff.at(j)) == 0x1B && (j + 5) < preBuff.length()){
-                                    if(static_cast<int>(preBuff.at(j + 1)) == 0x5B &&
-                                       static_cast<int>(preBuff.at(j + 2)) == 0x30 &&
-                                       static_cast<int>(preBuff.at(j + 3)) == 0x6D &&
-                                       static_cast<int>(preBuff.at(j + 4)) == 0xD &&
-                                       static_cast<int>(preBuff.at(j + 5)) == 0xA){
+                        }
 
-                                        break;
-                                    }
+                        for(strIt = preBuff.begin() + offsetStart; strIt != preBuff.end(); strIt++){
+
+                            if (*strIt == '[' && fruits == WITH_FRUITS)
+                                checkFruitsCommands(strIt, preBuff, postBuff, &postBuffActive, &inColor, uiTheme, &txtColor, &previousTxtColor);
+
+                            if(static_cast<int>(*(strIt)) == 0x1B && std::distance(strIt, preBuff.end()) > 5){
+                                if(static_cast<int>(*(strIt + 1)) == 0x5B &&
+                                   static_cast<int>(*(strIt + 2)) == 0x30 &&
+                                   static_cast<int>(*(strIt + 3)) == 0x6D &&
+                                   static_cast<int>(*(strIt + 4)) == 0xD &&
+                                   static_cast<int>(*(strIt + 5)) == 0xA){
+
+                                    break;
                                 }
-                                else
-                                    postBuff.push_back(preBuff.at(j));
-
+                            }
+                            else {
+                                postBuff.push_back(*strIt);
+                                postBuffActive = true;
                             }
 
-                            ImGui::TextUnformatted(postBuff.c_str());
-                            ImGui::SameLine(0,0);
-
-                            if(pushColor)
-                                ImGui::PopStyleColor();
                         }
+
+                        if (inColor && fruits == WITH_FRUITS)
+                            ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
+                        ImGui::TextUnformatted(postBuff.c_str());
+                        ImGui::SameLine(0,0);
+
+                        if (inColor && fruits == WITH_FRUITS)
+                            ImGui::PopStyleColor();
+
+                        if(pushColor)
+                            ImGui::PopStyleColor();
+
                     }
 
                     if(nullData){
@@ -445,206 +458,116 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                 }
                 else {
 
-                    bool postBuffActive = false;
-
                     for (strIt = preBuff.begin() + 16; strIt != preBuff.end(); strIt++) {
+
+                        if (*strIt == '[' && fruits == WITH_FRUITS)
+                            checkFruitsCommands(strIt, preBuff, postBuff, &postBuffActive, &inColor, uiTheme, &txtColor, &previousTxtColor);
 
                         switch (textEncoding) {
                             case UTF_8:
-
-                                if (*strIt == '[' && fruits == WITH_FRUITS) {
-
-                                    bool showIt = true;
-
-                                    int strPC = std::distance(preBuff.begin(), strIt);
-                                    strPC++;
-
-                                    int endIndex = -1;
-
-                                    for (size_t j = strPC; j < preBuff.length(); j++) {
-                                        if (preBuff.at(j) == ']') {
-                                            endIndex = j;
-                                            break;
-                                        }
-                                    }
-
-
-                                    if (endIndex != -1 && (strPC < preBuff.length())) {
-
-                                        switch (preBuff.at(strPC)) {
-                                            case 't':
-                                                strPC++;
-                                                if (strPC < preBuff.length()) {
-                                                    if (preBuff.at(strPC) == ']') {
-                                                        if(inColor){
-                                                            inColor = false;
-
-                                                            if(postBuffActive){
-                                                                postBuffActive = false;
-
-                                                                ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
-                                                                ImGui::TextUnformatted(postBuff.c_str());
-                                                                ImGui::SameLine(0,0);
-                                                                postBuff.assign(std::string());
-                                                                ImGui::PopStyleColor();
-                                                            }
-                                                        }
-
-                                                        showIt = false;
-                                                    } else if (preBuff.at(strPC) == ' ') {
-                                                        strPC++;
-
-                                                        if (FunctionTools::decodeColor(&preBuff, &strPC, endIndex,
-                                                                                       &txtColor, &previousTxtColor, uiTheme)) {
-                                                            if(postBuffActive){
-                                                                postBuffActive = false;
-
-                                                                if(inColor)
-                                                                    ImGui::PushStyleColor(ImGuiCol_Text, previousTxtColor);
-
-                                                                ImGui::TextUnformatted(postBuff.c_str());
-                                                                ImGui::SameLine(0,0);
-
-                                                                if(inColor)
-                                                                    ImGui::PopStyleColor();
-
-                                                                postBuff.assign(std::string());
-                                                            }
-
-                                                            inColor = true;
-                                                            showIt = false;
-                                                        }
-                                                    }
-
-                                                }
-
-                                                break;
-                                            case 'b':
-
-                                                break;
-                                            case 'a':
-
-                                                break;
-                                            case 'h':
-
-                                                break;
-                                            default:
-
-                                                break;
-                                        }
-
-                                    }
-
-                                    if (showIt)
-                                        postBuff.push_back(*strIt);
-                                    else
-                                        strIt = preBuff.begin() + endIndex;
-                                }
-                                else {
-                                    postBuff.push_back(*strIt);
-                                    postBuffActive = true;
-                                }
+                                postBuff.push_back(*strIt);
+                                postBuffActive = true;
                                 break;
                             case UTF_8_SPECIAL:
                                 switch (static_cast<int>(*strIt)) {
                                     case 0:
-                                        FunctionTools::printSpecialUTF8("NUL", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("NUL", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 1:
-                                        FunctionTools::printSpecialUTF8("SOH", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("SOH", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 2:
-                                        FunctionTools::printSpecialUTF8("STX", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("STX", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 3:
-                                        FunctionTools::printSpecialUTF8("ETX", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("ETX", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 4:
-                                        FunctionTools::printSpecialUTF8("EOT", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("EOT", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 5:
-                                        FunctionTools::printSpecialUTF8("ENQ", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("ENQ", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 6:
-                                        FunctionTools::printSpecialUTF8("ACK", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("ACK", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 7:
-                                        FunctionTools::printSpecialUTF8("BEL", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("BEL", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 8:
-                                        FunctionTools::printSpecialUTF8("BS", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("BS", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 9:
-                                        FunctionTools::printSpecialUTF8("TAB", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("TAB", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 10:
-                                        FunctionTools::printSpecialUTF8("LF", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("LF", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 11:
-                                        FunctionTools::printSpecialUTF8("VT", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("VT", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 12:
-                                        FunctionTools::printSpecialUTF8("FF", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("FF", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 13:
-                                        FunctionTools::printSpecialUTF8("CR", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("CR", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 14:
-                                        FunctionTools::printSpecialUTF8("SO", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("SO", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 15:
-                                        FunctionTools::printSpecialUTF8("SI", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("SI", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 16:
-                                        FunctionTools::printSpecialUTF8("DLE", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("DLE", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 17:
-                                        FunctionTools::printSpecialUTF8("DC1", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("DC1", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 18:
-                                        FunctionTools::printSpecialUTF8("DC2", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("DC2", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 19:
-                                        FunctionTools::printSpecialUTF8("DC3", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("DC3", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 20:
-                                        FunctionTools::printSpecialUTF8("DC4", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("DC4", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 21:
-                                        FunctionTools::printSpecialUTF8("NAK", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("NAK", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 22:
-                                        FunctionTools::printSpecialUTF8("SYN", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("SYN", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 23:
-                                        FunctionTools::printSpecialUTF8("ETB", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("ETB", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 24:
-                                        FunctionTools::printSpecialUTF8("CAN", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("CAN", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 25:
-                                        FunctionTools::printSpecialUTF8("EM", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("EM", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 26:
-                                        FunctionTools::printSpecialUTF8("SUB", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("SUB", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 27:
-                                        FunctionTools::printSpecialUTF8("ESC", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("ESC", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 28:
-                                        FunctionTools::printSpecialUTF8("FS", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("FS", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 29:
-                                        FunctionTools::printSpecialUTF8("GS", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("GS", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 30:
-                                        FunctionTools::printSpecialUTF8("RS", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("RS", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 31:
-                                        FunctionTools::printSpecialUTF8("US", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("US", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     case 127:
-                                        FunctionTools::printSpecialUTF8("DEL", uiTheme, postBuffActive, postBuff);
+                                        FunctionTools::printSpecialUTF8("DEL", uiTheme, postBuffActive, postBuff, inColor, &fruits, &txtColor);
                                         break;
                                     default:
                                         postBuff.push_back(*strIt);
@@ -655,7 +578,7 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                             case UTF_8_RAW_DEC:
                                 if (static_cast<int>(*strIt) < 32)
                                     FunctionTools::printDECorHEX_UTF8(true, *strIt, uiTheme, postBuffActive,
-                                                                      postBuff);
+                                                                      postBuff, inColor, &fruits, &txtColor);
                                 else {
                                     postBuff.push_back(*strIt);
                                     postBuffActive = true;
@@ -665,7 +588,7 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                             case UTF_8_RAW_HEX:
                                 if (static_cast<int>(*strIt) < 32)
                                     FunctionTools::printDECorHEX_UTF8(false, *strIt, uiTheme, postBuffActive,
-                                                                      postBuff);
+                                                                      postBuff, inColor, &fruits, &txtColor);
                                 else {
                                     postBuff.push_back(*strIt);
                                     postBuffActive = true;
@@ -694,8 +617,15 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
                         case UTF_8_SPECIAL:
                         case UTF_8_RAW_DEC:
                         case UTF_8_RAW_HEX:
-                            if (postBuffActive)
+                            if (postBuffActive) {
+                                if (inColor && fruits == WITH_FRUITS)
+                                    ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
                                 ImGui::TextUnformatted(postBuff.c_str());
+
+                                if (inColor && fruits == WITH_FRUITS)
+                                    ImGui::PopStyleColor();
+                            }
 
                             ImGui::NewLine();
                             break;
@@ -715,9 +645,108 @@ void SerialConnection::printLines(const UI_Theme& uiTheme) {
 
 }
 
+void SerialConnection::checkFruitsCommands(std::string::iterator &strIt, std::string &preBuff,  std::string &postBuff, bool *postBuffActive, bool *inColor, const UI_Theme& uiTheme,
+                                           ImU32 *txtColor, ImU32 *previousTxtColor){
+    bool showIt = true;
+
+    int strPC = std::distance(preBuff.begin(), strIt);
+    strPC++;
+
+    int endIndex = -1;
+
+    for (size_t j = strPC; j < preBuff.length(); j++) {
+        if (preBuff.at(j) == ']') {
+            endIndex = j;
+            break;
+        }
+    }
+
+
+    if (endIndex != -1 && (strPC < preBuff.length())) {
+
+        switch (preBuff.at(strPC)) {
+            case 't':
+                strPC++;
+                if (strPC < preBuff.length()) {
+                    if (preBuff.at(strPC) == ']') {
+                        if (*inColor) {
+                            *inColor = false;
+
+                            if (*postBuffActive) {
+                                *postBuffActive = false;
+
+                                ImGui::PushStyleColor(ImGuiCol_Text, *txtColor);
+                                ImGui::TextUnformatted(postBuff.c_str());
+                                ImGui::SameLine(0, 0);
+                                postBuff.assign(std::string());
+                                ImGui::PopStyleColor();
+                            }
+                        }
+
+                        showIt = false;
+                    } else if (preBuff.at(strPC) == ' ') {
+                        strPC++;
+
+                        if (FunctionTools::decodeColor(&preBuff, &strPC, endIndex,
+                                                       txtColor, previousTxtColor, uiTheme)) {
+                            if (*postBuffActive) {
+                                *postBuffActive = false;
+
+                                if (*inColor)
+                                    ImGui::PushStyleColor(ImGuiCol_Text, *previousTxtColor);
+
+                                ImGui::TextUnformatted(postBuff.c_str());
+                                ImGui::SameLine(0, 0);
+
+                                if (*inColor)
+                                    ImGui::PopStyleColor();
+
+                                postBuff.assign(std::string());
+                            }
+
+                            *inColor = true;
+                            showIt = false;
+                        }
+                    }
+
+                }
+
+                break;
+            case 'b':
+
+                break;
+            case 'a':
+
+                break;
+            case 'h':
+
+                break;
+            default:
+
+                break;
+        }
+
+    }
+
+    endIndex++;
+    if (!showIt) {
+        strIt = preBuff.begin() + endIndex;
+
+        if(strIt >= preBuff.end())
+            strIt = preBuff.end() - 1;
+    }
+}
+
 void SerialConnection::checkAndReadPort(ClockTime *clockTime) {
     if(mySerial->isOpen()){
-        size_t bytesBuff = mySerial->available();
+        size_t bytesBuff = 0;
+
+        try {
+            bytesBuff = mySerial->available();
+        }catch (serial::IOException e){
+            std::cout<<"Serial Error: "<<e.what()<<std::endl;
+            mySerial->close();
+        }
 
         if(bytesBuff > 0) {
             std::string strBuff;

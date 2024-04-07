@@ -493,7 +493,7 @@ int main(int, char**)
 
         hud->update(deltaTime, menuData, appData, ioData, serialManager);
 
-        hud->statusBar();
+        hud->statusBar(&deltaTime);
 
         if (menuData.exitApp) {
             menuData.exitApp = false;
