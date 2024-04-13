@@ -13,7 +13,8 @@ TabSerialWindow::TabSerialWindow(SerialPortData *serialPortData, SerialConnectio
 
     this->serialConnection = serialConnection;
 
-    splitRight = false;
+    splitType = NONE_SPLIT;
+    moveType = NONE_MOVE;
     open = true;
     serialSettings = false;
     //undock = false;
@@ -38,11 +39,18 @@ bool TabSerialWindow::isTabClosing(){
     return !open;
 }
 
-bool TabSerialWindow::isTabSplitting(){
-    bool postSplit = splitRight;
-    splitRight = false;
+TabSplitType TabSerialWindow::isTabSplitting(){
+    TabSplitType postSplit = splitType;
+    splitType = NONE_SPLIT;
 
     return postSplit;
+}
+
+TabMoveType TabSerialWindow::isTabMoving() {
+    TabMoveType postMove = moveType;
+    moveType = NONE_MOVE;
+
+    return postMove;
 }
 
 bool TabSerialWindow::isUndocking(){
@@ -52,7 +60,7 @@ bool TabSerialWindow::isUndocking(){
     return postUndock;
 }
 
-bool TabSerialWindow::isRenaming(){
+bool TabSerialWindow::need2Rename(){
     bool postRename = rename;
     rename = false;
 
@@ -64,13 +72,13 @@ void TabSerialWindow::freePort() {
     tabSerialPortData->updateIt = true;
 }
 
-void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiTheme) {
+void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiTheme, const WinPos *winPosPtr, const bool moreThanOne) {
 
     static const float offset30 = FunctionTools::norm2HeightFloat(30);
 
      if(ImGui::BeginTabItem(tabName.c_str(), &open, ImGuiTabItemFlags_None)) {
 
-         drawPopupTabMenu(multiTabs);
+         drawPopupTabMenu(uiTheme, multiTabs, winPosPtr, moreThanOne);
 
          drawTopBar(uiTheme);
 
@@ -117,13 +125,12 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
          tabSelected = false;
 
 
-
      if(serialSettings){
 
          std::string nameId;
 
          nameId.assign("Settings: ");
-         nameId.append(tabSerialPortData->portInfo.port);
+         nameId.append(tabName);
 
          ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus;
 
@@ -284,7 +291,8 @@ void TabSerialWindow::draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiT
 }
 
 
-void TabSerialWindow::drawPopupTabMenu(bool multiTabs) {
+void TabSerialWindow::drawPopupTabMenu(const UI_Theme &uiTheme, bool multiTabs, const WinPos *winPosPtr, const bool moreThanOneWin) {
+
     if(ImGui::BeginPopupContextItem()){
 
         ImGui::Spacing();
@@ -296,24 +304,105 @@ void TabSerialWindow::drawPopupTabMenu(bool multiTabs) {
         ImGui::Separator();
         ImGui::Spacing();
 
-        if(multiTabs) {
 
-            if (ImGui::Selectable("Split Right"))
-                splitRight = true;
-
-            ImGui::Spacing();
-            ImGui::Spacing();
-
-            if (ImGui::Selectable("Undock"))
-                undock = true;
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
+        if(!multiTabs){
+            if(uiTheme == DARK)
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128,128, 128, 255));
+            else
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180,180,180,255));
         }
+
+        if(ImGui::Selectable("Split Right")) {
+            if(multiTabs)
+                splitType = RIGHT_SPLIT;
+        }
+
+        if(!multiTabs)
+            ImGui::PopStyleColor();
+
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        if(!multiTabs){
+            if(uiTheme == DARK)
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128,128, 128, 255));
+            else
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180,180,180,255));
+        }
+
+        if(ImGui::Selectable("Split Left")) {
+            if(multiTabs)
+                splitType = LEFT_SPLIT;
+        }
+
+        if(!multiTabs)
+            ImGui::PopStyleColor();
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+
+        bool disabledBtn = false;
+
+        if(!moreThanOneWin || *winPosPtr == RIGHT) {
+
+            disabledBtn = true;
+            if (uiTheme == DARK)
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128, 128, 128, 255));
+            else
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180, 180, 180, 255));
+
+        }
+
+        if(ImGui::Selectable("Move Right")){
+            if(!disabledBtn)
+                moveType = RIGHT_MOVE;
+        }
+
+        if(disabledBtn){
+            disabledBtn = false;
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        if(!moreThanOneWin || *winPosPtr == LEFT){
+
+            disabledBtn = true;
+            if(uiTheme == DARK)
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128,128, 128, 255));
+            else
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180,180,180,255));
+        }
+
+        if(ImGui::Selectable("Move Left")){
+            if(!disabledBtn)
+                moveType = LEFT_MOVE;
+        }
+
+        if(disabledBtn)
+            ImGui::PopStyleColor();
+
+        /*
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        if (ImGui::Selectable("Undock"))
+            undock = true;
+        */
+
+        /*
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
 
         if(ImGui::Selectable("Rename Tab"))
             rename = true;
+        */
 
         ImGui::Spacing();
 

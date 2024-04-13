@@ -16,11 +16,28 @@ SubWindow::SubWindow(int &windowCount){
 
 }
 
+SubWindow::SubWindow(int &windowCount, TabSerialWindow *tabSerialWinPtr) {
+    windowName.assign("Win");
+    windowName.append(std::to_string(windowCount));
+    windowCount++;
+
+    winSize.x = 0;
+    winSize.y = 0;
+
+    focused = true;
+
+    tabSerialWindows.push_back(tabSerialWinPtr);
+}
+
 void SubWindow::addTabPortConnection(SerialPortData *serialPortData, SerialConnection *serialConnection) {
 
     auto* tabSerialWin = new TabSerialWindow(serialPortData, serialConnection);
     tabSerialWindows.push_back(tabSerialWin);
 
+}
+
+void SubWindow::addTab(TabSerialWindow *tabSerialWindow){
+    tabSerialWindows.push_back(tabSerialWindow);
 }
 
 
@@ -31,7 +48,7 @@ void SubWindow::update(const IOData &ioData, SerialManager *serialManager) {
 }
 
 
-void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
+void SubWindow::draw(AppData &appData, SerialManager *serialManager, const WinPos *windowPosPtr, const bool moreThanOne) {
 
     ImGuiWindowFlags wFlags = ImGuiWindowFlags_None;//ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysVerticalScrollbar;
 
@@ -172,7 +189,7 @@ void SubWindow::draw(AppData &appData, SerialManager *serialManager) {
             bool multiTabs = tabSerialWindows.size() > 1;
 
             for(auto* tabSerialWin : tabSerialWindows)
-                tabSerialWin->draw(multiTabs, appData.monoFont, appData.uiTheme);
+                tabSerialWin->draw(multiTabs, appData.monoFont, appData.uiTheme, windowPosPtr, moreThanOne);
 
         ImGui::EndTabBar();
 
@@ -230,17 +247,36 @@ bool SubWindow::isFocused() {
     return focused;
 }
 
-bool SubWindow::isWindowSplitting() {
+TabSplitType SubWindow::isWindowSplitting() {
     splitTabIndex = -1;
+    TabSplitType tabSplitType = NONE_SPLIT;
 
     for(size_t i = 0; i < tabSerialWindows.size(); i++){
-        if(tabSerialWindows.at(i)->isTabSplitting()){
+
+        tabSplitType = tabSerialWindows.at(i)->isTabSplitting();
+        if(tabSplitType != NONE_SPLIT){
+            splitTabIndex = i;
+            break;
+        }
+
+    }
+
+    return tabSplitType;
+}
+
+TabMoveType SubWindow::isWindowMoving(){
+    splitTabIndex = -1;
+    TabMoveType tabMoveType = NONE_MOVE;
+
+    for(size_t i = 0; i < tabSerialWindows.size(); i++){
+        tabMoveType = tabSerialWindows.at(i)->isTabMoving();
+        if(tabMoveType != NONE_MOVE){
             splitTabIndex = i;
             break;
         }
     }
 
-    return (splitTabIndex > -1);
+    return tabMoveType;
 }
 
 
@@ -291,6 +327,10 @@ void SubWindow::check4ClosedTabsRequest(SerialManager *serialManager) {
 
 }
 
+bool SubWindow::noTabs(){
+    return tabSerialWindows.empty();
+}
+
 bool SubWindow::anySelectedTab() {
 
     if(tabSerialWindows.empty())
@@ -311,4 +351,13 @@ bool SubWindow::anySelectedTab() {
 SerialConnection *SubWindow::getSerialConnection() {
     return tabSerialWindows.at(focusedIndex)->getSerialConnectionPtr();
 }
+
+TabSerialWindow *SubWindow::getTabSerialWin(){
+    TabSerialWindow *tempPtr = tabSerialWindows.at(splitTabIndex);
+
+    tabSerialWindows.erase(tabSerialWindows.begin() + splitTabIndex);
+
+    return tempPtr;
+}
+
 

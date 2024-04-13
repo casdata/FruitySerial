@@ -37,7 +37,9 @@ private:
     void checkMouseInsideInputTextBar(AppData &appdata, const IOData &ioData);
     void checkInputTextBarIO(const double &dt, AppData &appdata, const IOData &ioData);
 
-    void newSubWindow(int &windowCount, const int &subWindowIndex);
+    void newSubWindow(int &windowCount, const int &subWindowIndex, TabSerialWindow *tabWindowPtr, TabSplitType tabSplitType);
+    void moveSubWindow(const int &subWindowIndex, TabSerialWindow *tabWindowPtr, TabMoveType tabMoveType);
+    void adjustSubWindowsWidth();
 
     void updateAndPrintInputBar(const double &dt, const AppData &appData);
 

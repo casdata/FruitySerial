@@ -514,6 +514,12 @@ int main(int, char**)
             SDL_RestoreWindow(gWindow);
         }
 
+        if(menuData.minimize){
+            menuData.minimize = false;
+
+            SDL_MinimizeWindow(gWindow);
+        }
+
         if (hud->closeAppDialog(appData))
             runMainLoop = false;
 
@@ -829,7 +835,7 @@ SDL_HitTestResult SDLCALL hitTest(SDL_Window *window, const SDL_Point *pt, void 
 
                                                                                                                         //TEMP DELETE after resize code implemented;
     int minXPoint = hitTestData->windowSizeW * 0.1582f;
-    int maxXPoint = hitTestData->windowSizeW * 0.8222f;
+    int maxXPoint = hitTestData->windowSizeW * 0.778f;     //0.822f
 
     if(pt->x > minXPoint && pt->x < maxXPoint){
         if(pt->y > 0 && pt->y < MENU_BAR_HIGHT)

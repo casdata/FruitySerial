@@ -17,11 +17,13 @@
 class SubWindow {
 public:
     explicit SubWindow(int &windowCount);
+    explicit SubWindow(int &windowCount, TabSerialWindow *tabSerialWinPtr);
     void addTabPortConnection(SerialPortData *serialPortData, SerialConnection *serialConnection);
+    void addTab(TabSerialWindow *tabSerialWindow);
 
     void update(const IOData &ioData, SerialManager *serialManager);
 
-    void draw(AppData &appData, SerialManager *serialManager);
+    void draw(AppData &appData, SerialManager *serialManager, const WinPos *windowPosPtr, const bool moreThanOne);
 
     std::string getWinName();
     void setWinSize(const float &w, const float &h);
@@ -34,12 +36,16 @@ public:
     void setFocused(bool focus);
     bool isFocused();
 
-    bool isWindowSplitting();
+    TabSplitType isWindowSplitting();
+    TabMoveType isWindowMoving();
+
     bool isClickOverWin(const ImVec2 &mousePos);
     bool isCursorOverBorder(const ImVec2 &mousePos);
 
+    bool noTabs();
     bool anySelectedTab();
     SerialConnection* getSerialConnection();
+    TabSerialWindow* getTabSerialWin();
 
     virtual ~SubWindow();
 private:

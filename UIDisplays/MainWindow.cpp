@@ -222,8 +222,18 @@ void MainWindow::draw(const double &dt, AppData &appData, SerialManager *serialM
 
         calculateSubWinSizes();
 
-        for(auto* subWin : subWindows){
-            subWin->draw(appData, serialManager);
+        WinPos winPos;
+        bool moreThanOne = subWindows.size() > 1;
+
+        for(size_t i = 0; i < subWindows.size(); i++){
+            if(i == 0)
+                winPos = LEFT;
+            else if(i == subWindows.size() - 1)
+                winPos = RIGHT;
+            else
+                winPos = CENTER;
+
+            subWindows.at(i)->draw(appData, serialManager, &winPos, moreThanOne);
             ImGui::SameLine(0,0);
         }
 
@@ -445,33 +455,87 @@ void MainWindow::calculateSubWinSizes() {
 void MainWindow::checkAndSplitWindow(int &windowCount) {
 
     int winIndex = -1;
+    int subWinIndex = -1;
+    TabSerialWindow *tabWinPtr = nullptr;
+    TabSplitType tabSplitType = NONE_SPLIT;
+    TabMoveType tabMoveType = NONE_MOVE;
 
     for(size_t i = 0; i < subWindows.size(); i++){
-        if(subWindows.at(i)->isWindowSplitting()){
+        tabSplitType = subWindows.at(i)->isWindowSplitting();
+        if(tabSplitType != NONE_SPLIT){
             winIndex = i;
+            tabWinPtr = subWindows.at(i)->getTabSerialWin();
             break;
         }
+
+        tabMoveType = subWindows.at(i)->isWindowMoving();
+        if(tabMoveType != NONE_MOVE){
+            winIndex = i;
+            tabWinPtr = subWindows.at(i)->getTabSerialWin();
+            break;
+        }
+
+        if(subWindows.size() > 1 && subWindows.at(i)->noTabs())
+            subWinIndex = i;
+
     }
 
-    if(winIndex > -1)
-        newSubWindow(windowCount, winIndex);
+    if(tabSplitType != NONE_SPLIT)
+        newSubWindow(windowCount, winIndex, tabWinPtr, tabSplitType);
 
+    if(tabMoveType != NONE_MOVE)
+        moveSubWindow(winIndex, tabWinPtr, tabMoveType);
+
+    if(subWinIndex > -1){
+        SubWindow *subWindowPtr = subWindows.at(subWinIndex);
+        subWindows.erase(subWindows.begin() + subWinIndex);
+
+        adjustSubWindowsWidth();
+
+        delete subWindowPtr;
+    }
 }
 
-void MainWindow::newSubWindow(int &windowCount, const int &subWindowIndex) {
+void MainWindow::newSubWindow(int &windowCount, const int &subWindowIndex, TabSerialWindow *tabWindowPtr, TabSplitType tabSplitType) {
 
     for(auto* sWin : subWindows)                                                                            //Desfocus all sub windows
         sWin->setFocused(false);
 
-    auto* subWin = new SubWindow(windowCount);
-    subWindows.insert(subWindows.begin() + subWindowIndex + 1, subWin);
+    auto* subWin = new SubWindow(windowCount, tabWindowPtr);
 
+    if(tabSplitType == RIGHT_SPLIT)
+        subWindows.insert(subWindows.begin() + subWindowIndex + 1, subWin);
+    else
+        subWindows.insert(subWindows.begin() + subWindowIndex, subWin);
+
+    adjustSubWindowsWidth();
+
+}
+
+void MainWindow::moveSubWindow(const int &subWindowIndex, TabSerialWindow *tabWindowPtr, TabMoveType tabMoveType){
+    for(auto* sWin: subWindows)
+        sWin->setFocused(false);
+
+    switch(tabMoveType){
+        case LEFT_MOVE:
+            if(subWindowIndex - 1 >= 0)
+                subWindows.at(subWindowIndex - 1)->addTab(tabWindowPtr);
+            break;
+        case RIGHT_MOVE:
+            if(subWindowIndex + 1 < subWindows.size())
+                subWindows.at(subWindowIndex + 1)->addTab(tabWindowPtr);
+            break;
+        default:
+
+            break;
+    }
+}
+
+void MainWindow::adjustSubWindowsWidth() {
     float percentage = 1/static_cast<float>(subWindows.size());
-
 
     for(auto* sWin : subWindows)
         sWin->setWidthPercentage(percentage);
-
 }
 
 void MainWindow::checkClickAndFocus(const IOData &ioData, const AppState &appState) {

@@ -123,29 +123,81 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
 
             ImGui::SetNextWindowPos(ImVec2(tempCursor0.x + FunctionTools::norm2Height(4), ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31)));
             if(ImGui::BeginPopup("iconMenu")){
-                if(ImGui::MenuItem("Restore")){
+                bool tempChangeColor = false;
 
+                if(menuData.maximize == NORMAL || menuData.maximize == SET_2NORMAL){
+                    tempChangeColor = true;
+                    if(appData.uiTheme == DARK)
+                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128,128, 128, 255));
+                    else
+                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180,180,180,255));
                 }
+
+                if(ImGui::MenuItem("Restore")){
+                    if(!tempChangeColor)
+                        menuData.maximize = SET_2NORMAL;
+                }
+
+                if(tempChangeColor){
+                    tempChangeColor = false;
+                    ImGui::PopStyleColor();
+                }
+
+
                 ImGui::Spacing();
 
                 if(ImGui::MenuItem("Minimize")){
-
+                    menuData.minimize = true;
                 }
                 ImGui::Spacing();
 
-                if(ImGui::MenuItem("Maximize")){
-
+                if(menuData.maximize == MAXIMIZE || menuData.maximize == SET_2MAXIMIZE) {
+                    tempChangeColor = true;
+                    if(appData.uiTheme == DARK)
+                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(128,128, 128, 255));
+                    else
+                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(180,180,180,255));
                 }
+
+                if(ImGui::MenuItem("Maximize")){
+                    if(!tempChangeColor)
+                        menuData.maximize = SET_2MAXIMIZE;
+                }
+
+                if(tempChangeColor){
+                    tempChangeColor = false;
+                    ImGui::PopStyleColor();
+                }
+
                 ImGui::Separator();
 
                 if(ImGui::MenuItem("Close")){
-
+                    menuData.exitApp = true;
                 }
 
                 ImGui::EndPopup();
             }
 
             ImGui::Spacing();
+
+            /*
+             * switch (menuData.maximize) {
+                case MAXIMIZE:
+                case SET_2MAXIMIZE:
+                    if (ImGui::ImageButton((void *) (intptr_t) maximizeTexture, ImVec2(iconWidth, iconSize),
+                                           ImVec2(0, 0), ImVec2(1, 1), imagePadding)) {
+                        menuData.maximize = SET_2NORMAL;
+                    }
+                    break;
+                case NORMAL:
+                case SET_2NORMAL:
+                    if (ImGui::ImageButton((void *) (intptr_t) maximize2Texture, ImVec2(iconWidth, iconSize),
+                                           ImVec2(0, 0), ImVec2(1, 1), imagePadding)) {
+                        menuData.maximize = SET_2MAXIMIZE;
+                    }
+                    break;
+            }
+             */
 
         }
 
@@ -247,6 +299,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
             ImGui::SetNextWindowPos(tempPos);
 
 
+
             if(editBtnSelected) {
                 ImGui::PopStyleColor();
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
@@ -256,9 +309,12 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
             }
 
+            /*
             if(ImGui::Button("Edit")){
 
             }
+             */
+
 
             if(ioData.mouseCursorPositionRaw.x > tempPos.x && ioData.mouseCursorPositionRaw.x < ImGui::GetCursorScreenPos().x
                && (ioData.mouseCursorPositionRaw.y > ImGui::GetWindowViewport()->Pos.y && ioData.mouseCursorPositionRaw.y < tempPos.y)){
@@ -275,6 +331,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
                 helpBtnSelected = false;
             }
 
+            /*
             if(ImGui::BeginPopup("editMenu")){
 
                 if (ImGui::BeginMenu("Connections")) {
@@ -294,6 +351,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
 
                 ImGui::EndPopup();
             }
+             */
 
             tempPos = ImVec2(ImGui::GetCursorScreenPos().x, ImGui::GetWindowViewport()->Pos.y + FunctionTools::norm2Height(31));
             ImGui::SetNextWindowPos(tempPos);
@@ -307,12 +365,15 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_MenuBarBg));
             }
 
+            /*
             if(ImGui::Button("Help")){
 
             }
+             */
 
             ImGui::PopStyleColor();
 
+            /*
             if(ioData.mouseCursorPositionRaw.x > tempPos.x && ioData.mouseCursorPositionRaw.x < ImGui::GetCursorScreenPos().x
                && (ioData.mouseCursorPositionRaw.y > ImGui::GetWindowViewport()->Pos.y && ioData.mouseCursorPositionRaw.y < tempPos.y)){
                 if(!helpState){
@@ -342,6 +403,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
                 ImGui::EndPopup();
             }
 
+             */
             if(!fileState && !editState && !helpState)
                 menuShown = false;
 
@@ -442,7 +504,7 @@ void Hud::menuBar(MenuData &menuData, AppData &appData, IOData &ioData) {
             ImGui::SetCursorPos(ImVec2(tempX, 0));
             if (ImGui::ImageButton((void *) (intptr_t) minimizeTexture, ImVec2(iconWidth, iconSize), ImVec2(0, 0),
                                    ImVec2(1, 1), imagePadding)) {
-
+                menuData.minimize = true;
             }
 
             tempX -= ((spaceBetween * 2) + iconSize);

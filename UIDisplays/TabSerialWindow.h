@@ -44,13 +44,14 @@ public:
 
     bool isTabSelected();
     bool isTabClosing();
-    bool isTabSplitting();
+    TabSplitType isTabSplitting();
+    TabMoveType isTabMoving();
     bool isUndocking();
-    bool isRenaming();
+    bool need2Rename();
 
     void freePort();
 
-    void draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiTheme);
+    void draw(bool multiTabs, ImFont* monoFont, const UI_Theme& uiTheme, const WinPos *winPosPtr, const bool moreThanOne);
 
     void add2DataBuffer(const std::string &dataText);
     void clearDataBuffer();
@@ -58,14 +59,15 @@ public:
     SerialConnection* getSerialConnectionPtr();
 
 private:
-    void drawPopupTabMenu(bool multiTabs);
+    void drawPopupTabMenu(const UI_Theme &uiTheme, bool multiTabs, const WinPos *winPosPtr, const bool moreThanOneWin);
     void drawTopBar(const UI_Theme& uiTheme);
 
     std::string tabName;
 
     bool tabSelected;
     bool open;
-    bool splitRight;
+    TabSplitType splitType;
+    TabMoveType moveType;
     bool undock;
     bool rename;
 
