@@ -11,6 +11,7 @@ Hud::Hud() {
     int imageWidth = 0;
     int imageHeight = 0;
 
+#ifdef DEBUG_TAG
     bool ret = FunctionTools::loadTextureFromFile("../Assets/iconQ.png", &questionTexture, &imageWidth, &imageHeight); //Assets
     IM_ASSERT(ret);
     questionSize = new ImVec2(imageWidth, imageHeight);
@@ -78,6 +79,76 @@ Hud::Hud() {
 
     ret = FunctionTools::loadTextureFromFile("../Assets/closeBtn.png", &closeTexture, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
+#else
+    bool ret = FunctionTools::loadTextureFromFile("Assets/iconQ.png", &questionTexture, &imageWidth, &imageHeight); //Assets
+    IM_ASSERT(ret);
+    questionSize = new ImVec2(imageWidth, imageHeight);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/menuLightUp.png", &menuLightTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+    menuBarIconSize = new ImVec2(imageWidth, imageHeight);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/menuDarkUp.png", &menuDarkTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret  = FunctionTools::loadTextureFromFile("Assets/icon.png", &iconTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/newBtn.png", &newBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/openBtn.png", &openBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/saveAsBtn.png", &saveAsBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/saveBtn.png", &saveBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/rewindBtn.png", &rewindTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/uNewBtn.png", &uNewBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/uOpenBtn.png", &uOpenBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/uSaveBtn.png", &uSaveBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/uSaveAsBtn.png", &uSaveAsBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/uEmpty.png", &uEmptyBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/sun.png", &sunBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/moon.png", &moonBtnTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/withBar.png", &withBarTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/withoutBar.png", &withoutBarTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/minimizeBtn.png", &minimizeTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/maximizeBtn.png", &maximizeTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/maximize2Btn.png", &maximize2Texture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    ret = FunctionTools::loadTextureFromFile("Assets/closeBtn.png", &closeTexture, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+#endif
+
     cornerIconSize = new ImVec2(imageWidth, imageHeight);
 
     mainWin = new MainWindow();

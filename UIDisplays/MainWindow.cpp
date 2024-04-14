@@ -34,6 +34,7 @@ MainWindow::MainWindow() {
 
     GLuint *texturePtr = &TabSerialWindow::timestampTexture;
 
+#ifdef DEBUG_TAG
     bool ret = FunctionTools::loadTextureFromFile("../Assets/timestamp.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
 
@@ -158,6 +159,133 @@ MainWindow::MainWindow() {
     texturePtr = &infoTexture;
     ret = FunctionTools::loadTextureFromFile("../Assets/info.png", texturePtr, &imageWidth, &imageHeight);
     IM_ASSERT(ret);
+
+#else
+    bool ret = FunctionTools::loadTextureFromFile("Assets/timestamp.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    TabSerialWindow::textureSize = ImVec2(imageWidth, imageHeight);
+
+    texturePtr = &TabSerialWindow::timestampDisLightTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/timestampDisableLight.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::timestampDisDarkTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/timestampDisableDark.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::settingsTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/comSettings.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::separatorTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/separator.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::playTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/play.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::pauseTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/pause.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::fruitsTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/orange.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::fruitsDisDarkTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/orangeDisableDark.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::fruitsDisLightTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/orangeDisableLight.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn0RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn0Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn1RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn1Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn2RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn2Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::darkBtn3RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn3Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn0RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn0Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn1RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn1Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn2RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn2Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &TabSerialWindow::lightBtn3RedTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn3Red.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+
+    texturePtr = &darkSendTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightSend.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    sendTextureSize = ImVec2(imageWidth, imageHeight);
+
+    texturePtr = &lightSendTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightSend.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn0Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn0.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn1Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn1.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn2Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn2.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &darkBtn3Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/darkbtn3.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+
+    texturePtr = &lightBtn0Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn0.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &lightBtn1Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn1.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &lightBtn2Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn2.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &lightBtn3Texture;
+    ret = FunctionTools::loadTextureFromFile("Assets/lightbtn3.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &sepTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/separator.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+
+    texturePtr = &infoTexture;
+    ret = FunctionTools::loadTextureFromFile("Assets/info.png", texturePtr, &imageWidth, &imageHeight);
+    IM_ASSERT(ret);
+#endif
 
 
     auto* subWin = new SubWindow(windowCount);

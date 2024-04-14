@@ -5,6 +5,8 @@
 #ifndef MASTERSERIALMONITOR_DTYPES_H
 #define MASTERSERIALMONITOR_DTYPES_H
 
+//#define DEBUG_TAG
+
 #include <unordered_map>
 #include "serial/serial.h"
 
