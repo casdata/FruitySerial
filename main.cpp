@@ -608,7 +608,7 @@ bool initSDL(){
 
     SDL_DisplayMode dm;
     SDL_GetCurrentDisplayMode(0, &dm);
-    std::cout<<"DisplayMode: "<<dm.w<<" "<<dm.h<<std::endl;
+    //std::cout<<"DisplayMode: "<<dm.w<<" "<<dm.h<<std::endl;
 
     int testWidth = dm.w;
     int testHeight = dm.h;
@@ -645,7 +645,14 @@ bool initSDL(){
 
     int imgFlags = IMG_INIT_PNG;
 
-    SDL_Surface* loadedSurface = IMG_Load("../Assets/icon.png");
+    SDL_Surface* loadedSurface;
+
+#ifdef DEBUG_TAG
+    loadedSurface = IMG_Load("../Assets/icon.png");
+#else
+    loadedSurface = IMG_Load("Assets/icon.png");
+#endif
+
     if(loadedSurface != nullptr){
         iconSurface = SDL_ConvertSurface(loadedSurface, loadedSurface->format, 0);
 
@@ -659,7 +666,12 @@ bool initSDL(){
         SDL_FreeSurface(loadedSurface);
     }
 
+#ifdef DEBUG_TAG
     loadedSurface = IMG_Load("../Assets/splash.png");
+#else
+    loadedSurface = IMG_Load("Assets/splash.png");
+#endif
+
     if(loadedSurface != nullptr){
         pngSplashSurface = SDL_ConvertSurface(loadedSurface, loadedSurface->format, 0);
 
@@ -670,7 +682,10 @@ bool initSDL(){
             if(!(IMG_Init(imgFlags) & imgFlags))
                 std::cout<<"SDL_image could not initialize!"<<std::endl;
             else{
-                gSplashSurface = SDL_GetWindowSurface(gSplashWindow);                                                 //COMMENT IN ORDER TO WORK WITH ARCH LINUX
+#ifdef NON_ARCH_TAG
+                gSplashSurface = SDL_GetWindowSurface(gSplashWindow);
+#endif
+
                 SDL_BlitSurface(pngSplashSurface, nullptr, gSplashSurface, nullptr);
             }
 
